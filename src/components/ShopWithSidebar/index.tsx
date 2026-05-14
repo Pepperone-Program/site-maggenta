@@ -1,90 +1,370 @@
 "use client";
-import React, { useState, useEffect } from "react";
+
+import React, { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import RangeSlider from "react-range-slider-input";
+import "react-range-slider-input/dist/style.css";
 import Breadcrumb from "../Common/Breadcrumb";
-import CustomSelect from "./CustomSelect";
-import CategoryDropdown from "./CategoryDropdown";
-import GenderDropdown from "./GenderDropdown";
-import SizeDropdown from "./SizeDropdown";
-import ColorsDropdwon from "./ColorsDropdwon";
-import PriceDropdown from "./PriceDropdown";
-import shopData from "../Shop/shopData";
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
+import shopData from "../Shop/shopData";
+import { CatalogoOption, CatalogoProdutos } from "@/lib/api";
 import { Product } from "@/types/product";
 
-const ShopWithSidebar = ({ products = shopData }: { products?: Product[] }) => {
+type ActiveFilters = {
+  categoria?: string;
+  subcategorias?: string;
+  publicos_alvos?: string;
+  quantidade_minima_min?: string;
+  quantidade_minima_max?: string;
+  datas_promocionais?: string;
+  limit?: string;
+};
+
+type FilterOption = {
+  id: number;
+  label: string;
+  total: number;
+};
+
+const defaultCatalogo: CatalogoProdutos = {
+  categoria: {
+    id_empresa: 1,
+    id_categoria: 1,
+    categoria: "Brindes",
+    descricao: null,
+    icon: null,
+    habilitado: "S",
+    url_capa: null,
+  },
+  filtros: {
+    subcategorias: [],
+    publicos_alvos: [],
+    datas_promocionais: [],
+    quantidade_minima: {
+      min: 0,
+      max: 0,
+    },
+  },
+  items: shopData,
+  total: shopData.length,
+  page: 1,
+  limit: 24,
+  totalPages: 1,
+};
+
+const parseIds = (value = "") =>
+  value
+    .split(",")
+    .map((item) => Number(item))
+    .filter((item) => Number.isFinite(item) && item > 0);
+
+const formatNumber = (value: number) =>
+  new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(value);
+
+const sanitizeCategoryDescription = (value = "") =>
+  value
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?>[\s\S]*?<\/style>/gi, "")
+    .replace(/<iframe[\s\S]*?>[\s\S]*?<\/iframe>/gi, "")
+    .replace(/\son\w+="[^"]*"/gi, "")
+    .replace(/\son\w+='[^']*'/gi, "")
+    .replace(/javascript:/gi, "");
+
+const FilterGroup = ({
+  title,
+  options,
+  selectedIds,
+  onToggle,
+}: {
+  title: string;
+  options: FilterOption[];
+  selectedIds: number[];
+  onToggle: (id: number) => void;
+}) => {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <div className="rounded-md border border-gray-3 bg-white shadow-1">
+      <button
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        className={`flex w-full cursor-pointer items-center justify-between py-3 pl-6 pr-5.5 ${
+          open ? "shadow-filter" : ""
+        }`}
+      >
+        <span className="font-medium text-dark">{title}</span>
+        <svg
+          className={`fill-current text-dark duration-200 ${open ? "rotate-180" : ""}`}
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            fillRule="evenodd"
+            clipRule="evenodd"
+            d="M4.43057 8.51192C4.70014 8.19743 5.17361 8.161 5.48811 8.43057L12 14.0122L18.5119 8.43057C18.8264 8.16101 19.2999 8.19743 19.5695 8.51192C19.839 8.82642 19.8026 9.29989 19.4881 9.56946L12.4881 15.5695C12.2072 15.8102 11.7928 15.8102 11.5119 15.5695L4.51192 9.56946C4.19743 9.29989 4.161 8.82641 4.43057 8.51192Z"
+            fill=""
+          />
+        </svg>
+      </button>
+
+      <div className={`flex-col gap-3 py-6 pl-6 pr-5.5 ${open ? "flex" : "hidden"}`}>
+        {options.length ? (
+          options.map((option) => {
+            const selected = selectedIds.includes(option.id);
+
+            return (
+              <button
+                key={option.id}
+                type="button"
+                className={`group flex items-center justify-between gap-3 text-left duration-200 hover:text-blue ${
+                  selected ? "text-blue" : ""
+                }`}
+                onClick={() => onToggle(option.id)}
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  <span
+                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                      selected ? "border-blue bg-blue" : "border-gray-3 bg-white"
+                    }`}
+                  >
+                    <svg
+                      className={selected ? "block" : "hidden"}
+                      width="10"
+                      height="10"
+                      viewBox="0 0 10 10"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M8.33317 2.5L3.74984 7.08333L1.6665 5"
+                        stroke="white"
+                        strokeWidth="1.94437"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
+                  <span className="min-w-0 truncate">{option.label}</span>
+                </span>
+
+                <span
+                  className={`inline-flex shrink-0 rounded-[30px] px-2 text-custom-xs duration-200 group-hover:bg-blue group-hover:text-white ${
+                    selected ? "bg-blue text-white" : "bg-gray-2"
+                  }`}
+                >
+                  {option.total}
+                </span>
+              </button>
+            );
+          })
+        ) : (
+          <p className="text-custom-sm text-dark-4">Nenhuma opcao disponivel</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const ShopWithSidebar = ({
+  catalogo = defaultCatalogo,
+  products,
+  activeFilters = {},
+  categoryOptions = [],
+  publicOptions: globalPublicOptions = [],
+  dateOptions = [],
+}: {
+  catalogo?: CatalogoProdutos;
+  products?: Product[];
+  activeFilters?: ActiveFilters;
+  categoryOptions?: CatalogoOption[];
+  publicOptions?: CatalogoOption[];
+  dateOptions?: CatalogoOption[];
+}) => {
+  const router = useRouter();
   const [productStyle, setProductStyle] = useState("grid");
   const [productSidebar, setProductSidebar] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
 
-  const handleStickyMenu = () => {
-    if (window.scrollY >= 80) {
-      setStickyMenu(true);
-    } else {
-      setStickyMenu(false);
-    }
+  const categoryName = catalogo.categoria?.categoria || "Brindes";
+  const categoryDescription = sanitizeCategoryDescription(
+    catalogo.categoria?.descricao || ""
+  );
+  const activeCategoryId =
+    Number(activeFilters.categoria || catalogo.categoria?.id_categoria || 1) || 1;
+  const pageTitle = `${categoryName} personalizados`;
+  const items = products || catalogo.items;
+  const selectedSubcategorias = useMemo(
+    () => parseIds(activeFilters.subcategorias),
+    [activeFilters.subcategorias]
+  );
+  const selectedPublicos = useMemo(
+    () => parseIds(activeFilters.publicos_alvos),
+    [activeFilters.publicos_alvos]
+  );
+  const selectedDatas = useMemo(
+    () => parseIds(activeFilters.datas_promocionais),
+    [activeFilters.datas_promocionais]
+  );
+  const quantityMin = catalogo.filtros.quantidade_minima.min || 0;
+  const quantityMax = catalogo.filtros.quantidade_minima.max || 0;
+  const selectedQuantityMin = Number(activeFilters.quantidade_minima_min || quantityMin);
+  const selectedQuantityMax = Number(activeFilters.quantidade_minima_max || quantityMax);
+  const [quantityRange, setQuantityRange] = useState<[number, number]>([
+    selectedQuantityMin,
+    selectedQuantityMax,
+  ]);
+
+  const subcategoryOptions = catalogo.filtros.subcategorias.map((item) => ({
+    id: item.id_subcategoria,
+    label: item.subcategoria,
+    total: item.total || 0,
+  }));
+  const publicOptions = useMemo(() => {
+    const totals = new Map(
+      catalogo.filtros.publicos_alvos.map((item) => [
+        item.id_publico_alvo,
+        item.total || 0,
+      ])
+    );
+    const merged = [
+      ...globalPublicOptions,
+      ...catalogo.filtros.publicos_alvos.map((item) => ({
+        id: item.id_publico_alvo,
+        title: item.publico_alvo,
+      })),
+    ];
+    const unique = new Map<number, FilterOption>();
+
+    merged.forEach((item) => {
+      if (Number.isFinite(item.id) && item.title) {
+        unique.set(item.id, {
+          id: item.id,
+          label: item.title,
+          total: totals.get(item.id) || 0,
+        });
+      }
+    });
+
+    return Array.from(unique.values()).sort((a, b) =>
+      a.label.localeCompare(b.label, "pt-BR", { sensitivity: "base" })
+    );
+  }, [catalogo.filtros.publicos_alvos, globalPublicOptions]);
+  const dateFilterOptions = useMemo(() => {
+    const totals = new Map(
+      catalogo.filtros.datas_promocionais.map((item) => [
+        item.id_data_promocional,
+        item.total || 0,
+      ])
+    );
+    const merged = [
+      ...dateOptions,
+      ...catalogo.filtros.datas_promocionais.map((item) => ({
+        id: item.id_data_promocional,
+        title: item.data_promocional,
+      })),
+    ];
+    const unique = new Map<number, FilterOption>();
+
+    merged.forEach((item) => {
+      if (Number.isFinite(item.id) && item.title) {
+        unique.set(item.id, {
+          id: item.id,
+          label: item.title,
+          total: totals.get(item.id) || 0,
+        });
+      }
+    });
+
+    return Array.from(unique.values()).sort((a, b) =>
+      a.label.localeCompare(b.label, "pt-BR", { sensitivity: "base" })
+    );
+  }, [catalogo.filtros.datas_promocionais, dateOptions]);
+  const firstItem = catalogo.total === 0 ? 0 : (catalogo.page - 1) * catalogo.limit + 1;
+  const lastItem = Math.min(catalogo.page * catalogo.limit, catalogo.total);
+  const categories = useMemo(() => {
+    const currentCategory = catalogo.categoria
+      ? {
+          id: catalogo.categoria.id_categoria,
+          title: catalogo.categoria.categoria,
+        }
+      : null;
+    const merged = [...categoryOptions, ...(currentCategory ? [currentCategory] : [])];
+    const unique = new Map<number, CatalogoOption>();
+
+    merged.forEach((category) => {
+      if (Number.isFinite(category.id) && category.title) {
+        unique.set(category.id, category);
+      }
+    });
+
+    return Array.from(unique.values()).sort((a, b) =>
+      a.title.localeCompare(b.title, "pt-BR", { sensitivity: "base" })
+    );
+  }, [catalogo.categoria, categoryOptions]);
+  const hasFilters =
+    selectedSubcategorias.length > 0 ||
+    selectedPublicos.length > 0 ||
+    selectedDatas.length > 0 ||
+    activeFilters.quantidade_minima_min ||
+    activeFilters.quantidade_minima_max;
+
+  const buildCatalogHref = (
+    updates: Record<string, string | number | null | undefined>
+  ) => {
+    const params = new URLSearchParams();
+    const current: Record<string, string | undefined> = {
+      categoria: activeFilters.categoria,
+      subcategorias: activeFilters.subcategorias,
+      publicos_alvos: activeFilters.publicos_alvos,
+      quantidade_minima_min: activeFilters.quantidade_minima_min,
+      quantidade_minima_max: activeFilters.quantidade_minima_max,
+      datas_promocionais: activeFilters.datas_promocionais,
+      limit: activeFilters.limit,
+      page: String(catalogo.page),
+    };
+
+    Object.entries({ ...current, ...updates }).forEach(([key, value]) => {
+      if (
+        value === undefined ||
+        value === null ||
+        value === "" ||
+        (key === "categoria" && String(value) === "1") ||
+        (key === "limit" && String(value) === "24") ||
+        (key === "page" && String(value) === "1")
+      ) {
+        return;
+      }
+
+      params.set(key, String(value));
+    });
+
+    const query = params.toString();
+    return query ? `/brindes-personalizados?${query}` : "/brindes-personalizados";
   };
 
-  const options = [
-    { label: "Mais recentes", value: "0" },
-    { label: "Mais vendidos", value: "1" },
-    { label: "Menor preço", value: "2" },
-  ];
+  useEffect(() => {
+    const handleStickyMenu = () => {
+      setStickyMenu(window.scrollY >= 80);
+    };
 
-  const categories = [
-    {
-      name: "Mochilas",
-      products: 1,
-      isRefined: true,
-    },
-    {
-      name: "Jaquetas",
-      products: 1,
-      isRefined: false,
-    },
-    {
-      name: "Hidratação",
-      products: 1,
-      isRefined: false,
-    },
-    {
-      name: "Roupas",
-      products: 2,
-      isRefined: false,
-    },
-    {
-      name: "Acessórios",
-      products: 3,
-      isRefined: false,
-    },
-    {
-      name: "Camping",
-      products: 0,
-      isRefined: false,
-    },
-  ];
-
-  const genders = [
-    {
-      name: "Masculino",
-      products: 4,
-    },
-    {
-      name: "Feminino",
-      products: 4,
-    },
-    {
-      name: "Unisex",
-      products: 8,
-    },
-  ];
+    window.addEventListener("scroll", handleStickyMenu);
+    return () => window.removeEventListener("scroll", handleStickyMenu);
+  }, []);
 
   useEffect(() => {
-    window.addEventListener("scroll", handleStickyMenu);
+    setQuantityRange([selectedQuantityMin, selectedQuantityMax]);
+  }, [selectedQuantityMin, selectedQuantityMax]);
 
-    // closing sidebar while clicking outside
-    function handleClickOutside(event) {
-      if (!event.target.closest(".sidebar-content")) {
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as HTMLElement;
+
+      if (!target.closest(".sidebar-content")) {
         setProductSidebar(false);
       }
     }
@@ -93,35 +373,86 @@ const ShopWithSidebar = ({ products = shopData }: { products?: Product[] }) => {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  });
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [productSidebar]);
+
+  const navigateWith = (updates: Record<string, string | number | null | undefined>) => {
+    router.push(buildCatalogHref({ ...updates, page: updates.page ?? 1 }));
+  };
+
+  const toggleMultiFilter = (
+    key: "subcategorias" | "publicos_alvos" | "datas_promocionais",
+    id: number
+  ) => {
+    const current =
+      key === "subcategorias"
+        ? selectedSubcategorias
+        : key === "publicos_alvos"
+          ? selectedPublicos
+          : selectedDatas;
+    const next = current.includes(id)
+      ? current.filter((item) => item !== id)
+      : [...current, id];
+
+    navigateWith({ [key]: next.join(",") || null });
+  };
+
+  const selectCategory = (id: number) => {
+    router.push(
+      buildCatalogHref({
+        categoria: id,
+        subcategorias: null,
+        quantidade_minima_min: null,
+        quantidade_minima_max: null,
+        page: 1,
+      })
+    );
+  };
+
+  const applyQuantityFilter = () => {
+    navigateWith({
+      quantidade_minima_min: quantityRange[0] > quantityMin ? quantityRange[0] : null,
+      quantidade_minima_max: quantityRange[1] < quantityMax ? quantityRange[1] : null,
+    });
+  };
+
+  const clearFilters = () => {
+    router.push(
+      activeFilters.categoria && activeFilters.categoria !== "1"
+        ? `/brindes-personalizados?categoria=${activeFilters.categoria}`
+        : "/brindes-personalizados"
+    );
+  };
+
+  const pageNumbers = Array.from(
+    { length: Math.min(catalogo.totalPages, 7) },
+    (_, index) => {
+      const start = Math.max(
+        1,
+        Math.min(catalogo.page - 3, Math.max(catalogo.totalPages - 6, 1))
+      );
+      return start + index;
+    }
+  ).filter((page) => page <= catalogo.totalPages);
 
   return (
     <>
-      <Breadcrumb
-        title={"Todos os produtos"}
-        pages={["loja"]}
-      />
+      <Breadcrumb title={pageTitle} pages={["brindes personalizados"]} />
       <section className="relative overflow-hidden bg-[#f3f4f6] pb-20 pt-5 lg:pt-12 xl:pt-16">
         <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
           <div className="flex gap-6 xl:gap-8">
-            {/* <!-- Sidebar Start --> */}
             <div
-              className={`sidebar-content fixed xl:z-1 z-9999 left-0 top-0 xl:translate-x-0 xl:static max-w-[310px] xl:max-w-[292px] w-full shrink-0 ease-out duration-200 ${
+              className={`sidebar-content fixed left-0 top-0 z-9999 w-full max-w-[310px] shrink-0 duration-200 ease-out xl:static xl:z-1 xl:max-w-[292px] xl:translate-x-0 ${
                 productSidebar
-                  ? "translate-x-0 bg-white p-5 h-screen overflow-y-auto"
+                  ? "h-screen translate-x-0 overflow-y-auto bg-white p-5"
                   : "-translate-x-full"
               }`}
             >
               <button
                 onClick={() => setProductSidebar(!productSidebar)}
-                aria-label="button for product sidebar toggle"
-                className={`xl:hidden absolute -right-12.5 sm:-right-8 flex items-center justify-center w-8 h-8 rounded-md bg-white shadow-1 ${
-                  stickyMenu
-                    ? "lg:top-20 sm:top-34.5 top-35"
-                    : "lg:top-24 sm:top-39 top-37"
+                aria-label="Abrir filtros"
+                className={`absolute -right-12.5 flex h-8 w-8 items-center justify-center rounded-md bg-white shadow-1 sm:-right-8 xl:hidden ${
+                  stickyMenu ? "top-35 sm:top-34.5 lg:top-20" : "top-37 sm:top-39 lg:top-24"
                 }`}
               >
                 <svg
@@ -147,59 +478,93 @@ const ShopWithSidebar = ({ products = shopData }: { products?: Product[] }) => {
                 </svg>
               </button>
 
-              <form onSubmit={(e) => e.preventDefault()}>
+              <form onSubmit={(event) => event.preventDefault()}>
                 <div className="flex flex-col gap-5">
-                  {/* <!-- filter box --> */}
                   <div className="rounded-md border border-gray-3 bg-white px-5 py-4 shadow-1">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-3">
                       <p className="font-medium text-dark">Filtros</p>
-                      <button className="text-blue">Limpar filtros</button>
+                      <button
+                        type="button"
+                        onClick={clearFilters}
+                        disabled={!hasFilters}
+                        className="text-blue disabled:cursor-not-allowed disabled:text-dark-4"
+                      >
+                        Limpar filtros
+                      </button>
                     </div>
                   </div>
 
-                  {/* <!-- category box --> */}
-                  <CategoryDropdown categories={categories} />
+                  <div className="rounded-md border border-gray-3 bg-white shadow-1">
+                    <label
+                      htmlFor="catalog-category"
+                      className="block py-3 pl-6 pr-5.5 font-medium text-dark shadow-filter"
+                    >
+                      Categoria
+                    </label>
+                    <div className="p-5">
+                      <select
+                        id="catalog-category"
+                        value={activeCategoryId}
+                        onChange={(event) => selectCategory(Number(event.target.value))}
+                        className="h-11 w-full rounded-md border border-gray-3 bg-white px-3 text-custom-sm text-dark outline-none duration-200 focus:border-blue"
+                      >
+                        {categories.map((category) => (
+                          <option key={category.id} value={category.id}>
+                            {category.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
 
-                  {/* <!-- gender box --> */}
-                  <GenderDropdown genders={genders} />
+                  <FilterGroup
+                    title="Subcategorias"
+                    options={subcategoryOptions}
+                    selectedIds={selectedSubcategorias}
+                    onToggle={(id) => toggleMultiFilter("subcategorias", id)}
+                  />
 
-                  {/* // <!-- size box --> */}
-                  <SizeDropdown />
+                  <FilterGroup
+                    title="Publico-alvo"
+                    options={publicOptions}
+                    selectedIds={selectedPublicos}
+                    onToggle={(id) => toggleMultiFilter("publicos_alvos", id)}
+                  />
 
-                  {/* // <!-- color box --> */}
-                  <ColorsDropdwon />
-
-                  {/* // <!-- price range box --> */}
-                  <PriceDropdown />
+                  <FilterGroup
+                    title="Datas promocionais"
+                    options={dateFilterOptions}
+                    selectedIds={selectedDatas}
+                    onToggle={(id) => toggleMultiFilter("datas_promocionais", id)}
+                  />
+                
                 </div>
               </form>
             </div>
-            {/* // <!-- Sidebar End --> */}
 
-            {/* // <!-- Content Start --> */}
             <div className="min-w-0 flex-1">
               <div className="mb-6 rounded-md border border-gray-3 bg-white px-4 py-3 shadow-1 sm:px-5">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  {/* <!-- top bar left --> */}
                   <div className="flex flex-wrap items-center gap-4">
-                    <CustomSelect options={options} />
-
                     <p>
-                      Mostrando <span className="text-dark">{products.length}</span>{" "}
+                      Mostrando{" "}
+                      <span className="text-dark">
+                        {formatNumber(firstItem)}-{formatNumber(lastItem)}
+                      </span>{" "}
+                      de <span className="text-dark">{formatNumber(catalogo.total)}</span>{" "}
                       produtos
                     </p>
                   </div>
 
-                  {/* <!-- top bar right --> */}
                   <div className="flex items-center gap-2.5 self-end sm:self-auto">
                     <button
                       onClick={() => setProductStyle("grid")}
-                      aria-label="button for product grid tab"
+                      aria-label="Visualizacao em grade"
                       className={`${
                         productStyle === "grid"
-                          ? "bg-blue border-blue text-white"
-                          : "text-dark bg-gray-1 border-gray-3"
-                      } flex items-center justify-center w-10.5 h-9 rounded-[5px] border ease-out duration-200 hover:bg-blue hover:border-blue hover:text-white`}
+                          ? "border-blue bg-blue text-white"
+                          : "border-gray-3 bg-gray-1 text-dark"
+                      } flex h-9 w-10.5 items-center justify-center rounded-[5px] border duration-200 hover:border-blue hover:bg-blue hover:text-white`}
                     >
                       <svg
                         className="fill-current"
@@ -209,41 +574,18 @@ const ShopWithSidebar = ({ products = shopData }: { products?: Product[] }) => {
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
                       >
-                        <path
-                          fillRule="evenodd"
-                          clipRule="evenodd"
-                          d="M4.836 1.3125C4.16215 1.31248 3.60022 1.31246 3.15414 1.37244C2.6833 1.43574 2.2582 1.57499 1.91659 1.91659C1.57499 2.2582 1.43574 2.6833 1.37244 3.15414C1.31246 3.60022 1.31248 4.16213 1.3125 4.83598V4.914C1.31248 5.58785 1.31246 6.14978 1.37244 6.59586C1.43574 7.06671 1.57499 7.49181 1.91659 7.83341C2.2582 8.17501 2.6833 8.31427 3.15414 8.37757C3.60022 8.43754 4.16213 8.43752 4.83598 8.4375H4.914C5.58785 8.43752 6.14978 8.43754 6.59586 8.37757C7.06671 8.31427 7.49181 8.17501 7.83341 7.83341C8.17501 7.49181 8.31427 7.06671 8.37757 6.59586C8.43754 6.14978 8.43752 5.58787 8.4375 4.91402V4.83601C8.43752 4.16216 8.43754 3.60022 8.37757 3.15414C8.31427 2.6833 8.17501 2.2582 7.83341 1.91659C7.49181 1.57499 7.06671 1.43574 6.59586 1.37244C6.14978 1.31246 5.58787 1.31248 4.91402 1.3125H4.836ZM2.71209 2.71209C2.80983 2.61435 2.95795 2.53394 3.30405 2.4874C3.66632 2.4387 4.15199 2.4375 4.875 2.4375C5.59801 2.4375 6.08368 2.4387 6.44596 2.4874C6.79205 2.53394 6.94018 2.61435 7.03791 2.71209C7.13565 2.80983 7.21607 2.95795 7.2626 3.30405C7.31131 3.66632 7.3125 4.15199 7.3125 4.875C7.3125 5.59801 7.31131 6.08368 7.2626 6.44596C7.21607 6.79205 7.13565 6.94018 7.03791 7.03791C6.94018 7.13565 6.79205 7.21607 6.44596 7.2626C6.08368 7.31131 5.59801 7.3125 4.875 7.3125C4.15199 7.3125 3.66632 7.31131 3.30405 7.2626C2.95795 7.21607 2.80983 7.13565 2.71209 7.03791C2.61435 6.94018 2.53394 6.79205 2.4874 6.44596C2.4387 6.08368 2.4375 5.59801 2.4375 4.875C2.4375 4.15199 2.4387 3.66632 2.4874 3.30405C2.53394 2.95795 2.61435 2.80983 2.71209 2.71209Z"
-                          fill=""
-                        />
-                        <path
-                          fillRule="evenodd"
-                          clipRule="evenodd"
-                          d="M13.086 9.5625C12.4121 9.56248 11.8502 9.56246 11.4041 9.62244C10.9333 9.68574 10.5082 9.82499 10.1666 10.1666C9.82499 10.5082 9.68574 10.9333 9.62244 11.4041C9.56246 11.8502 9.56248 12.4121 9.5625 13.086V13.164C9.56248 13.8379 9.56246 14.3998 9.62244 14.8459C9.68574 15.3167 9.82499 15.7418 10.1666 16.0834C10.5082 16.425 10.9333 16.5643 11.4041 16.6276C11.8502 16.6875 12.4121 16.6875 13.0859 16.6875H13.164C13.8378 16.6875 14.3998 16.6875 14.8459 16.6276C15.3167 16.5643 15.7418 16.425 16.0834 16.0834C16.425 15.7418 16.5643 15.3167 16.6276 14.8459C16.6875 14.3998 16.6875 13.8379 16.6875 13.1641V13.086C16.6875 12.4122 16.6875 11.8502 16.6276 11.4041C16.5643 10.9333 16.425 10.5082 16.0834 10.1666C15.7418 9.82499 15.3167 9.68574 14.8459 9.62244C14.3998 9.56246 13.8379 9.56248 13.164 9.5625H13.086ZM10.9621 10.9621C11.0598 10.8644 11.208 10.7839 11.554 10.7374C11.9163 10.6887 12.402 10.6875 13.125 10.6875C13.848 10.6875 14.3337 10.6887 14.696 10.7374C15.0421 10.7839 15.1902 10.8644 15.2879 10.9621C15.3857 11.0598 15.4661 11.208 15.5126 11.554C15.5613 11.9163 15.5625 12.402 15.5625 13.125C15.5625 13.848 15.5613 14.3337 15.5126 14.696C15.4661 15.0421 15.3857 15.1902 15.2879 15.2879C15.1902 15.3857 15.0421 15.4661 14.696 15.5126C14.3337 15.5613 13.848 15.5625 13.125 15.5625C12.402 15.5625 11.9163 15.5613 11.554 15.5126C11.208 15.4661 11.0598 15.3857 10.9621 15.2879C10.8644 15.1902 10.7839 15.0421 10.7374 14.696C10.6887 14.3337 10.6875 13.848 10.6875 13.125C10.6875 12.402 10.6887 11.9163 10.7374 11.554C10.7839 11.208 10.8644 11.0598 10.9621 10.9621Z"
-                          fill=""
-                        />
-                        <path
-                          fillRule="evenodd"
-                          clipRule="evenodd"
-                          d="M4.836 9.5625H4.914C5.58786 9.56248 6.14978 9.56246 6.59586 9.62244C7.06671 9.68574 7.49181 9.82499 7.83341 10.1666C8.17501 10.5082 8.31427 10.9333 8.37757 11.4041C8.43754 11.8502 8.43752 12.4121 8.4375 13.086V13.164C8.43752 13.8378 8.43754 14.3998 8.37757 14.8459C8.31427 15.3167 8.17501 15.7418 7.83341 16.0834C7.49181 16.425 7.06671 16.5643 6.59586 16.6276C6.14979 16.6875 5.58789 16.6875 4.91405 16.6875H4.83601C4.16217 16.6875 3.60022 16.6875 3.15414 16.6276C2.6833 16.5643 2.2582 16.425 1.91659 16.0834C1.57499 15.7418 1.43574 15.3167 1.37244 14.8459C1.31246 14.3998 1.31248 13.8379 1.3125 13.164V13.086C1.31248 12.4122 1.31246 11.8502 1.37244 11.4041C1.43574 10.9333 1.57499 10.5082 1.91659 10.1666C2.2582 9.82499 2.6833 9.68574 3.15414 9.62244C3.60023 9.56246 4.16214 9.56248 4.836 9.5625ZM3.30405 10.7374C2.95795 10.7839 2.80983 10.8644 2.71209 10.9621C2.61435 11.0598 2.53394 11.208 2.4874 11.554C2.4387 11.9163 2.4375 12.402 2.4375 13.125C2.4375 13.848 2.4387 14.3337 2.4874 14.696C2.53394 15.0421 2.61435 15.1902 2.71209 15.2879C2.80983 15.3857 2.95795 15.4661 3.30405 15.5126C3.66632 15.5613 4.15199 15.5625 4.875 15.5625C5.59801 15.5625 6.08368 15.5613 6.44596 15.5126C6.79205 15.4661 6.94018 15.3857 7.03791 15.2879C7.13565 15.1902 7.21607 15.0421 7.2626 14.696C7.31131 14.3337 7.3125 13.848 7.3125 13.125C7.3125 12.402 7.31131 11.9163 7.2626 11.554C7.21607 11.208 7.13565 11.0598 7.03791 10.9621C6.94018 10.8644 6.79205 10.7839 6.44596 10.7374C6.08368 10.6887 5.59801 10.6875 4.875 10.6875C4.15199 10.6875 3.66632 10.6887 3.30405 10.7374Z"
-                          fill=""
-                        />
-                        <path
-                          fillRule="evenodd"
-                          clipRule="evenodd"
-                          d="M13.086 1.3125C12.4122 1.31248 11.8502 1.31246 11.4041 1.37244C10.9333 1.43574 10.5082 1.57499 10.1666 1.91659C9.82499 2.2582 9.68574 2.6833 9.62244 3.15414C9.56246 3.60023 9.56248 4.16214 9.5625 4.836V4.914C9.56248 5.58786 9.56246 6.14978 9.62244 6.59586C9.68574 7.06671 9.82499 7.49181 10.1666 7.83341C10.5082 8.17501 10.9333 8.31427 11.4041 8.37757C11.8502 8.43754 12.4121 8.43752 13.086 8.4375H13.164C13.8378 8.43752 14.3998 8.43754 14.8459 8.37757C15.3167 8.31427 15.7418 8.17501 16.0834 7.83341C16.425 7.49181 16.5643 7.06671 16.6276 6.59586C16.6875 6.14978 16.6875 5.58787 16.6875 4.91402V4.83601C16.6875 4.16216 16.6875 3.60022 16.6276 3.15414C16.5643 2.6833 16.425 2.2582 16.0834 1.91659C15.7418 1.57499 15.3167 1.43574 14.8459 1.37244C14.3998 1.31246 13.8379 1.31248 13.164 1.3125H13.086ZM10.9621 2.71209C11.0598 2.61435 11.208 2.53394 11.554 2.4874C11.9163 2.4387 12.402 2.4375 13.125 2.4375C13.848 2.4375 14.3337 2.4387 14.696 2.4874C15.0421 2.53394 15.1902 2.61435 15.2879 2.71209C15.3857 2.80983 15.4661 2.95795 15.5126 3.30405C15.5613 3.66632 15.5625 4.15199 15.5625 4.875C15.5625 5.59801 15.5613 6.08368 15.5126 6.44596C15.4661 6.79205 15.3857 6.94018 15.2879 7.03791C15.1902 7.13565 15.0421 7.21607 14.696 7.2626C14.3337 7.31131 13.848 7.3125 13.125 7.3125C12.402 7.3125 11.9163 7.31131 11.554 7.2626C11.208 7.21607 11.0598 7.13565 10.9621 7.03791C10.8644 6.94018 10.7839 6.79205 10.7374 6.44596C10.6887 6.08368 10.6875 5.59801 10.6875 4.875C10.6875 4.15199 10.6887 3.66632 10.7374 3.30405C10.7839 2.95795 10.8644 2.80983 10.9621 2.71209Z"
-                          fill=""
-                        />
+                        <path d="M2 2h5v5H2V2Zm9 0h5v5h-5V2ZM2 11h5v5H2v-5Zm9 0h5v5h-5v-5Z" />
                       </svg>
                     </button>
 
                     <button
                       onClick={() => setProductStyle("list")}
-                      aria-label="button for product list tab"
+                      aria-label="Visualizacao em lista"
                       className={`${
                         productStyle === "list"
-                          ? "bg-blue border-blue text-white"
-                          : "text-dark bg-gray-1 border-gray-3"
-                      } flex items-center justify-center w-10.5 h-9 rounded-[5px] border ease-out duration-200 hover:bg-blue hover:border-blue hover:text-white`}
+                          ? "border-blue bg-blue text-white"
+                          : "border-gray-3 bg-gray-1 text-dark"
+                      } flex h-9 w-10.5 items-center justify-center rounded-[5px] border duration-200 hover:border-blue hover:bg-blue hover:text-white`}
                     >
                       <svg
                         className="fill-current"
@@ -253,161 +595,104 @@ const ShopWithSidebar = ({ products = shopData }: { products?: Product[] }) => {
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
                       >
-                        <path
-                          fillRule="evenodd"
-                          clipRule="evenodd"
-                          d="M4.4234 0.899903C3.74955 0.899882 3.18763 0.899864 2.74155 0.959838C2.2707 1.02314 1.8456 1.16239 1.504 1.504C1.16239 1.8456 1.02314 2.2707 0.959838 2.74155C0.899864 3.18763 0.899882 3.74953 0.899903 4.42338V4.5014C0.899882 5.17525 0.899864 5.73718 0.959838 6.18326C1.02314 6.65411 1.16239 7.07921 1.504 7.42081C1.8456 7.76241 2.2707 7.90167 2.74155 7.96497C3.18763 8.02495 3.74953 8.02493 4.42339 8.02491H4.5014C5.17525 8.02493 14.7372 8.02495 15.1833 7.96497C15.6541 7.90167 16.0792 7.76241 16.4208 7.42081C16.7624 7.07921 16.9017 6.65411 16.965 6.18326C17.0249 5.73718 17.0249 5.17527 17.0249 4.50142V4.42341C17.0249 3.74956 17.0249 3.18763 16.965 2.74155C16.9017 2.2707 16.7624 1.8456 16.4208 1.504C16.0792 1.16239 15.6541 1.02314 15.1833 0.959838C14.7372 0.899864 5.17528 0.899882 4.50142 0.899903H4.4234ZM2.29949 2.29949C2.39723 2.20175 2.54535 2.12134 2.89145 2.07481C3.25373 2.0261 3.7394 2.0249 4.4624 2.0249C5.18541 2.0249 14.6711 2.0261 15.0334 2.07481C15.3795 2.12134 15.5276 2.20175 15.6253 2.29949C15.7231 2.39723 15.8035 2.54535 15.85 2.89145C15.8987 3.25373 15.8999 3.7394 15.8999 4.4624C15.8999 5.18541 15.8987 5.67108 15.85 6.03336C15.8035 6.37946 15.7231 6.52758 15.6253 6.62532C15.5276 6.72305 15.3795 6.80347 15.0334 6.85C14.6711 6.89871 5.18541 6.8999 4.4624 6.8999C3.7394 6.8999 3.25373 6.89871 2.89145 6.85C2.54535 6.80347 2.39723 6.72305 2.29949 6.62532C2.20175 6.52758 2.12134 6.37946 2.07481 6.03336C2.0261 5.67108 2.0249 5.18541 2.0249 4.4624C2.0249 3.7394 2.0261 3.25373 2.07481 2.89145C2.12134 2.54535 2.20175 2.39723 2.29949 2.29949Z"
-                          fill=""
-                        />
-                        <path
-                          fillRule="evenodd"
-                          clipRule="evenodd"
-                          d="M4.4234 9.1499H4.5014C5.17526 9.14988 14.7372 9.14986 15.1833 9.20984C15.6541 9.27314 16.0792 9.41239 16.4208 9.754C16.7624 10.0956 16.9017 10.5207 16.965 10.9915C17.0249 11.4376 17.0249 11.9995 17.0249 12.6734V12.7514C17.0249 13.4253 17.0249 13.9872 16.965 14.4333C16.9017 14.9041 16.7624 15.3292 16.4208 15.6708C16.0792 16.0124 15.6541 16.1517 15.1833 16.215C14.7372 16.2749 5.17529 16.2749 4.50145 16.2749H4.42341C3.74957 16.2749 3.18762 16.2749 2.74155 16.215C2.2707 16.1517 1.8456 16.0124 1.504 15.6708C1.16239 15.3292 1.02314 14.9041 0.959838 14.4333C0.899864 13.9872 0.899882 13.4253 0.899903 12.7514V12.6734C0.899882 11.9996 0.899864 11.4376 0.959838 10.9915C1.02314 10.5207 1.16239 10.0956 1.504 9.754C1.8456 9.41239 2.2707 9.27314 2.74155 9.20984C3.18763 9.14986 3.74955 9.14988 4.4234 9.1499ZM2.89145 10.3248C2.54535 10.3713 2.39723 10.4518 2.29949 10.5495C2.20175 10.6472 2.12134 10.7954 2.07481 11.1414C2.0261 11.5037 2.0249 11.9894 2.0249 12.7124C2.0249 13.4354 2.0261 13.9211 2.07481 14.2834C2.12134 14.6295 2.20175 14.7776 2.29949 14.8753C2.39723 14.9731 2.54535 15.0535 2.89145 15.1C3.25373 15.1487 3.7394 15.1499 4.4624 15.1499C5.18541 15.1499 14.6711 15.1487 15.0334 15.1C15.3795 15.0535 15.5276 14.9731 15.6253 14.8753C15.7231 14.7776 15.8035 14.6295 15.85 14.2834C15.8987 13.9211 15.8999 13.4354 15.8999 12.7124C15.8999 11.9894 15.8987 11.5037 15.85 11.1414C15.8035 10.7954 15.7231 10.6472 15.6253 10.5495C15.5276 10.4518 15.3795 10.3713 15.0334 10.3248C14.6711 10.2761 5.18541 10.2749 4.4624 10.2749C3.7394 10.2749 3.25373 10.2761 2.89145 10.3248Z"
-                          fill=""
-                        />
+                        <path d="M2 3h3v3H2V3Zm5 0h9v3H7V3ZM2 8h3v3H2V8Zm5 0h9v3H7V8Zm-5 5h3v3H2v-3Zm5 0h9v3H7v-3Z" />
                       </svg>
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* <!-- Products Grid Tab Content Start --> */}
-              <div
-                className={`${
-                  productStyle === "grid"
-                    ? "grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
-                    : "flex flex-col gap-7.5"
-                }`}
-              >
-                {products.map((item) =>
-                  productStyle === "grid" ? (
-                    <SingleGridItem item={item} key={item.id} />
-                  ) : (
-                    <SingleListItem item={item} key={item.id} />
-                  )
-                )}
-              </div>
-              {/* <!-- Products Grid Tab Content End --> */}
-
-              {/* <!-- Products Pagination Start --> */}
-              <div className="flex justify-center mt-15">
-                <div className="bg-white shadow-1 rounded-md p-2">
-                  <ul className="flex items-center">
-                    <li>
-                      <button
-                        id="paginationLeft"
-                        aria-label="button for pagination left"
-                        type="button"
-                        disabled
-                        className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px disabled:text-gray-4"
-                      >
-                        <svg
-                          className="fill-current"
-                          width="18"
-                          height="18"
-                          viewBox="0 0 18 18"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M12.1782 16.1156C12.0095 16.1156 11.8407 16.0594 11.7282 15.9187L5.37197 9.45C5.11885 9.19687 5.11885 8.80312 5.37197 8.55L11.7282 2.08125C11.9813 1.82812 12.3751 1.82812 12.6282 2.08125C12.8813 2.33437 12.8813 2.72812 12.6282 2.98125L6.72197 9L12.6563 15.0187C12.9095 15.2719 12.9095 15.6656 12.6563 15.9187C12.4876 16.0312 12.347 16.1156 12.1782 16.1156Z"
-                            fill=""
-                          />
-                        </svg>
-                      </button>
-                    </li>
-
-                    <li>
-                      <a
-                        href="#"
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] bg-blue text-white hover:text-white hover:bg-blue"
-                      >
-                        1
-                      </a>
-                    </li>
-
-                    <li>
-                      <a
-                        href="#"
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
-                      >
-                        2
-                      </a>
-                    </li>
-
-                    <li>
-                      <a
-                        href="#"
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
-                      >
-                        3
-                      </a>
-                    </li>
-
-                    <li>
-                      <a
-                        href="#"
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
-                      >
-                        4
-                      </a>
-                    </li>
-
-                    <li>
-                      <a
-                        href="#"
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
-                      >
-                        5
-                      </a>
-                    </li>
-
-                    <li>
-                      <a
-                        href="#"
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
-                      >
-                        ...
-                      </a>
-                    </li>
-
-                    <li>
-                      <a
-                        href="#"
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
-                      >
-                        10
-                      </a>
-                    </li>
-
-                    <li>
-                      <button
-                        id="paginationLeft"
-                        aria-label="button for pagination left"
-                        type="button"
-                        className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] hover:text-white hover:bg-blue disabled:text-gray-4"
-                      >
-                        <svg
-                          className="fill-current"
-                          width="18"
-                          height="18"
-                          viewBox="0 0 18 18"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M5.82197 16.1156C5.65322 16.1156 5.5126 16.0594 5.37197 15.9469C5.11885 15.6937 5.11885 15.3 5.37197 15.0469L11.2782 9L5.37197 2.98125C5.11885 2.72812 5.11885 2.33437 5.37197 2.08125C5.6251 1.82812 6.01885 1.82812 6.27197 2.08125L12.6282 8.55C12.8813 8.80312 12.8813 9.19687 12.6282 9.45L6.27197 15.9187C6.15947 16.0312 5.99072 16.1156 5.82197 16.1156Z"
-                            fill=""
-                          />
-                        </svg>
-                      </button>
-                    </li>
-                  </ul>
+              {items.length ? (
+                <div
+                  className={`${
+                    productStyle === "grid"
+                      ? "grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+                      : "flex flex-col gap-7.5"
+                  }`}
+                >
+                  {items.map((item) =>
+                    productStyle === "grid" ? (
+                      <SingleGridItem item={item} key={item.id} />
+                    ) : (
+                      <SingleListItem item={item} key={item.id} />
+                    )
+                  )}
                 </div>
-              </div>
-              {/* <!-- Products Pagination End --> */}
+              ) : (
+                <div className="rounded-md border border-gray-3 bg-white p-8 text-center shadow-1">
+                  <h2 className="text-lg font-medium text-dark">Nenhum produto encontrado</h2>
+                  <p className="mt-2 text-custom-sm text-dark-4">
+                    Ajuste os filtros para ver mais opcoes desta categoria.
+                  </p>
+                </div>
+              )}
+
+              {catalogo.totalPages > 1 && (
+                <div className="mt-15 flex justify-center">
+                  <div className="rounded-md bg-white p-2 shadow-1">
+                    <ul className="flex items-center">
+                      <li>
+                        <Link
+                          aria-label="Pagina anterior"
+                          href={buildCatalogHref({
+                            page: catalogo.page > 1 ? catalogo.page - 1 : catalogo.page,
+                          })}
+                          className={`flex h-9 w-8 items-center justify-center rounded-[3px] duration-200 ${
+                            catalogo.page <= 1
+                              ? "pointer-events-none text-gray-4"
+                              : "hover:bg-blue hover:text-white"
+                          }`}
+                        >
+                          &lt;
+                        </Link>
+                      </li>
+
+                      {pageNumbers.map((page) => (
+                        <li key={page}>
+                          <Link
+                            href={buildCatalogHref({ page })}
+                            className={`flex rounded-[3px] px-3.5 py-1.5 duration-200 hover:bg-blue hover:text-white ${
+                              page === catalogo.page ? "bg-blue text-white" : ""
+                            }`}
+                          >
+                            {page}
+                          </Link>
+                        </li>
+                      ))}
+
+                      <li>
+                        <Link
+                          aria-label="Próxima página"
+                          href={buildCatalogHref({
+                            page:
+                              catalogo.page < catalogo.totalPages
+                                ? catalogo.page + 1
+                                : catalogo.page,
+                          })}
+                          className={`flex h-9 w-8 items-center justify-center rounded-[3px] duration-200 ${
+                            catalogo.page >= catalogo.totalPages
+                              ? "pointer-events-none text-gray-4"
+                              : "hover:bg-blue hover:text-white"
+                          }`}
+                        >
+                          &gt;
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {categoryDescription && (
+                <section className="mx-auto mt-16 max-w-[1500px] rounded-md border border-gray-3 bg-white px-5 py-8 text-center shadow-1 sm:px-8 lg:px-12">
+                  <div
+                    className="text-justify text-base leading-8 text-dark-4 [&_h2]:mb-4 [&_h2]:mt-8 [&_h2]:text-center [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:text-dark"
+                    style={{ whiteSpace: "pre-line" }}
+                    dangerouslySetInnerHTML={{ __html: categoryDescription }}
+                  />
+                </section>
+              )}
             </div>
-            {/* // <!-- Content End --> */}
           </div>
         </div>
       </section>

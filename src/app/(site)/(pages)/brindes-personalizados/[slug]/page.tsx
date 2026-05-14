@@ -167,7 +167,7 @@ const ProductPage = async ({ params }: ProductPageProps) => {
         "@type": "ListItem",
         position: 2,
         name: "Brindes personalizados",
-        item: new URL("/shop-with-sidebar", siteUrl).toString(),
+        item: new URL("/brindes-personalizados", siteUrl).toString(),
       },
       {
         "@type": "ListItem",

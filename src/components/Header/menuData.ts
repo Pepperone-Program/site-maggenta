@@ -11,13 +11,13 @@ export const menuData: Menu[] = [
     id: 2,
     title: "Loja",
     newTab: false,
-    path: "/shop-with-sidebar",
+    path: "/brindes-personalizados",
   },
   {
     id: 3,
-    title: "Vitrine",
+    title: "Brindes para empresas",
     newTab: false,
-    path: "/shop-without-sidebar",
+    path: "/brindes-para-empresas",
   },
   {
     id: 4,
@@ -29,6 +29,6 @@ export const menuData: Menu[] = [
     id: 5,
     title: "Contato",
     newTab: false,
-    path: "/contact",
+    path: "/fale-conosco",
   },
 ];

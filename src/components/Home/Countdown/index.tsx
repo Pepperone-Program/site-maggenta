@@ -35,7 +35,7 @@ const CounDown = () => {
               promoção ou lançamento.
             </p>
             <Link
-              href="/shop-with-sidebar"
+              href="/brindes-personalizados"
               className="mt-8 inline-flex w-fit rounded-md bg-blue px-9 py-3 text-sm font-semibold text-white duration-200 hover:bg-blue-dark"
             >
               Solicitar orçamento

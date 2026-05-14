@@ -18,7 +18,7 @@ const slides = [
     description:
       "Mochilas, jaquetas e acessórios técnicos para trilhas, viagens e clima imprevisível.",
     image: "/images/hero/hero-bg.png",
-    href: "/shop-with-sidebar",
+    href: "/brindes-personalizados",
     cta: "Solicitar orçamento",
   },
   {
@@ -38,7 +38,7 @@ const slides = [
     description:
       "Jaquetas compactáveis e roupas de secagem rápida para manter o ritmo.",
     image: "/images/products/product-2-bg-1.png",
-    href: "/shop-with-sidebar",
+    href: "/brindes-personalizados",
     cta: "Orçar seleção",
   },
 ];
@@ -55,7 +55,7 @@ const Hero = ({ banners = [] }: HeroProps) => {
         title: banner.titulo || "Pepperone Brindes",
         description: "",
         image: banner.url_banner || "",
-        href: banner.url || "/shop-with-sidebar",
+        href: banner.url || "/brindes-personalizados",
         cta: "Ver campanha",
       }))
     : slides;

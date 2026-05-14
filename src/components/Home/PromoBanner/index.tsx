@@ -76,7 +76,7 @@ const PromoBanner = ({ banners = [] }: PromoBannerProps) => {
             </p>
 
             <Link
-              href="/shop-with-sidebar"
+              href="/brindes-personalizados"
               className="mt-7.5 inline-flex rounded-md bg-blue px-9.5 py-[11px] text-custom-sm font-medium text-white duration-200 hover:bg-blue-dark"
             >
               Solicitar orçamento

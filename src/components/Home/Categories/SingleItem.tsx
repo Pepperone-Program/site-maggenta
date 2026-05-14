@@ -9,12 +9,12 @@ const SingleItem = ({ item }: { item: Category }) => {
 
   return (
     <Link
-      href={`/shop-with-sidebar?categoria=${item.id}`}
+      href={`/brindes-personalizados?categoria=${item.id}`}
       className="group flex flex-col items-center"
     >
-      <div className="max-w-[130px] w-full bg-[#F2F3F8] h-32.5 rounded-full flex items-center justify-center mb-4">
+      <div className="max-w-[130px] w-full bg-[#fbfbfc] h-32.5 border border-gray rounded-full flex items-center justify-center mb-4">
         {hasImage ? (
-          <Image src={item.img} alt={item.title} width={82} height={62} />
+          <Image src={item.img} alt={item.title} width={85} height={62} />
         ) : (
           <span className="text-3xl font-semibold text-blue">
             {item.title.slice(0, 1).toUpperCase()}

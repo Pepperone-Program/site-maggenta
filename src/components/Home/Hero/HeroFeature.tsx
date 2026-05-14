@@ -9,8 +9,8 @@ import "swiper/css";
 const featureData = [
   {
     img: "/images/icons/icon-01.svg",
-    title: "Frete gratis",
-    description: "Acima de R$349",
+    title: "Personalização própria",
+    description: "Qualidade muito maior",
   },
   {
     img: "/images/icons/icon-02.svg",
