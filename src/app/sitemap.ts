@@ -6,12 +6,13 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.pepperone.com.b
 
 const routes = [
   "",
-  "/shop-with-sidebar",
-  "/shop-without-sidebar",
+  "/brindes-personalizados",
+  "/brindes-para-empresas",
   "/cart",
   "/orcamento",
   "/wishlist",
   "/contact",
+  "/fale-conosco",
   "/empresa-de-brindes",
   "/termos-de-uso",
   "/politicas-de-privacidade",

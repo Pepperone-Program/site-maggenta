@@ -35,22 +35,22 @@ const defaultMenuGroups: HeaderMenuGroup[] = [
   {
     id: "categorias",
     title: "Categorias",
-    items: [{ id: "1", title: "Produtos", path: "/shop-with-sidebar" }],
+    items: [{ id: "1", title: "Produtos", path: "/brindes-personalizados" }],
   },
   {
     id: "brindes",
     title: "Brindes",
-    items: [{ id: "1", title: "Corporativos", path: "/shop-with-sidebar?tipo=1" }],
+    items: [{ id: "1", title: "Corporativos", path: "/brindes-personalizados" }],
   },
   {
     id: "publicos",
     title: "Publicos alvos",
-    items: [{ id: "1", title: "Empresas", path: "/shop-with-sidebar?publico=1" }],
+    items: [{ id: "1", title: "Empresas", path: "/brindes-personalizados?publicos_alvos=1" }],
   },
   {
     id: "datas",
     title: "Datas promocionais",
-    items: [{ id: "1", title: "Black Friday", path: "/shop-with-sidebar?data=1" }],
+    items: [{ id: "1", title: "Black Friday", path: "/brindes-personalizados" }],
   },
 ];
 
@@ -59,6 +59,11 @@ const topbarItems = [
   "Seja Bem-Vindo à Pepperone Brindes Corporativos!",
   "Faturamento mínimo R$1.000,00",
 ];
+
+const menuColumns = <T,>(items: T[], rowsPerColumn = 12) =>
+  Array.from({ length: Math.ceil(items.length / rowsPerColumn) }, (_, index) =>
+    items.slice(index * rowsPerColumn, index * rowsPerColumn + rowsPerColumn)
+  );
 
 const Header = () => {
   const router = useRouter();
@@ -74,8 +79,6 @@ const Header = () => {
   const { openCartModal } = useCartModalContext();
   const cartItems = useAppSelector((state) => state.cartReducer.items);
   const totalPrice = useSelector(selectTotalPrice);
-  const menuColumnCount = (itemsCount: number) =>
-    Math.max(1, Math.min(4, Math.ceil(itemsCount / 8)));
 
   const openMenu = (menuId: string) => {
     if (menuCloseTimer.current) {
@@ -229,11 +232,11 @@ const Header = () => {
 
       <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
         <div
-          className={`relative grid grid-cols-[auto_1fr_auto] items-center gap-4 transition-all duration-200 ${
+          className={`relative grid grid-cols-[auto_1fr_auto] items-center gap-4 transition-all duration-200 sm:grid-cols-[auto_1fr_auto] xl:grid-cols-[auto_1fr_auto] ${
             stickyMenu ? "py-3" : "py-4"
           }`}
         >
-          <Link className="flex-shrink-0" href="/" aria-label="Pepperone">
+          <Link className="flex-shrink-0 sm:flex-shrink-0 xl:flex-shrink-0" href="/" aria-label="Pepperone">
             <Image
               src="/images/logo/logo.svg"
               alt="Pepperone"
@@ -245,17 +248,18 @@ const Header = () => {
           </Link>
 
           <nav
-            className={`absolute right-2 top-full w-[300px] rounded-md border border-gray-3 bg-white p-5 shadow-lg xl:left-1/2 xl:right-auto xl:top-1/2 xl:block xl:w-auto xl:-translate-x-1/2 xl:-translate-y-1/2 xl:border-0 xl:bg-transparent xl:p-0 xl:shadow-none ${
-              navigationOpen ? "block" : "hidden"
+            className={`absolute left-0 right-0 top-full w-full flex-col rounded-none border-none border-gray-3 bg-white p-0 shadow-lg sm:static sm:block sm:w-auto sm:translate-x-0 sm:translate-y-0 sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none ${
+            
+              navigationOpen ? "flex" : "hidden"
             }`}
           >
-            <ul className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-center xl:gap-9">
+            <ul className="flex flex-col gap-5 px-2 py-3 sm:flex-row sm:px-0 sm:py-0 sm:items-center sm:justify-center sm:gap-9">
               {menuGroups.map((menuItem) => (
                 <li
                   key={menuItem.id}
                   onMouseEnter={() => openMenu(menuItem.id)}
                   onMouseLeave={closeMenu}
-                  className="relative before:absolute before:left-0 before:top-0 before:h-[3px] before:w-0 before:rounded-b-[3px] before:bg-blue before:duration-200 hover:before:w-full"
+                  className="group"
                 >
                   {menuItem.items?.length ? (
                     <>
@@ -266,40 +270,42 @@ const Header = () => {
                             current === menuItem.id ? null : menuItem.id
                           )
                         }
-                        className="flex items-center gap-1 py-2 text-left text-custom-sm font-medium text-dark hover:text-blue xl:py-0"
+                        className="flex items-center gap-1 py-2 text-left text-custom-sm font-medium text-dark hover:text-blue sm:py-0"
                       >
-                        {menuItem.title}
+                        <span className="relative before:absolute before:left-0 before:-top-2 before:h-[3px] before:w-0 before:rounded-b-[3px] before:bg-blue before:duration-200 sm:group-hover:before:w-full">
+                          {menuItem.title}
+                        </span>
                         <span className="text-xs">⌄</span>
                       </button>
 
                       <div
                         onMouseEnter={() => openMenu(menuItem.id)}
                         onMouseLeave={closeMenu}
-                        className={`static pt-0 xl:fixed xl:left-1/2 xl:top-[104px] xl:w-[calc(100vw-32px)] xl:max-w-[1170px] xl:-translate-x-1/2 xl:pt-0 ${
+                        className={`static pt-0 sm:absolute sm:left-[calc(50%+140px)] sm:top-full sm:z-9999 sm:w-auto sm:max-w-[calc(100vw-32px)] sm:-translate-x-1/2 sm:pt-0 ${
                           activeMenuId === menuItem.id ? "block" : "hidden"
                         }`}
                       >
-                        <div className="rounded-md border border-gray-3 bg-white p-4 shadow-lg xl:rounded-none xl:border-x-0 xl:border-b xl:border-t-0 xl:px-8 xl:py-5">
-                          <ul
-                            className="flex flex-col gap-x-12 gap-y-1 xl:grid"
-                            style={{
-                              gridTemplateColumns: `repeat(${menuColumnCount(
-                                menuItem.items.length
-                              )}, minmax(0, 1fr))`,
-                            }}
-                          >
-                            {menuItem.items.map((item) => (
-                              <li key={item.id}>
-                                <Link
-                                  href={item.path}
-                                  onClick={() => setNavigationOpen(false)}
-                                  className="block rounded px-3 py-2 text-sm font-medium uppercase text-dark hover:bg-gray-1 hover:text-blue"
-                                >
-                                  {item.title}
-                                </Link>
-                              </li>
+                        <div className="mt-0 overflow-x-auto rounded-md border border-gray-3 bg-white p-2 pt-0 shadow-lg sm:rounded-none sm:border-x-0 sm:border-b sm:border-t-0 sm:px-8 sm:py-7 sm:pt-7">
+                          <div className="flex flex-col gap-x-12 gap-y-1 sm:flex-row">
+                            {menuColumns(menuItem.items, 16).map((column, columnIndex) => (
+                              <ul
+                                key={`${menuItem.id}-${columnIndex}`}
+                                className="flex min-w-[240px] flex-col gap-y-1"
+                              >
+                                {column.map((item) => (
+                                  <li key={item.id}>
+                                    <Link
+                                      href={item.path}
+                                      onClick={() => setNavigationOpen(false)}
+                                      className="block rounded px-2 py-1.5 text-xs font-light uppercase text-dark hover:bg-gray-1 hover:text-blue"
+                                    >
+                                      {item.title}
+                                    </Link>
+                                  </li>
+                                ))}
+                              </ul>
                             ))}
-                          </ul>
+                          </div>
                         </div>
                       </div>
                     </>
@@ -307,7 +313,7 @@ const Header = () => {
                     <Link
                       href={menuItem.path || "/"}
                       onClick={() => setNavigationOpen(false)}
-                      className="flex py-2 text-custom-sm font-medium text-dark hover:text-blue xl:py-0"
+                      className="relative flex py-2 text-custom-sm font-medium text-dark hover:text-blue before:absolute before:left-0 before:-top-2 before:h-[3px] before:w-0 before:rounded-b-[3px] before:bg-blue before:duration-200 sm:hover:before:w-full sm:py-0"
                     >
                       {menuItem.title}
                     </Link>
@@ -315,19 +321,17 @@ const Header = () => {
                 </li>
               ))}
             </ul>
-          </nav>
 
-          <div className="flex items-center justify-end gap-2 sm:gap-4">
             <form
               onSubmit={handleSearchSubmit}
-              className="relative flex w-[132px] items-center justify-end transition-all duration-300 xsm:w-[150px] sm:w-[220px] lg:w-[320px]"
+              className="relative mx-2 mb-3 flex w-auto items-center justify-end transition-all duration-300 sm:hidden"
             >
               <input
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => {
-                  setTimeout(() => setSearchFocused(false), 140);
+                  setTimeout(() => setSearchFocused(false), 300);
                 }}
                 type="search"
                 name="search"
@@ -345,7 +349,55 @@ const Header = () => {
                 </svg>
               </button>
               {searchFocused && searchSuggestions.length > 0 && (
-                <div className="absolute right-0 top-full z-50 mt-1 w-[min(420px,calc(100vw-24px))] overflow-hidden rounded-md border border-gray-3 bg-white py-2 shadow-lg">
+                <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-md border border-gray-3 bg-white py-2 shadow-lg" onMouseDown={(e) => e.preventDefault()}>
+                  {searchSuggestions.map((suggestion) => (
+                    <Link
+                      key={suggestion.id}
+                      href={suggestion.path}
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => {
+                        setSearchQuery("");
+                        setSearchFocused(false);
+                      }}
+                      className="block px-4 py-2 text-left text-sm font-medium text-dark hover:bg-gray-1 hover:text-blue"
+                    >
+                      {suggestion.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </form>
+          </nav>
+
+          <div className="flex items-center justify-end gap-2 sm:gap-4">
+            <form
+              onSubmit={handleSearchSubmit}
+              className="relative hidden w-[132px] items-center justify-end transition-all duration-300 xsm:w-[150px] sm:flex sm:w-[220px] lg:w-[320px]"
+            >
+              <input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => {
+                  setTimeout(() => setSearchFocused(false), 300);
+                }}
+                type="search"
+                name="search"
+                aria-label="Buscar produtos"
+                placeholder="Buscar produtos"
+                className="h-11 w-full rounded-md border border-gray-3 bg-gray-1 pl-4 pr-11 text-sm text-dark outline-none transition-all duration-300 placeholder:text-dark-4 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+              />
+              <button
+                type="submit"
+                aria-label="Buscar"
+                className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-md text-dark transition-colors duration-200 hover:bg-gray-2 hover:text-blue"
+              >
+                <svg className="fill-current" width="19" height="19" viewBox="0 0 18 18">
+                  <path d="M17.27 15.67 12.63 11.9a6.72 6.72 0 1 0-.84.96l4.69 3.8a.64.64 0 0 0 .88-.08.64.64 0 0 0-.09-.91ZM7.2 13.39a5.46 5.46 0 1 1 0-10.92 5.46 5.46 0 0 1 0 10.92Z" />
+                </svg>
+              </button>
+              {searchFocused && searchSuggestions.length > 0 && (
+                <div className="absolute right-0 top-full z-50 mt-1 w-[min(420px,calc(100vw-24px))] overflow-hidden rounded-md border border-gray-3 bg-white py-2 shadow-lg" onMouseDown={(e) => e.preventDefault()}>
                   {searchSuggestions.map((suggestion) => (
                     <Link
                       key={suggestion.id}
@@ -397,7 +449,7 @@ const Header = () => {
 
             <button
               aria-label="Abrir menu"
-              className="flex h-11 w-11 items-center justify-center rounded-md border border-gray-3 xl:hidden"
+              className="flex h-11 w-11 items-center justify-center rounded-md border border-gray-3 sm:hidden"
               onClick={() => setNavigationOpen((value) => !value)}
               type="button"
             >

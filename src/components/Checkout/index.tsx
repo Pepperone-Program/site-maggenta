@@ -1,22 +1,23 @@
 "use client";
 
 import React, { FormEvent, FocusEvent, useState } from "react";
+import Image from "next/image";
 import Breadcrumb from "../Common/Breadcrumb";
 import { useAppSelector } from "@/redux/store";
 import { formatDisplayPrice } from "@/lib/products";
 
 const fields = [
-  { name: "fantasia", label: "Empresa ou nome", required: true },
-  { name: "contato", label: "Contato", required: true },
-  { name: "email", label: "E-mail", type: "email", required: true },
-  { name: "tel", label: "Telefone", required: true },
-  { name: "endereco", label: "Endereco", required: true },
-  { name: "endereco_n", label: "Numero" },
-  { name: "endereco_compl", label: "Complemento" },
-  { name: "bairro", label: "Bairro" },
-  { name: "cep", label: "CEP" },
-  { name: "cidade", label: "Cidade", required: true },
-  { name: "uf", label: "UF", maxLength: 2, required: true },
+  { name: "fantasia", label: "Empresa ou nome", placeholder: "Ex.: Pepperone Brindes", required: true },
+  { name: "contato", label: "Contato", placeholder: "Nome do responsavel", required: true },
+  { name: "email", label: "E-mail", type: "email", placeholder: "vendas@empresa.com.br", required: true },
+  { name: "tel", label: "Telefone", placeholder: "(11) 99999-9999", required: true },
+  { name: "endereco", label: "Endereco", placeholder: "Rua, avenida ou travessa", required: true },
+  { name: "endereco_n", label: "Numero", placeholder: "43" },
+  { name: "endereco_compl", label: "Complemento", placeholder: "Sala, bloco ou referencia" },
+  { name: "bairro", label: "Bairro", placeholder: "Casa Verde" },
+  { name: "cep", label: "CEP", placeholder: "02515-010" },
+  { name: "cidade", label: "Cidade", placeholder: "Sao Paulo", required: true },
+  { name: "uf", label: "UF", placeholder: "SP", maxLength: 2, required: true },
 ];
 
 const Checkout = () => {
@@ -144,8 +145,9 @@ const Checkout = () => {
                           type={field.type || "text"}
                           required={field.required}
                           maxLength={field.maxLength}
+                          placeholder={field.placeholder}
                           onBlur={field.name === "cep" ? handleCepBlur : undefined}
-                          className="h-12 w-full rounded-md border border-gray-3 bg-gray-1 px-4 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                          className="h-12 w-full rounded-md border border-gray-3 bg-gray-1 px-4 outline-none duration-200 placeholder:text-dark-5 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                         />
                         {field.name === "cep" && cepLoading && (
                           <span className="mt-1.5 block text-sm text-blue">
@@ -175,7 +177,7 @@ const Checkout = () => {
                       Resumo
                     </span>
                     <h3 className="mt-2 text-2xl font-semibold text-dark">
-                      Seu orcamento
+                      Seu orçamento
                     </h3>
                   </div>
 
@@ -190,11 +192,22 @@ const Checkout = () => {
                           key={item.id}
                           className="flex items-start justify-between gap-5 border-b border-gray-3 py-5"
                         >
-                          <div>
+                          <div className="flex min-w-0 gap-4">
+                            <div className="relative h-18 w-18 shrink-0 overflow-hidden rounded-md border border-gray-3 bg-gray-1">
+                              <Image
+                                src={item.imgs.previews[0]}
+                                alt={item.title}
+                                fill
+                                sizes="72px"
+                                className="object-contain p-1"
+                              />
+                            </div>
+                            <div className="min-w-0">
                             <p className="font-medium text-dark">{item.title}</p>
                             <p className="mt-1 text-sm text-dark-4">
                               Codigo: {item.codigo || item.id} - Qtd: {item.quantity}
                             </p>
+                            </div>
                           </div>
                           <p className="text-right text-dark">
                             {formatDisplayPrice(item.discountedPrice)}

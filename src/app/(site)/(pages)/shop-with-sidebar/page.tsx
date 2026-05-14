@@ -1,6 +1,5 @@
 import React from "react";
-import ShopWithSidebar from "@/components/ShopWithSidebar";
-import { getProdutos } from "@/lib/api";
+import { redirect } from "next/navigation";
 
 import { Metadata } from "next";
 export const metadata: Metadata = {
@@ -10,13 +9,7 @@ export const metadata: Metadata = {
 };
 
 const ShopWithSidebarPage = async () => {
-  const products = await getProdutos();
-
-  return (
-    <main>
-      <ShopWithSidebar products={products} />
-    </main>
-  );
+  redirect("/brindes-personalizados");
 };
 
 export default ShopWithSidebarPage;

@@ -23,9 +23,7 @@ const ShopDetails = ({
   const [showTags, setShowTags] = useState(false);
   const mainImageRef = useRef<HTMLDivElement>(null);
   const wheelLockRef = useRef(0);
-  const categoryPath = product.idTipoProduto
-    ? `/shop-with-sidebar?tipo=${encodeURIComponent(String(product.idTipoProduto))}`
-    : `/shop-with-sidebar?categoria=${encodeURIComponent(product.category)}`;
+  const categoryPath = "/brindes-personalizados";
 
   useEffect(() => {
     setPreviewImg(0);
@@ -146,10 +144,16 @@ const ShopDetails = ({
                 </Link>
                 <span className="mx-2">/</span>
                 <Link
-                  href="/shop-with-sidebar"
+                  href="/brindes-personalizados"
                   className="duration-200 hover:text-blue"
                 >
-                  Loja
+                  Brindes Personalizados
+                </Link>
+                <span className="mx-2">/</span>
+                <Link
+                  href={categoryPath}
+                >
+                  {product.category}
                 </Link>
                 <span className="mx-2">/</span>
                 <span className="text-dark">{product.title}</span>
@@ -163,16 +167,16 @@ const ShopDetails = ({
               </h1>
               <p className="mt-5 text-base leading-7 text-dark-3">
                 {showTags ? (
-                  <>
+                  <p className=" text-blue hover:text-blue-dark">
                     {product.title},{" "}
                     <Link
                       href={categoryPath}
-                      className="font-medium text-blue hover:text-blue-dark"
+                      
                     >
                       {product.category}
                     </Link>
                     {`, ${product.description}`}
-                  </>
+                  </p>
                 ) : (
                   product.shortDescription
                 )}
@@ -244,7 +248,7 @@ const ShopDetails = ({
                 </h2>
               </div>
               <Link
-                href="/shop-with-sidebar"
+                href="/brindes-personalizados"
                 className="hidden rounded-md border border-gray-3 px-5 py-2.5 text-sm font-semibold text-dark duration-200 hover:bg-blue hover:text-white sm:inline-flex"
               >
                 Ver loja

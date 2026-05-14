@@ -15,8 +15,8 @@ const Newsletter = () => {
                 Receba novidades e ofertas outdoor
               </h2>
               <p className="text-white">
-                Cadastre seu email para acompanhar lancamentos, cupons e
-                conteudos para sua proxima viagem.
+                Cadastre seu email para acompanhar lançamentos, cupons e
+                conteúdos para sua próxima viagem.
               </p>
             </div>
 

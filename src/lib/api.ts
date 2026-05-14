@@ -7,6 +7,7 @@ import { isValidImageSrc, safeImageSrc } from "@/lib/images";
 type ApiFlag = "S" | "N" | string | null | undefined;
 
 export type ProdutoApi = {
+  id_empresa?: number;
   id_produto: number;
   id_tipo_produto?: number;
   produto: string;
@@ -16,7 +17,10 @@ export type ProdutoApi = {
   largura?: string | null;
   profundidade?: string | null;
   peso?: string | null;
+  ncm?: string | null;
+  quantidade_minima?: string | null;
   imagem?: string | null;
+  imagem_url?: string | null;
   data_inclusao?: string | null;
   obs?: string | null;
   site?: ApiFlag;
@@ -26,6 +30,9 @@ export type ProdutoApi = {
   habilitado?: ApiFlag;
   cod_forn?: string | null;
   imagens?: ProdutoImageApi[];
+  subcategorias?: CatalogoSubcategoria[];
+  publicos_alvos?: CatalogoPublicoAlvo[];
+  datas_promocionais?: CatalogoDataPromocional[];
 };
 
 export type ProdutoRankingApi = {
@@ -83,6 +90,102 @@ type PaginatedApiData<T> = {
   totalPages?: number;
 };
 
+export type CatalogoCategoria = {
+  id_empresa: number;
+  id_categoria: number;
+  categoria: string;
+  descricao?: string | null;
+  icon?: string | null;
+  habilitado?: ApiFlag;
+  url_capa?: string | null;
+};
+
+export type CatalogoSubcategoria = {
+  id_subcategoria: number;
+  subcategoria: string;
+  total?: number;
+};
+
+export type CatalogoPublicoAlvo = {
+  id_publico_alvo: number;
+  publico_alvo: string;
+  total?: number;
+};
+
+export type CatalogoDataPromocional = {
+  id_data_promocional: number;
+  data_promocional: string;
+  data?: string | null;
+  total?: number;
+};
+
+export type CatalogoFiltros = {
+  subcategorias: CatalogoSubcategoria[];
+  publicos_alvos: CatalogoPublicoAlvo[];
+  datas_promocionais: CatalogoDataPromocional[];
+  quantidade_minima: {
+    min: number;
+    max: number;
+  };
+};
+
+export type CatalogoProdutos = {
+  categoria: CatalogoCategoria | null;
+  filtros: CatalogoFiltros;
+  items: Product[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export type CatalogoProdutosQuery = {
+  empresaId?: number;
+  page?: number;
+  limit?: number;
+  subcategorias?: string;
+  publicos_alvos?: string;
+  quantidade_minima_min?: number;
+  quantidade_minima_max?: number;
+  data_promocional?: string;
+  datas_promocionais?: string;
+};
+
+export type CatalogoTipoProduto = {
+  tipo_produto: {
+    id_empresa: number;
+    id_tipo_produto: number;
+    tipo_produto: string;
+    descricao?: string | null;
+    habilitado?: ApiFlag;
+  } | null;
+  filtros: CatalogoFiltros;
+  items: Product[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export type CatalogoOption = {
+  id: number;
+  title: string;
+};
+
+type DataPromocionalApi = {
+  id_data_promocional: number;
+  data_promocional: string;
+  data?: string | null;
+  descricao?: string | null;
+  ordem?: number | null;
+  habilitado?: ApiFlag;
+};
+
+type DataPromocionalProdutoApi = {
+  id_data_promocional: number;
+  id_produto: number;
+};
+
 const API_BASE_PATH = "/api/v1";
 const REQUEST_TIMEOUT_MS = 8000;
 
@@ -135,6 +238,21 @@ const mockDatasPromocionais = [
   { id_data_promocional: 3, data_promocional: "Black Friday", ordem: 3, habilitado: "S" },
 ];
 
+const sortByOrderAndName = <T extends Record<string, unknown>>(
+  titleKey: keyof T
+) => (a: T, b: T) => {
+  const orderA = Number(a.ordem ?? Number.MAX_SAFE_INTEGER);
+  const orderB = Number(b.ordem ?? Number.MAX_SAFE_INTEGER);
+
+  if (orderA !== orderB) {
+    return orderA - orderB;
+  }
+
+  return String(a[titleKey]).localeCompare(String(b[titleKey]), "pt-BR", {
+    sensitivity: "base",
+  });
+};
+
 export const slugify = (value: string) =>
   value
     .normalize("NFD")
@@ -145,6 +263,11 @@ export const slugify = (value: string) =>
 
 const isEnabled = (value?: ApiFlag) => !value || value === "S";
 const isYes = (value?: ApiFlag) => value === "S" || value === "s";
+const parseIdList = (value?: string) =>
+  (value || "")
+    .split(",")
+    .map((item) => Number(item))
+    .filter((item) => Number.isFinite(item) && item > 0);
 
 const apiBaseUrl = () => (process.env.NEXT_API_URL || "").replace(/\/$/, "");
 
@@ -341,6 +464,10 @@ export const productImageProxy = (
   );
 
 const normalizeImage = (product: ProdutoApi, folder: "thumb" | "alta") => {
+  if (isValidImageSrc(product.imagem_url)) {
+    return product.imagem_url;
+  }
+
   if (!isValidImageSrc(product.imagem)) {
     return "";
   }
@@ -383,9 +510,27 @@ const uniqueValidImages = (images: string[]) =>
     (image, index, items) => isValidImageSrc(image) && items.indexOf(image) === index
   );
 
+const ensureProductImages = (images: string[], fallback: string) => {
+  const validImages = uniqueValidImages(images);
+  const safeFallback = isValidImageSrc(fallback)
+    ? fallback
+    : "/images/logo/logo.svg";
+
+  if (validImages.length >= 2) {
+    return validImages;
+  }
+
+  if (validImages.length === 1) {
+    return [validImages[0], validImages[0]];
+  }
+
+  return [safeFallback, safeFallback];
+};
+
 export const mapApiProdutoToProduct = (
   product: ProdutoApi,
-  images: ProdutoImageApi[] = []
+  images: ProdutoImageApi[] = [],
+  categoryName?: string
 ): Product => {
   const mock = shopData[(product.id_produto - 1) % shopData.length];
   const productImages = product.imagens?.length ? product.imagens : images;
@@ -393,15 +538,13 @@ export const mapApiProdutoToProduct = (
   const apiThumbs = normalizeProductImages(product, productImages, "thumb");
   const mainImage = normalizeImage(product, "alta");
   const mainThumb = normalizeImage(product, "thumb");
-  const previews = uniqueValidImages(
-    apiPreviews.length
-      ? apiPreviews
-      : [mainImage, ...mock.imgs.previews]
+  const previews = ensureProductImages(
+    [mainImage, ...apiPreviews],
+    mainImage
   );
-  const thumbnails = uniqueValidImages(
-    apiThumbs.length
-      ? apiThumbs
-      : [mainThumb, ...mock.imgs.thumbnails]
+  const thumbnails = ensureProductImages(
+    [mainThumb, ...apiThumbs],
+    mainThumb || mainImage
   );
   const title = product.produto || mock.title;
   const codigo = product.codigo || `PEP-${product.id_produto}`;
@@ -419,14 +562,16 @@ export const mapApiProdutoToProduct = (
     idTipoProduto: product.id_tipo_produto,
     title,
     slug: `${product.id_produto}-${slugify(title)}`,
-    category: mock.category,
+    category: categoryName || mock.category,
     shortDescription: product.obs || product.descricao || mock.shortDescription,
     description: product.descricao || product.obs || mock.description,
     features: [
       product.codigo ? `Codigo ${product.codigo}` : "",
       product.altura ? `Altura: ${product.altura}` : "",
       product.largura ? `Largura: ${product.largura}` : "",
+      product.profundidade ? `Profundidade: ${product.profundidade}` : "",
       product.peso ? `Peso: ${product.peso}` : "",
+      product.quantidade_minima ? `Quantidade minima: ${product.quantidade_minima}` : "",
     ].filter(Boolean),
     specs: [
       { label: "Codigo", value: codigo },
@@ -436,6 +581,10 @@ export const mapApiProdutoToProduct = (
         ? { label: "Profundidade", value: product.profundidade }
         : null,
       product.peso ? { label: "Peso", value: product.peso } : null,
+      product.quantidade_minima
+        ? { label: "Quantidade minima", value: product.quantidade_minima }
+        : null,
+      product.ncm ? { label: "NCM", value: product.ncm } : null,
     ].filter(Boolean) as Product["specs"],
     reviews: mock.reviews,
     price: 0,
@@ -463,6 +612,296 @@ export async function getProdutos(limit = 100): Promise<Product[]> {
     .filter((product) => isEnabled(product.habilitado) && isEnabled(product.site))
     .map((product) => mapApiProdutoToProduct(product))
     .slice(0, limit);
+}
+
+const emptyCatalogoFiltros: CatalogoFiltros = {
+  subcategorias: [],
+  publicos_alvos: [],
+  datas_promocionais: [],
+  quantidade_minima: {
+    min: 0,
+    max: 0,
+  },
+};
+
+const sanitizeCatalogPage = (value?: number) =>
+  Number.isFinite(value) && Number(value) > 0 ? Math.floor(Number(value)) : 1;
+
+const sanitizeCatalogLimit = (value?: number) => {
+  const limit = Number.isFinite(value) && Number(value) > 0 ? Math.floor(Number(value)) : 24;
+  return Math.min(Math.max(limit, 1), 60);
+};
+
+const appendCatalogParam = (
+  params: URLSearchParams,
+  key: string,
+  value: string | number | undefined
+) => {
+  if (value === undefined || value === null || value === "") {
+    return;
+  }
+
+  params.set(key, String(value));
+};
+
+export async function getCatalogoCategoria(
+  idCategoria = 1,
+  query: CatalogoProdutosQuery = {}
+): Promise<CatalogoProdutos> {
+  const page = sanitizeCatalogPage(query.page);
+  const limit = sanitizeCatalogLimit(query.limit);
+  const params = new URLSearchParams({
+    empresaId: String(query.empresaId || 1),
+    page: String(page),
+    limit: String(limit),
+  });
+
+  appendCatalogParam(params, "subcategorias", query.subcategorias);
+  appendCatalogParam(params, "publicos_alvos", query.publicos_alvos);
+  appendCatalogParam(params, "quantidade_minima_min", query.quantidade_minima_min);
+  appendCatalogParam(params, "quantidade_minima_max", query.quantidade_minima_max);
+  appendCatalogParam(
+    params,
+    "datas_promocionais",
+    query.datas_promocionais || query.data_promocional
+  );
+  appendCatalogParam(params, "data_promocional", query.data_promocional);
+
+  const payload = await apiRequest(
+    `/categorias/${encodeURIComponent(String(idCategoria))}/catalogo?${params.toString()}`
+  );
+
+  const data =
+    payload && typeof payload === "object" && "data" in payload
+      ? (payload.data as {
+          categoria?: CatalogoCategoria | null;
+          filtros?: Partial<CatalogoFiltros>;
+          items?: ProdutoApi[];
+          total?: number;
+          page?: number;
+          limit?: number;
+          totalPages?: number;
+        })
+      : null;
+
+  if (!data) {
+    const fallback = await getProdutos(limit);
+
+    return {
+      categoria: {
+        id_empresa: 1,
+        id_categoria: idCategoria,
+        categoria: "Brindes",
+        descricao: null,
+        icon: null,
+        habilitado: "S",
+        url_capa: null,
+      },
+      filtros: emptyCatalogoFiltros,
+      items: fallback,
+      total: fallback.length,
+      page,
+      limit,
+      totalPages: 1,
+    };
+  }
+
+  const categoryName = data.categoria?.categoria;
+  const selectedDataIds = parseIdList(query.datas_promocionais || query.data_promocional);
+  const dataProductIds = selectedDataIds.length
+    ? await getProdutosIdsByDatasPromocionais(selectedDataIds)
+    : null;
+  const dataProductSet = dataProductIds ? new Set(dataProductIds) : null;
+  const sourceItems =
+    dataProductSet && data.items?.length
+      ? data.items.filter((product) => dataProductSet.has(product.id_produto))
+      : data.items || [];
+
+  return {
+    categoria: data.categoria || null,
+    filtros: {
+      subcategorias: data.filtros?.subcategorias || [],
+      publicos_alvos: data.filtros?.publicos_alvos || [],
+      datas_promocionais: data.filtros?.datas_promocionais || [],
+      quantidade_minima:
+        data.filtros?.quantidade_minima || emptyCatalogoFiltros.quantidade_minima,
+    },
+    items: sourceItems.map((product) =>
+      mapApiProdutoToProduct(product, [], categoryName)
+    ),
+    total:
+      dataProductSet && data.items?.length
+        ? sourceItems.length
+        : Number(data.total || sourceItems.length || 0),
+    page: Number(data.page || page),
+    limit: Number(data.limit || limit),
+    totalPages: Number(data.totalPages || 0),
+  };
+}
+
+export async function getCatalogoTipoProduto(
+  idTipoProduto = 12,
+  query: Pick<CatalogoProdutosQuery, "empresaId"> = {}
+): Promise<CatalogoTipoProduto> {
+  const limit = 100;
+  const params = new URLSearchParams({
+    empresaId: String(query.empresaId || 1),
+    page: "1",
+    limit: String(limit),
+  });
+  const firstPayload = await apiRequest(
+    `/tipos-produtos/${encodeURIComponent(String(idTipoProduto))}/catalogo?${params.toString()}`
+  );
+  const firstData =
+    firstPayload && typeof firstPayload === "object" && "data" in firstPayload
+      ? (firstPayload.data as {
+          tipo_produto?: CatalogoTipoProduto["tipo_produto"];
+          filtros?: Partial<CatalogoFiltros>;
+          items?: ProdutoApi[];
+          total?: number;
+          page?: number;
+          limit?: number;
+          totalPages?: number;
+        })
+      : null;
+
+  if (!firstData) {
+    const fallback = await getProdutos(limit);
+
+    return {
+      tipo_produto: {
+        id_empresa: 1,
+        id_tipo_produto: idTipoProduto,
+        tipo_produto: "Brindes para empresas",
+        descricao: null,
+        habilitado: "S",
+      },
+      filtros: emptyCatalogoFiltros,
+      items: fallback,
+      total: fallback.length,
+      page: 1,
+      limit,
+      totalPages: 1,
+    };
+  }
+
+  const totalPages = Math.max(Number(firstData.totalPages || 1), 1);
+  const restPages = Array.from({ length: Math.max(totalPages - 1, 0) }, (_, index) => index + 2);
+  const restItems = await Promise.all(
+    restPages.map(async (page) => {
+      const pageParams = new URLSearchParams(params);
+      pageParams.set("page", String(page));
+      const payload = await apiRequest(
+        `/tipos-produtos/${encodeURIComponent(String(idTipoProduto))}/catalogo?${pageParams.toString()}`
+      );
+      const data =
+        payload && typeof payload === "object" && "data" in payload
+          ? (payload.data as { items?: ProdutoApi[] })
+          : null;
+
+      return data?.items || [];
+    })
+  );
+  const tipoNome = firstData.tipo_produto?.tipo_produto;
+  const items = [...(firstData.items || []), ...restItems.flat()];
+
+  return {
+    tipo_produto: firstData.tipo_produto || null,
+    filtros: {
+      subcategorias: firstData.filtros?.subcategorias || [],
+      publicos_alvos: firstData.filtros?.publicos_alvos || [],
+      datas_promocionais: firstData.filtros?.datas_promocionais || [],
+      quantidade_minima:
+        firstData.filtros?.quantidade_minima || emptyCatalogoFiltros.quantidade_minima,
+    },
+    items: items.map((product) => mapApiProdutoToProduct(product, [], tipoNome)),
+    total: Number(firstData.total || items.length),
+    page: 1,
+    limit: items.length || limit,
+    totalPages: 1,
+  };
+}
+
+export async function getCatalogoCategorias(): Promise<CatalogoOption[]> {
+  const categorias =
+    (await fetchAllFirstAvailable<(typeof mockCategorias)[number]>([
+      "/categorias",
+      "/produtos/categorias",
+    ], 100)) || mockCategorias;
+
+  return categorias
+    .filter((category) => isEnabled(category.habilitado))
+    .sort(sortByOrderAndName("categoria"))
+    .map((category) => ({
+      id: Number(category.id_categoria),
+      title: String(category.categoria),
+    }))
+    .filter((category) => Number.isFinite(category.id) && category.title);
+}
+
+export async function getDatasPromocionais(): Promise<CatalogoOption[]> {
+  const datas =
+    (await fetchAllFirstAvailable<DataPromocionalApi>([
+      "/datas-promocionais",
+    ], 10)) || mockDatasPromocionais;
+
+  return datas
+    .filter((data) => isEnabled(data.habilitado))
+    .sort(sortByOrderAndName("data_promocional"))
+    .map((data) => ({
+      id: Number(data.id_data_promocional),
+      title: String(data.data_promocional),
+    }))
+    .filter((data) => Number.isFinite(data.id) && data.title);
+}
+
+export async function getPublicosAlvos(): Promise<CatalogoOption[]> {
+  const publicos =
+    (await fetchAllFirstAvailable<(typeof mockPublicosAlvos)[number]>([
+      "/publicos-alvos",
+      "/publicos_alvos",
+      "/publicos-alvo",
+    ], 100)) || mockPublicosAlvos;
+
+  return publicos
+    .filter((publico) => isEnabled(publico.habilitado))
+    .sort(sortByOrderAndName("publico_alvo"))
+    .map((publico) => ({
+      id: Number(publico.id_publico_alvo),
+      title: String(publico.publico_alvo),
+    }))
+    .filter((publico) => Number.isFinite(publico.id) && publico.title);
+}
+
+export async function getProdutosIdsByDatasPromocionais(
+  ids: number[]
+): Promise<number[]> {
+  const uniqueIds = Array.from(new Set(ids)).filter((id) => Number.isFinite(id) && id > 0);
+
+  if (!uniqueIds.length) {
+    return [];
+  }
+
+  const groups = await Promise.all(
+    uniqueIds.map(async (id) => {
+      const produtos = await apiFetchAllPages<DataPromocionalProdutoApi>(
+        `/datas-promocionais/${encodeURIComponent(String(id))}/produtos`,
+        100,
+        50
+      );
+
+      return produtos || [];
+    })
+  );
+
+  return Array.from(
+    new Set(
+      groups
+        .flat()
+        .map((item) => Number(item.id_produto))
+        .filter((id) => Number.isFinite(id) && id > 0)
+    )
+  );
 }
 
 export async function getProdutosForSitemap(limit = 5000): Promise<Product[]> {
@@ -612,14 +1051,14 @@ export async function getProductSections() {
     },
     {
       id: "mais-orcados",
-      eyebrow: "Mais pedidos",
-      title: "Mais orcados",
+      eyebrow: "Mais Pedidos",
+      title: "Mais Procurados",
       products: sectionFallback(mostQuoted || [], 1),
     },
     {
       id: "lancamentos",
-      eyebrow: "Lancamentos",
-      title: "Lancamentos",
+      eyebrow: "Lançamentos",
+      title: "Lançamentos",
       products: sectionFallback(products.filter((product) => product.lancamento), 2),
     },
     {
@@ -650,8 +1089,8 @@ export async function getHomeCategories(): Promise<Category[]> {
       id: Number(category.id_categoria),
       title: String(category.categoria),
       img: safeImageSrc(
-        "icon" in category ? category.icon : null,
-        categoryIcon(index)
+        "url_capa" in category ? category.url_capa : null,
+        ""
       ),
     }));
 }
@@ -676,29 +1115,28 @@ const toMenuItems = <T extends Record<string, unknown>>(
     .map((item) => ({
       id: String(item[idKey]),
       title: String(item[titleKey]),
-      path: `/shop-with-sidebar?${filterKey}=${encodeURIComponent(String(item[idKey]))}`,
+      path:
+        filterKey === "categoria"
+          ? `/brindes-personalizados?categoria=${encodeURIComponent(String(item[idKey]))}`
+          : filterKey === "publico"
+            ? `/brindes-personalizados?publicos_alvos=${encodeURIComponent(String(item[idKey]))}`
+            : filterKey === "data"
+              ? `/brindes-personalizados?datas_promocionais=${encodeURIComponent(String(item[idKey]))}`
+              : filterKey === "tipo"
+                ? `/brindes-para-empresas?tipo=${encodeURIComponent(String(item[idKey]))}`
+              : "/brindes-personalizados",
     }));
 
 export async function getMenuGroups(): Promise<ApiMenuGroup[]> {
   const [categorias, tipos, publicos, datas] = await Promise.all([
-    fetchAllFirstAvailable<(typeof mockCategorias)[number]>([
-      "/categorias",
-      "/produtos/categorias",
-    ], 100),
+    getCatalogoCategorias(),
     fetchAllFirstAvailable<(typeof mockTiposProdutos)[number]>([
       "/tipos-produtos",
       "/tipos_produtos",
       "/tiposProdutos",
     ], 100),
-    fetchAllFirstAvailable<(typeof mockPublicosAlvos)[number]>([
-      "/publicos-alvos",
-      "/publicos_alvos",
-      "/publicos-alvo",
-    ], 100),
-    fetchAllFirstAvailable<(typeof mockDatasPromocionais)[number]>([
-      "/datas-promocionais",
-      "/datas_promocionais",
-    ], 100),
+    getPublicosAlvos(),
+    getDatasPromocionais(),
   ]);
 
   return [
@@ -706,7 +1144,11 @@ export async function getMenuGroups(): Promise<ApiMenuGroup[]> {
     {
       id: "categorias",
       title: "Categorias",
-      items: toMenuItems(categorias || mockCategorias, "id_categoria", "categoria", "categoria"),
+      items: categorias.map((category) => ({
+        id: String(category.id),
+        title: category.title,
+        path: `/brindes-personalizados?categoria=${encodeURIComponent(String(category.id))}`,
+      })),
     },
     {
       id: "brindes",
@@ -716,12 +1158,20 @@ export async function getMenuGroups(): Promise<ApiMenuGroup[]> {
     {
       id: "publicos",
       title: "Publicos alvos",
-      items: toMenuItems(publicos || mockPublicosAlvos, "id_publico_alvo", "publico_alvo", "publico"),
+      items: publicos.map((publico) => ({
+        id: String(publico.id),
+        title: publico.title,
+        path: `/brindes-personalizados?publicos_alvos=${encodeURIComponent(String(publico.id))}`,
+      })),
     },
     {
       id: "datas",
       title: "Datas promocionais",
-      items: toMenuItems(datas || mockDatasPromocionais, "id_data_promocional", "data_promocional", "data"),
+      items: datas.map((data) => ({
+        id: String(data.id),
+        title: data.title,
+        path: `/brindes-personalizados?datas_promocionais=${encodeURIComponent(String(data.id))}`,
+      })),
     },
   ];
 }

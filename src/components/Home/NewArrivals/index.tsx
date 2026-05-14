@@ -56,7 +56,7 @@ const NewArrival = ({
           </div>
 
           <Link
-            href="/shop-with-sidebar"
+            href="/brindes-personalizados"
             className="mt-4 inline-flex font-medium text-custom-sm py-2.5 px-7 rounded-md border-gray-3 border bg-gray-1 text-dark ease-out duration-200 hover:bg-blue hover:text-white hover:border-transparent sm:absolute sm:right-0 sm:top-1/2 sm:mt-0 sm:-translate-y-1/2"
           >
             Ver todos
