@@ -37,9 +37,9 @@ const HeroCarousal = () => {
               </span>
             </div>
 
-            <h1 className="font-semibold text-dark text-xl sm:text-3xl mb-3">
+            <h2 className="font-semibold text-dark text-xl sm:text-3xl mb-3">
               <a href="#">True Wireless Noise Cancelling Headphone</a>
-            </h1>
+            </h2>
 
             <p>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi at ipsum at risus euismod lobortis in
@@ -78,9 +78,9 @@ const HeroCarousal = () => {
               </span>
             </div>
 
-            <h1 className="font-semibold text-dark text-xl sm:text-3xl mb-3">
+            <h2 className="font-semibold text-dark text-xl sm:text-3xl mb-3">
               <a href="#">True Wireless Noise Cancelling Headphone</a>
-            </h1>
+            </h2>
 
             <p>
               Lorem ipsum dolor sit, consectetur elit nunc suscipit non ipsum

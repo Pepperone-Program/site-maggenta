@@ -167,6 +167,39 @@ export type CatalogoTipoProduto = {
   totalPages: number;
 };
 
+type CatalogoPublicoAlvoResponse = {
+  publico_alvo?: {
+    id_publico_alvo: number;
+    publico_alvo: string;
+    descricao?: string | null;
+    ordem?: number | null;
+    habilitado?: ApiFlag;
+  } | null;
+  filtros?: Partial<CatalogoFiltros>;
+  items?: ProdutoApi[];
+  total?: number;
+  page?: number;
+  limit?: number;
+  totalPages?: number;
+};
+
+type CatalogoDataPromocionalResponse = {
+  data_promocional?: {
+    id_data_promocional: number;
+    data_promocional: string;
+    data?: string | null;
+    descricao?: string | null;
+    ordem?: number | null;
+    habilitado?: ApiFlag;
+  } | null;
+  filtros?: Partial<CatalogoFiltros>;
+  items?: ProdutoApi[];
+  total?: number;
+  page?: number;
+  limit?: number;
+  totalPages?: number;
+};
+
 export type CatalogoOption = {
   id: number;
   title: string;
@@ -632,6 +665,11 @@ const sanitizeCatalogLimit = (value?: number) => {
   return Math.min(Math.max(limit, 1), 60);
 };
 
+const sanitizeWideCatalogLimit = (value?: number) => {
+  const limit = Number.isFinite(value) && Number(value) > 0 ? Math.floor(Number(value)) : 100;
+  return Math.min(Math.max(limit, 1), 500);
+};
+
 const appendCatalogParam = (
   params: URLSearchParams,
   key: string,
@@ -736,6 +774,179 @@ export async function getCatalogoCategoria(
     page: Number(data.page || page),
     limit: Number(data.limit || limit),
     totalPages: Number(data.totalPages || 0),
+  };
+}
+
+const mapCatalogDataToProdutos = ({
+  data,
+  page,
+  limit,
+  fallbackTitle,
+  fallbackDescription = null,
+  fallbackId = 0,
+}: {
+  data: {
+    filtros?: Partial<CatalogoFiltros>;
+    items?: ProdutoApi[];
+    total?: number;
+    page?: number;
+    limit?: number;
+    totalPages?: number;
+  } | null;
+  page: number;
+  limit: number;
+  fallbackTitle: string;
+  fallbackDescription?: string | null;
+  fallbackId?: number;
+}): CatalogoProdutos | null => {
+  if (!data) {
+    return null;
+  }
+
+  const items = data.items || [];
+
+  return {
+    categoria: {
+      id_empresa: 1,
+      id_categoria: fallbackId,
+      categoria: fallbackTitle,
+      descricao: fallbackDescription,
+      icon: null,
+      habilitado: "S",
+      url_capa: null,
+    },
+    filtros: {
+      subcategorias: data.filtros?.subcategorias || [],
+      publicos_alvos: data.filtros?.publicos_alvos || [],
+      datas_promocionais: data.filtros?.datas_promocionais || [],
+      quantidade_minima:
+        data.filtros?.quantidade_minima || emptyCatalogoFiltros.quantidade_minima,
+    },
+    items: items.map((product) => mapApiProdutoToProduct(product, [], fallbackTitle)),
+    total: Number(data.total || items.length || 0),
+    page: Number(data.page || page),
+    limit: Number(data.limit || limit),
+    totalPages: Number(data.totalPages || 0),
+  };
+};
+
+export async function getCatalogoPublicoAlvo(
+  idPublicoAlvo = 1,
+  query: CatalogoProdutosQuery = {}
+): Promise<CatalogoProdutos> {
+  const page = sanitizeCatalogPage(query.page);
+  const limit = sanitizeWideCatalogLimit(query.limit);
+  const params = new URLSearchParams({
+    empresaId: String(query.empresaId || 1),
+    page: String(page),
+    limit: String(limit),
+  });
+
+  appendCatalogParam(params, "subcategorias", query.subcategorias);
+  appendCatalogParam(params, "publicos_alvos", query.publicos_alvos);
+  appendCatalogParam(params, "datas_promocionais", query.datas_promocionais);
+  appendCatalogParam(params, "quantidade_minima_min", query.quantidade_minima_min);
+  appendCatalogParam(params, "quantidade_minima_max", query.quantidade_minima_max);
+
+  const payload = await apiRequest(
+    `/publicos-alvos/${encodeURIComponent(String(idPublicoAlvo))}/catalogo?${params.toString()}`
+  );
+  const data =
+    payload && typeof payload === "object" && "data" in payload
+      ? (payload.data as CatalogoPublicoAlvoResponse)
+      : null;
+  const titulo = data?.publico_alvo?.publico_alvo || "Publico-alvo";
+  const mapped = mapCatalogDataToProdutos({
+    data,
+    page,
+    limit,
+    fallbackTitle: titulo,
+    fallbackDescription: data?.publico_alvo?.descricao || null,
+    fallbackId: idPublicoAlvo,
+  });
+
+  if (mapped) {
+    return mapped;
+  }
+
+  const fallback = await getProdutos(limit);
+
+  return {
+    categoria: {
+      id_empresa: 1,
+      id_categoria: idPublicoAlvo,
+      categoria: titulo,
+      descricao: null,
+      icon: null,
+      habilitado: "S",
+      url_capa: null,
+    },
+    filtros: emptyCatalogoFiltros,
+    items: fallback,
+    total: fallback.length,
+    page,
+    limit,
+    totalPages: 1,
+  };
+}
+
+export async function getCatalogoDataPromocional(
+  idDataPromocional = 1,
+  query: CatalogoProdutosQuery = {}
+): Promise<CatalogoProdutos> {
+  const page = sanitizeCatalogPage(query.page);
+  const limit = sanitizeWideCatalogLimit(query.limit);
+  const params = new URLSearchParams({
+    empresaId: String(query.empresaId || 1),
+    page: String(page),
+    limit: String(limit),
+  });
+
+  appendCatalogParam(params, "subcategorias", query.subcategorias);
+  appendCatalogParam(params, "publicos_alvos", query.publicos_alvos);
+  appendCatalogParam(params, "datas_promocionais", query.datas_promocionais);
+  appendCatalogParam(params, "quantidade_minima_min", query.quantidade_minima_min);
+  appendCatalogParam(params, "quantidade_minima_max", query.quantidade_minima_max);
+
+  const payload = await apiRequest(
+    `/datas-promocionais/${encodeURIComponent(String(idDataPromocional))}/catalogo?${params.toString()}`
+  );
+  const data =
+    payload && typeof payload === "object" && "data" in payload
+      ? (payload.data as CatalogoDataPromocionalResponse)
+      : null;
+  const titulo = data?.data_promocional?.data_promocional || "Data promocional";
+  const mapped = mapCatalogDataToProdutos({
+    data,
+    page,
+    limit,
+    fallbackTitle: titulo,
+    fallbackDescription: data?.data_promocional?.descricao || null,
+    fallbackId: idDataPromocional,
+  });
+
+  if (mapped) {
+    return mapped;
+  }
+
+  const fallback = await getProdutos(limit);
+
+  return {
+    categoria: {
+      id_empresa: 1,
+      id_categoria: idDataPromocional,
+      categoria: titulo,
+      descricao: null,
+      icon: null,
+      habilitado: "S",
+      url_capa: null,
+    },
+    filtros: emptyCatalogoFiltros,
+    items: fallback,
+    total: fallback.length,
+    page,
+    limit,
+    totalPages: 1,
   };
 }
 
@@ -1119,9 +1330,9 @@ const toMenuItems = <T extends Record<string, unknown>>(
         filterKey === "categoria"
           ? `/brindes-personalizados?categoria=${encodeURIComponent(String(item[idKey]))}`
           : filterKey === "publico"
-            ? `/brindes-personalizados?publicos_alvos=${encodeURIComponent(String(item[idKey]))}`
+            ? `/publicos-alvos?publico_alvo=${encodeURIComponent(String(item[idKey]))}`
             : filterKey === "data"
-              ? `/brindes-personalizados?datas_promocionais=${encodeURIComponent(String(item[idKey]))}`
+              ? `/datas-promocionais?data_promocional=${encodeURIComponent(String(item[idKey]))}`
               : filterKey === "tipo"
                 ? `/brindes-para-empresas?tipo=${encodeURIComponent(String(item[idKey]))}`
               : "/brindes-personalizados",
@@ -1161,7 +1372,7 @@ export async function getMenuGroups(): Promise<ApiMenuGroup[]> {
       items: publicos.map((publico) => ({
         id: String(publico.id),
         title: publico.title,
-        path: `/brindes-personalizados?publicos_alvos=${encodeURIComponent(String(publico.id))}`,
+        path: `/publicos-alvos?publico_alvo=${encodeURIComponent(String(publico.id))}`,
       })),
     },
     {
@@ -1170,7 +1381,7 @@ export async function getMenuGroups(): Promise<ApiMenuGroup[]> {
       items: datas.map((data) => ({
         id: String(data.id),
         title: data.title,
-        path: `/brindes-personalizados?datas_promocionais=${encodeURIComponent(String(data.id))}`,
+        path: `/datas-promocionais?data_promocional=${encodeURIComponent(String(data.id))}`,
       })),
     },
   ];

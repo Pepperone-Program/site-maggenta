@@ -1,13 +1,22 @@
-import React from "react";
+import React, { Suspense } from "react";
+import dynamic from "next/dynamic";
 import Hero from "./Hero";
 import Categories from "./Categories";
 import NewArrival from "./NewArrivals";
 import PromoBanner from "./PromoBanner";
-import CounDown from "./Countdown";
-import Testimonials from "./Testimonials";
-import PersonalizedGiftsSeo from "./PersonalizedGiftsSeo";
 import Newsletter from "../Common/Newsletter";
 import { getActiveBanners, getHomeCategories, getProductSections } from "@/lib/api";
+
+// Lazy load componentes que não aparecem na viewport inicial
+const CounDown = dynamic(() => import("./Countdown"), {
+  loading: () => <div className="h-32 bg-gray-1" />,
+});
+const Testimonials = dynamic(() => import("./Testimonials"), {
+  loading: () => <div className="h-96 bg-gray-1" />,
+});
+const PersonalizedGiftsSeo = dynamic(() => import("./PersonalizedGiftsSeo"), {
+  loading: () => <div className="h-96 bg-gray-1" />,
+});
 
 const Home = async () => {
   const [productSections, categories, megaBanners, homeMegaBanners] = await Promise.all([
@@ -38,9 +47,15 @@ const Home = async () => {
           products={section.products}
         />
       ))}
-      <CounDown />
-      <Testimonials />
-      <PersonalizedGiftsSeo />
+      <Suspense fallback={<div className="h-32 bg-gray-1" />}>
+        <CounDown />
+      </Suspense>
+      <Suspense fallback={<div className="h-96 bg-gray-1" />}>
+        <Testimonials />
+      </Suspense>
+      <Suspense fallback={<div className="h-96 bg-gray-1" />}>
+        <PersonalizedGiftsSeo />
+      </Suspense>
       <Newsletter />
     </main>
   );

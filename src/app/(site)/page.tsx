@@ -4,11 +4,15 @@ import { Metadata } from "next";
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: "Pepperone Brindes Corporativos Personalizados",
+  title: "Pepperone Brindes Corporativos Personalizados para Empresas",
   description:
     "Solicite orcamento de brindes corporativos personalizados, produtos promocionais e itens para empresas em todo o Brasil.",
   alternates: {
     canonical: "/",
+    languages: {
+      "pt-BR": "/",
+      "x-default": "/",
+    },
   },
   robots: {
     index: true,

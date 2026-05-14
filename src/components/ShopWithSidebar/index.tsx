@@ -14,6 +14,8 @@ import { Product } from "@/types/product";
 
 type ActiveFilters = {
   categoria?: string;
+  publico_alvo?: string;
+  data_promocional?: string;
   subcategorias?: string;
   publicos_alvos?: string;
   quantidade_minima_min?: string;
@@ -177,6 +179,8 @@ const ShopWithSidebar = ({
   categoryOptions = [],
   publicOptions: globalPublicOptions = [],
   dateOptions = [],
+  pageTitle: customPageTitle,
+  basePath = "/brindes-personalizados",
 }: {
   catalogo?: CatalogoProdutos;
   products?: Product[];
@@ -184,6 +188,8 @@ const ShopWithSidebar = ({
   categoryOptions?: CatalogoOption[];
   publicOptions?: CatalogoOption[];
   dateOptions?: CatalogoOption[];
+  pageTitle?: string;
+  basePath?: string;
 }) => {
   const router = useRouter();
   const [productStyle, setProductStyle] = useState("grid");
@@ -196,7 +202,7 @@ const ShopWithSidebar = ({
   );
   const activeCategoryId =
     Number(activeFilters.categoria || catalogo.categoria?.id_categoria || 1) || 1;
-  const pageTitle = `${categoryName} personalizados`;
+  const pageTitle = customPageTitle || `${categoryName} personalizados`;
   const items = products || catalogo.items;
   const selectedSubcategorias = useMemo(
     () => parseIds(activeFilters.subcategorias),
@@ -319,6 +325,8 @@ const ShopWithSidebar = ({
     const params = new URLSearchParams();
     const current: Record<string, string | undefined> = {
       categoria: activeFilters.categoria,
+      publico_alvo: activeFilters.publico_alvo,
+      data_promocional: activeFilters.data_promocional,
       subcategorias: activeFilters.subcategorias,
       publicos_alvos: activeFilters.publicos_alvos,
       quantidade_minima_min: activeFilters.quantidade_minima_min,
@@ -344,7 +352,7 @@ const ShopWithSidebar = ({
     });
 
     const query = params.toString();
-    return query ? `/brindes-personalizados?${query}` : "/brindes-personalizados";
+    return query ? `${basePath}?${query}` : basePath;
   };
 
   useEffect(() => {
@@ -399,13 +407,7 @@ const ShopWithSidebar = ({
 
   const selectCategory = (id: number) => {
     router.push(
-      buildCatalogHref({
-        categoria: id,
-        subcategorias: null,
-        quantidade_minima_min: null,
-        quantidade_minima_max: null,
-        page: 1,
-      })
+      `/brindes-personalizados${id === 1 ? "" : `?categoria=${encodeURIComponent(String(id))}`}`
     );
   };
 
@@ -418,9 +420,14 @@ const ShopWithSidebar = ({
 
   const clearFilters = () => {
     router.push(
-      activeFilters.categoria && activeFilters.categoria !== "1"
-        ? `/brindes-personalizados?categoria=${activeFilters.categoria}`
-        : "/brindes-personalizados"
+      buildCatalogHref({
+        subcategorias: null,
+        publicos_alvos: activeFilters.publico_alvo ? activeFilters.publico_alvo : null,
+        datas_promocionais: activeFilters.data_promocional ? activeFilters.data_promocional : null,
+        quantidade_minima_min: null,
+        quantidade_minima_max: null,
+        page: 1,
+      })
     );
   };
 

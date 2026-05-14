@@ -1,7 +1,40 @@
-import React from "react";
-import Image from "next/image";
+"use client";
+
+import React, { useState } from "react";
 
 const Newsletter = () => {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [message, setMessage] = useState("");
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setStatus("loading");
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok || payload?.success === false) {
+        throw new Error(payload?.message || "Nao foi possivel cadastrar seu email.");
+      }
+
+      setStatus("success");
+      setMessage("Email cadastrado com sucesso.");
+      setEmail("");
+    } catch (error) {
+      setStatus("error");
+      setMessage(error instanceof Error ? error.message : "Nao foi possivel cadastrar seu email.");
+    }
+  };
+
   return (
     <section className="overflow-hidden">
       <div className="max-w-[1800px] mx-auto px-2 sm:px-3">
@@ -21,22 +54,35 @@ const Newsletter = () => {
             </div>
 
             <div className="max-w-[477px] w-full">
-              <form>
+              <form onSubmit={handleSubmit}>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <input
                     type="email"
                     name="email"
                     id="email"
                     placeholder="Seu email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    required
                     className="w-full bg-gray-1 border border-gray-3 outline-none rounded-md placeholder:text-dark-4 py-3 px-5"
                   />
                   <button
                     type="submit"
+                    disabled={status === "loading"}
                     className="inline-flex justify-center py-3 px-7 text-white bg-blue  font-medium rounded-md ease-out duration-200 hover:bg-white hover:text-blue"
                   >
-                    Cadastrar
+                    {status === "loading" ? "Enviando" : "Cadastrar"}
                   </button>
                 </div>
+                {message && (
+                  <p
+                    className={`mt-3 text-sm ${
+                      status === "success" ? "text-white" : "text-red-light"
+                    }`}
+                  >
+                    {message}
+                  </p>
+                )}
               </form>
             </div>
           </div>

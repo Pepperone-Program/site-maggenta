@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useCallback } from "react";
 import Image from "next/image";
 import { Product } from "@/types/product";
 import { addItemToCart } from "@/redux/features/cart-slice";
@@ -11,14 +11,14 @@ import { formatDisplayPrice, productPath } from "@/lib/products";
 const ProductItem = ({ item }: { item: Product }) => {
   const dispatch = useDispatch<AppDispatch>();
 
-  const handleAddToCart = () => {
+  const handleAddToCart = useCallback(() => {
     dispatch(
       addItemToCart({
         ...item,
         quantity: 1,
       })
     );
-  };
+  }, [dispatch, item]);
 
   return (
     <div className="group flex h-full min-h-[430px] flex-col text-center">
@@ -33,14 +33,20 @@ const ProductItem = ({ item }: { item: Product }) => {
             alt={item.title}
             fill
             sizes="(min-width: 1536px) 340px, (min-width: 1280px) 20vw, (min-width: 640px) 50vw, 100vw"
+            placeholder="blur"
+            blurDataURL="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect fill='%23f0f0f0' width='400' height='400'/%3E%3C/svg%3E"
             className="object-contain transition-opacity duration-500 group-hover:opacity-0"
+            loading="lazy"
           />
           <Image
             src={item.imgs.previews[1] || item.imgs.previews[0]}
             alt={`${item.title} - segunda imagem`}
             fill
             sizes="(min-width: 1536px) 340px, (min-width: 1280px) 20vw, (min-width: 640px) 50vw, 100vw"
+            placeholder="blur"
+            blurDataURL="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect fill='%23f0f0f0' width='400' height='400'/%3E%3C/svg%3E"
             className="object-contain opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+            loading="lazy"
           />
         </Link>
       </div>
@@ -72,7 +78,7 @@ const ProductItem = ({ item }: { item: Product }) => {
       ) : (
         <div className="mt-auto flex justify-center">
           <button
-            onClick={() => handleAddToCart()}
+            onClick={handleAddToCart}
             className="inline-flex w-full justify-center rounded-[5px] bg-blue px-6 py-2 text-custom-sm font-medium text-white duration-200 hover:bg-blue-dark"
           >
             Orçar
@@ -83,4 +89,4 @@ const ProductItem = ({ item }: { item: Product }) => {
   );
 };
 
-export default ProductItem;
+export default React.memo(ProductItem);

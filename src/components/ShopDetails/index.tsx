@@ -106,10 +106,9 @@ const ShopDetails = ({
                 />
                 <Image
                   src="/images/logo/logo-vertical.svg"
-                  alt=""
+                  alt="Marca d'agua Pepperone"
                   width={260}
                   height={260}
-                  aria-hidden="true"
                   className="pointer-events-none absolute left-1/2 top-1/2 z-20 w-[38%] max-w-[260px] -translate-x-1/2 -translate-y-1/2 opacity-[0.08]"
                 />
               </div>
@@ -129,7 +128,7 @@ const ShopDetails = ({
                       width={1000}
                       height={1000}
                       src={item}
-                      alt=""
+                      alt={`${product.title} - miniatura ${key + 1}`}
                       className="h-full w-full object-contain"
                     />
                   </button>

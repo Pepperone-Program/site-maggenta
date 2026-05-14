@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -11,6 +11,7 @@ import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import { selectTotalPrice } from "@/redux/features/cart-slice";
 import { formatDisplayPrice } from "@/lib/products";
 import { useAppSelector } from "@/redux/store";
+import { useThrottle } from "@/lib/performance";
 import "swiper/css";
 
 type HeaderMenuGroup = {
@@ -45,7 +46,7 @@ const defaultMenuGroups: HeaderMenuGroup[] = [
   {
     id: "publicos",
     title: "Publicos alvos",
-    items: [{ id: "1", title: "Empresas", path: "/brindes-personalizados?publicos_alvos=1" }],
+    items: [{ id: "1", title: "Empresas", path: "/publicos-alvos?publico_alvo=1" }],
   },
   {
     id: "datas",
@@ -94,14 +95,14 @@ const Header = () => {
     }, 160);
   };
 
+  const scrollY = useThrottle(
+    typeof window !== "undefined" ? window.scrollY : 0,
+    100
+  );
+
   useEffect(() => {
-    const handleStickyMenu = () => setStickyMenu(window.scrollY >= 24);
-
-    handleStickyMenu();
-    window.addEventListener("scroll", handleStickyMenu);
-
-    return () => window.removeEventListener("scroll", handleStickyMenu);
-  }, []);
+    setStickyMenu(scrollY >= 24);
+  }, [scrollY]);
 
   useEffect(() => {
     const query = searchQuery.trim();
@@ -143,46 +144,50 @@ const Header = () => {
     };
   }, [searchQuery]);
 
-  const handleSearchSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const query = searchQuery.trim();
+  const handleSearchSubmit = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      const query = searchQuery.trim();
 
-    if (!query) {
-      window.location.assign("/");
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `/api/produtos/busca?q=${encodeURIComponent(query)}&limit=1`
-      );
-
-      if (response.status === 404) {
-        setSearchFocused(false);
-        setSearchSuggestions([]);
+      if (!query) {
         window.location.assign("/");
         return;
       }
 
-      const payload = response.ok ? await response.json() : null;
-      const firstSuggestion = Array.isArray(payload?.data) ? payload.data[0] : null;
+      try {
+        const response = await fetch(
+          `/api/produtos/busca?q=${encodeURIComponent(query)}&limit=1`
+        );
 
-      if (firstSuggestion?.path) {
-        router.push(firstSuggestion.path);
-        setSearchFocused(false);
-        return;
+        if (response.status === 404) {
+          setSearchFocused(false);
+          setSearchSuggestions([]);
+          window.location.assign("/");
+          return;
+        }
+
+        const payload = response.ok ? await response.json() : null;
+        const firstSuggestion = Array.isArray(payload?.data) ? payload.data[0] : null;
+
+        if (firstSuggestion?.path) {
+          router.push(firstSuggestion.path);
+          setSearchFocused(false);
+          return;
+        }
+      } catch {
+        // Keep the search flow deterministic even when the suggestion endpoint fails.
       }
-    } catch {
-      // Keep the search flow deterministic even when the suggestion endpoint fails.
-    }
 
-    window.location.assign("/");
-  };
+      window.location.assign("/");
+    },
+    [searchQuery, router]
+  );
 
   useEffect(() => {
     let active = true;
+    const controller = new AbortController();
 
-    fetch("/api/menu")
+    fetch("/api/menu", { signal: controller.signal })
       .then((response) => (response.ok ? response.json() : null))
       .then((payload) => {
         if (active && Array.isArray(payload?.data)) {
@@ -193,6 +198,7 @@ const Header = () => {
 
     return () => {
       active = false;
+      controller.abort();
     };
   }, []);
 
