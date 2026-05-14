@@ -10,18 +10,30 @@ export async function GET(request: NextRequest) {
   if (products.length === 0) {
     return NextResponse.json(
       { success: false, message: "Nenhum produto encontrado", data: [] },
-      { status: 404 }
+      {
+        status: 404,
+        headers: {
+          "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=1800",
+        },
+      }
     );
   }
 
-  return NextResponse.json({
-    success: true,
-    data: products.map((product) => ({
-      id: product.id,
-      title: product.title,
-      codigo: product.codigo || String(product.id),
-      label: `${product.title} - ${product.codigo || product.id}`,
-      path: productPath(product),
-    })),
-  });
+  return NextResponse.json(
+    {
+      success: true,
+      data: products.map((product) => ({
+        id: product.id,
+        title: product.title,
+        codigo: product.codigo || String(product.id),
+        label: `${product.title} - ${product.codigo || product.id}`,
+        path: productPath(product),
+      })),
+    },
+    {
+      headers: {
+        "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=1800",
+      },
+    }
+  );
 }

@@ -14,7 +14,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Pepperone Brindes Corporativos",
+    default: "Pepperone Brindes Corporativos Personalizados para Empresas",
     template: "%s | Pepperone",
   },
   description:
@@ -22,6 +22,10 @@ export const metadata: Metadata = {
   applicationName: "Pepperone",
   alternates: {
     canonical: "/",
+    languages: {
+      "pt-BR": "/",
+      "x-default": "/",
+    },
   },
   verification: {
     google: "mgvzGTTx3EwBN_LTzrGsWq3yl0ClkS3KGvwLkNC-lU4",
@@ -41,7 +45,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pt_BR",
     siteName: "Pepperone",
-    title: "Pepperone Brindes Corporativos",
+    title: "Pepperone Brindes Corporativos Personalizados para Empresas",
     description:
       "Brindes corporativos personalizados, produtos promocionais e orcamentos para empresas.",
     url: "/",
@@ -54,7 +58,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pepperone Brindes Corporativos",
+    title: "Pepperone Brindes Corporativos Personalizados para Empresas",
     description:
       "Brindes corporativos personalizados, produtos promocionais e orcamentos para empresas.",
   },

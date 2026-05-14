@@ -107,9 +107,14 @@ const Hero = ({ banners = [] }: HeroProps) => {
                   )}
                   {!banners.length && (
                     <>
-                      <h1 className="text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl xl:text-[76px]">
-                        {slide.title}
-                      </h1>
+                      {React.createElement(
+                        index === 0 ? "h1" : "h2",
+                        {
+                          className:
+                            "text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl xl:text-[76px]",
+                        },
+                        slide.title
+                      )}
                       <p className="mt-5 max-w-[620px] text-base leading-7 text-white/85 sm:text-lg">
                         {slide.description}
                       </p>
