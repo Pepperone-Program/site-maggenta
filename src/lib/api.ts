@@ -341,7 +341,7 @@ const apiRequest = async (path: string, init: RequestInit = {}) => {
   }
 
   try {
-    const response = await fetch(url, {
+    const request = fetch(url, {
       ...init,
       cache: "no-store",
       headers: {
@@ -349,8 +349,15 @@ const apiRequest = async (path: string, init: RequestInit = {}) => {
         ...authHeaders(),
         ...(init.headers || {}),
       },
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    }).catch(() => null);
+    const timeout = new Promise<null>((resolve) => {
+      setTimeout(() => resolve(null), REQUEST_TIMEOUT_MS);
     });
+    const response = await Promise.race([request, timeout]);
+
+    if (!response) {
+      return null;
+    }
 
     if (!response.ok) {
       return null;
