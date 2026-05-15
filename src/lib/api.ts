@@ -343,12 +343,12 @@ const apiRequest = async (path: string, init: RequestInit = {}) => {
   try {
     const response = await fetch(url, {
       ...init,
+      cache: "no-store",
       headers: {
         "Content-Type": "application/json",
         ...authHeaders(),
         ...(init.headers || {}),
       },
-      next: init.method && init.method !== "GET" ? undefined : { revalidate: 300 },
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
 

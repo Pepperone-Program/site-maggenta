@@ -10,17 +10,14 @@ import {
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.pepperone.com.br";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 export const dynamicParams = true;
 
 type ProductPageProps = {
   params: Promise<{
     slug: string;
   }>;
-};
-
-export const generateStaticParams = async () => {
-  return [];
 };
 
 export async function generateMetadata({
