@@ -2,6 +2,7 @@ export type Product = {
   title: string;
   slug: string;
   category: string;
+  categoryId?: number;
   codigo?: string;
   idTipoProduto?: number;
   quantidadeMinima?: number;

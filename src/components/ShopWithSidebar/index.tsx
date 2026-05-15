@@ -9,8 +9,9 @@ import Breadcrumb from "../Common/Breadcrumb";
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
 import shopData from "../Shop/shopData";
-import { CatalogoOption, CatalogoProdutos, friendlyParam } from "@/lib/api";
-import { Product } from "@/types/product";
+import type { CatalogoOption, CatalogoProdutos } from "@/lib/api";
+import { friendlyParam } from "@/lib/slugs";
+import type { Product } from "@/types/product";
 
 type ActiveFilters = {
   categoria?: string;

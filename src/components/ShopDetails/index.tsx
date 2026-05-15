@@ -9,6 +9,7 @@ import { AppDispatch } from "@/redux/store";
 import ProductItem from "@/components/Common/ProductItem";
 import Newsletter from "@/components/Common/Newsletter";
 import { Product } from "@/types/product";
+import { friendlyParam } from "@/lib/slugs";
 
 const ShopDetails = ({
   product,
@@ -24,7 +25,11 @@ const ShopDetails = ({
   const [showTags, setShowTags] = useState(false);
   const mainImageRef = useRef<HTMLDivElement>(null);
   const wheelLockRef = useRef(0);
-  const categoryPath = "/brindes-personalizados";
+  const categoryPath = product.categoryId
+    ? `/brindes-personalizados?categoria=${encodeURIComponent(
+        friendlyParam(product.categoryId, product.category, "personalizados")
+      )}`
+    : "/brindes-personalizados";
 
   useEffect(() => {
     setPreviewImg(0);
@@ -81,6 +86,11 @@ const ShopDetails = ({
         quantity,
       })
     );
+  };
+
+  const updateQuantity = (value: string) => {
+    const parsed = Number(value.replace(/\D/g, ""));
+    setQuantity(Number.isFinite(parsed) ? Math.max(minimumQuantity, parsed) : minimumQuantity);
   };
 
   return (
@@ -166,9 +176,9 @@ const ShopDetails = ({
               <h1 className="text-3xl font-semibold leading-tight text-black sm:text-4xl lg:text-5xl">
                 {product.title}
               </h1>
-              <p className="mt-5 text-base leading-7 text-dark-3">
+              <div className="mt-5 text-base leading-7 text-dark-3">
                 {showTags ? (
-                  <p className=" text-blue hover:text-blue-dark">
+                  <p className="text-blue hover:text-blue-dark">
                     {product.title},{" "}
                     <Link
                       href={categoryPath}
@@ -179,9 +189,9 @@ const ShopDetails = ({
                     {`, ${product.description}`}
                   </p>
                 ) : (
-                  product.shortDescription
+                  <p>{product.shortDescription}</p>
                 )}
-              </p>
+              </div>
               <ul className="mt-8 grid gap-3 text-dark sm:grid-cols-2">
                 {product.features.map((feature) => (
                   <li key={feature} className="flex gap-2">
@@ -202,7 +212,18 @@ const ShopDetails = ({
                   >
                     -
                   </button>
-                  <span className="font-semibold text-dark">{quantity}</span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={minimumQuantity}
+                    value={quantity}
+                    onChange={(event) => updateQuantity(event.target.value)}
+                    onBlur={() =>
+                      setQuantity((value) => Math.max(minimumQuantity, Number(value) || minimumQuantity))
+                    }
+                    aria-label="Quantidade"
+                    className="h-full min-w-0 flex-1 border-0 bg-transparent text-center font-semibold text-dark outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  />
                   <button
                     type="button"
                     onClick={() => setQuantity((value) => value + 1)}
