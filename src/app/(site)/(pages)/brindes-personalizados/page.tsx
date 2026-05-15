@@ -1,7 +1,9 @@
 import React from "react";
 import { Metadata } from "next";
+import { permanentRedirect } from "next/navigation";
 import ShopWithSidebar from "@/components/ShopWithSidebar";
 import {
+  friendlyParam,
   getCatalogoCategoria,
   getCatalogoCategorias,
   getDatasPromocionais,
@@ -48,6 +50,26 @@ const BrindesPersonalizadosPage = async ({ searchParams }: CatalogPageProps) => 
     getPublicosAlvos(),
     getDatasPromocionais(),
   ]);
+
+  if (firstParam(params.categoria)) {
+    const redirectParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      const firstValue = firstParam(value);
+      if (key !== "categoria" && firstValue) {
+        redirectParams.set(key, firstValue);
+      }
+    });
+    const categoryTitle =
+      catalogo.categoria?.categoria ||
+      categorias.find((category) => category.id === categoriaId)?.title ||
+      "brindes";
+    const query = redirectParams.toString();
+    permanentRedirect(
+      `/categorias/${encodeURIComponent(
+        friendlyParam(categoriaId, categoryTitle, "personalizados")
+      )}${query ? `?${query}` : ""}`
+    );
+  }
 
   return (
     <main>

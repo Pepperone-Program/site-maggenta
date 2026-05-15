@@ -324,10 +324,13 @@ const ShopWithSidebar = ({
     updates: Record<string, string | number | null | undefined>
   ) => {
     const params = new URLSearchParams();
+    const isCleanCategoryRoute = basePath.startsWith("/categorias/");
+    const isCleanPublicRoute = basePath.startsWith("/publicos-alvos/");
+    const isCleanDateRoute = basePath.startsWith("/datas-promocionais/");
     const current: Record<string, string | undefined> = {
-      categoria: activeFilters.categoria,
-      publico_alvo: activeFilters.publico_alvo,
-      data_promocional: activeFilters.data_promocional,
+      categoria: isCleanCategoryRoute ? undefined : activeFilters.categoria,
+      publico_alvo: isCleanPublicRoute ? undefined : activeFilters.publico_alvo,
+      data_promocional: isCleanDateRoute ? undefined : activeFilters.data_promocional,
       subcategorias: activeFilters.subcategorias,
       publicos_alvos: activeFilters.publicos_alvos,
       quantidade_minima_min: activeFilters.quantidade_minima_min,
@@ -412,9 +415,7 @@ const ShopWithSidebar = ({
       ? friendlyParam(id, selectedCategory.title, "personalizados")
       : String(id);
 
-    router.push(
-      `/brindes-personalizados${id === 1 ? "" : `?categoria=${encodeURIComponent(categoryParam)}`}`
-    );
+    router.push(`/categorias/${encodeURIComponent(categoryParam)}`);
   };
 
   const applyQuantityFilter = () => {
