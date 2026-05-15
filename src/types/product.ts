@@ -4,6 +4,7 @@ export type Product = {
   category: string;
   codigo?: string;
   idTipoProduto?: number;
+  quantidadeMinima?: number;
   shortDescription: string;
   description: string;
   features: string[];

@@ -5,12 +5,31 @@ const PersonalizedGiftsSeo = () => {
     <section className="bg-white py-16">
       <div className="mx-auto w-full max-w-[1190px] px-4 sm:px-6">
         <div className="text-center">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-blue">
+          <h1 className="mb-3 text-lg font-semibold uppercase tracking-wide text-blue">
             Brindes Personalizados
-          </p>
+          </h1>
           <h2 className="text-2xl font-semibold text-dark sm:text-3xl">
             Qual é a importância dos brindes personalizados ?
           </h2>
+          <h3 className="pt-2 text-xl font-semibold text-dark">
+            Brindes corporativos para campanhas e eventos
+          </h3>
+          <p className="mt-8 space-y-6 text-justify text-base leading-8">
+            A Pepperone atende empresas que precisam de brindes personalizados para
+            feiras, congressos, datas promocionais, ações internas, programas de
+            relacionamento e lançamentos de produtos. O catálogo reúne opções como
+            canetas, blocos de anotações, copos, garrafas, mochilas, bolsas,
+            necessaires, kits e itens sustentáveis, permitindo selecionar produtos por
+            categoria, quantidade mínima e perfil do público.
+          </p>
+          <p className="mt-8 space-y-6 text-justify text-base leading-8"> 
+            Essa variedade ajuda compradores, equipes de marketing e departamentos de
+            recursos humanos a encontrar soluções adequadas para cada objetivo:
+            fortalecer a lembrança da marca, presentear clientes, reconhecer
+            colaboradores ou aumentar a visibilidade em eventos. Ao centralizar
+            informações de produto, imagens, códigos e filtros, a navegação fica mais
+            objetiva e o pedido de orçamento se torna mais rápido.
+          </p>
         </div>
 
         <div className="mt-8 space-y-6 text-justify text-base leading-8 text-dark-3">

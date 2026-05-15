@@ -9,7 +9,7 @@ import Breadcrumb from "../Common/Breadcrumb";
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
 import shopData from "../Shop/shopData";
-import { CatalogoOption, CatalogoProdutos } from "@/lib/api";
+import { CatalogoOption, CatalogoProdutos, friendlyParam } from "@/lib/api";
 import { Product } from "@/types/product";
 
 type ActiveFilters = {
@@ -201,7 +201,7 @@ const ShopWithSidebar = ({
     catalogo.categoria?.descricao || ""
   );
   const activeCategoryId =
-    Number(activeFilters.categoria || catalogo.categoria?.id_categoria || 1) || 1;
+    parseInt(String(activeFilters.categoria || catalogo.categoria?.id_categoria || 1), 10) || 1;
   const pageTitle = customPageTitle || `${categoryName} personalizados`;
   const items = products || catalogo.items;
   const selectedSubcategorias = useMemo(
@@ -406,8 +406,13 @@ const ShopWithSidebar = ({
   };
 
   const selectCategory = (id: number) => {
+    const selectedCategory = categories.find((category) => category.id === id);
+    const categoryParam = selectedCategory
+      ? friendlyParam(id, selectedCategory.title, "personalizados")
+      : String(id);
+
     router.push(
-      `/brindes-personalizados${id === 1 ? "" : `?categoria=${encodeURIComponent(String(id))}`}`
+      `/brindes-personalizados${id === 1 ? "" : `?categoria=${encodeURIComponent(categoryParam)}`}`
     );
   };
 
@@ -692,6 +697,9 @@ const ShopWithSidebar = ({
 
               {categoryDescription && (
                 <section className="mx-auto mt-16 max-w-[1500px] rounded-md border border-gray-3 bg-white px-5 py-8 text-center shadow-1 sm:px-8 lg:px-12">
+                  <h1 className="mb-8 text-center text-3xl font-semibold leading-tight text-dark sm:text-4xl">
+                    {categoryName}
+                  </h1>
                   <div
                     className="text-justify text-base leading-8 text-dark-4 [&_h2]:mb-4 [&_h2]:mt-8 [&_h2]:text-center [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:text-dark"
                     style={{ whiteSpace: "pre-line" }}

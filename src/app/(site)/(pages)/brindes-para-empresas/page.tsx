@@ -21,9 +21,14 @@ type PageProps = {
 const firstParam = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
 
+const toNumber = (value: string | string[] | undefined) => {
+  const parsed = parseInt(String(firstParam(value) || ""), 10);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
 const BrindesParaEmpresasPage = async ({ searchParams }: PageProps) => {
   const params = (await searchParams) || {};
-  const tipoId = Number(firstParam(params.tipo) || 12) || 12;
+  const tipoId = toNumber(params.tipo) || 12;
   const catalogo = await getCatalogoTipoProduto(tipoId);
 
   return (

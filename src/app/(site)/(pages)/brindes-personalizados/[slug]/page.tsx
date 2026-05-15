@@ -49,23 +49,35 @@ export async function generateMetadata({
     ? new URL(product.imgs.previews[0], siteUrl).toString()
     : new URL("/images/logo/logo.svg", siteUrl).toString();
   const description =
-    product.shortDescription ||
     product.description ||
+    product.shortDescription ||
     `Solicite orcamento para ${product.title} personalizado na Pepperone.`;
 
   return {
-    title: `${product.title} personalizado`,
+    title: {
+      absolute: product.title,
+    },
     description,
     keywords: [
       product.title,
       `${product.title} personalizado`,
+      product.category,
+      product.codigo || "",
       "brindes personalizados",
       "brindes corporativos",
-      "orcamento de brindes",
-      product.codigo || "",
+      "brindes promocionais",
+      "brindes para empresas",
+      "produto personalizado",
+      "orcamento de brindes personalizados",
+      "marketing promocional",
+      "campanhas promocionais",
     ].filter(Boolean),
     alternates: {
       canonical,
+      languages: {
+        "pt-BR": canonical,
+        "x-default": canonical,
+      },
     },
     robots: {
       index: true,
@@ -100,6 +112,13 @@ export async function generateMetadata({
       description,
       images: [image],
     },
+    other: {
+      "og:image:secure_url": image,
+      "og:image:type": image.includes(".png") ? "image/png" : "image/jpeg",
+      "product:category": product.category,
+      "product:retailer_item_id": product.codigo || String(product.id),
+      "ai-content": "index, follow",
+    },
   };
 }
 
@@ -126,7 +145,7 @@ const ProductPage = async ({ params }: ProductPageProps) => {
     "@type": "Product",
     "@id": `${canonical}#product`,
     name: product.title,
-    description: product.shortDescription,
+    description: product.description || product.shortDescription,
     image: images,
     sku: product.codigo || `PEP-${product.id}`,
     mpn: product.codigo || String(product.id),

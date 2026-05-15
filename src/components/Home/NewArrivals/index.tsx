@@ -19,9 +19,6 @@ const NewArrival = ({
   title = "Novidades",
   products,
 }: ProductSectionProps) => {
-  const carouselProducts =
-    products.length > 1 && products.length < 10 ? [...products, ...products] : products;
-
   return (
     <section className="overflow-hidden pt-15">
       <div className="max-w-[1800px] w-full mx-auto px-2 sm:px-3">
@@ -64,7 +61,7 @@ const NewArrival = ({
         </div>
 
         <Swiper
-          loop={carouselProducts.length > 1}
+          loop={products.length > 5}
           autoplay={{
             delay: 3200,
             disableOnInteraction: false,
@@ -81,8 +78,8 @@ const NewArrival = ({
           }}
           className="pb-2 [&_.swiper-wrapper]:items-stretch"
         >
-          {carouselProducts.map((item, index) => (
-            <SwiperSlide key={`${item.id}-${index}`} className="!h-auto">
+          {products.map((item) => (
+            <SwiperSlide key={item.id} className="!h-auto">
               <div className="h-full">
                 <ProductItem item={item} />
               </div>
