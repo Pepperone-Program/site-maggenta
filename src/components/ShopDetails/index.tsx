@@ -26,7 +26,7 @@ const ShopDetails = ({
   const mainImageRef = useRef<HTMLDivElement>(null);
   const wheelLockRef = useRef(0);
   const categoryPath = product.categoryId
-    ? `/brindes-personalizados?categoria=${encodeURIComponent(
+    ? `/categorias/${encodeURIComponent(
         friendlyParam(product.categoryId, product.category, "personalizados")
       )}`
     : "/brindes-personalizados";

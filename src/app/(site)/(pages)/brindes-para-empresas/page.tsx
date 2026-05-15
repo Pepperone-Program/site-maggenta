@@ -1,7 +1,8 @@
 import React from "react";
 import { Metadata } from "next";
+import { permanentRedirect } from "next/navigation";
 import ShopWithoutSidebar from "@/components/ShopWithoutSidebar";
-import { getCatalogoTipoProduto } from "@/lib/api";
+import { friendlyParam, getCatalogoTipoProduto } from "@/lib/api";
 
 export const revalidate = 120;
 
@@ -30,6 +31,18 @@ const BrindesParaEmpresasPage = async ({ searchParams }: PageProps) => {
   const params = (await searchParams) || {};
   const tipoId = toNumber(params.tipo) || 12;
   const catalogo = await getCatalogoTipoProduto(tipoId);
+
+  if (firstParam(params.tipo)) {
+    permanentRedirect(
+      `/brindes-para-empresas/${encodeURIComponent(
+        friendlyParam(
+          tipoId,
+          catalogo.tipo_produto?.tipo_produto || "brindes",
+          "personalizadas"
+        )
+      )}`
+    );
+  }
 
   return (
     <main>

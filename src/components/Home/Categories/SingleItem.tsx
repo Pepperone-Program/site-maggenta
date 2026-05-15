@@ -10,7 +10,7 @@ const SingleItem = ({ item, priority = false }: { item: Category; priority?: boo
 
   return (
     <Link
-      href={`/brindes-personalizados?categoria=${encodeURIComponent(
+      href={`/categorias/${encodeURIComponent(
         friendlyParam(item.id, item.title, "personalizados")
       )}`}
       className="group flex flex-col items-center"

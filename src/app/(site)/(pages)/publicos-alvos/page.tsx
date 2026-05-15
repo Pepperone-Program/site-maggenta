@@ -1,7 +1,9 @@
 import React from "react";
 import { Metadata } from "next";
+import { permanentRedirect } from "next/navigation";
 import ShopWithSidebar from "@/components/ShopWithSidebar";
 import {
+  friendlyParam,
   getCatalogoPublicoAlvo,
   getCatalogoCategorias,
   getDatasPromocionais,
@@ -49,6 +51,22 @@ const PublicosAlvosPage = async ({ searchParams }: PublicosAlvosPageProps) => {
 
   const publicoAlvo = publicosAlvos.find((p) => p.id === publicoAlvoId);
   const pageTitle = `Brindes para ${publicoAlvo?.title || "Público Alvo"}`;
+
+  if (firstParam(params.publico_alvo)) {
+    const redirectParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      const firstValue = firstParam(value);
+      if (key !== "publico_alvo" && firstValue) {
+        redirectParams.set(key, firstValue);
+      }
+    });
+    const query = redirectParams.toString();
+    permanentRedirect(
+      `/publicos-alvos/${encodeURIComponent(
+        friendlyParam(publicoAlvoId, publicoAlvo?.title || "publico-alvo")
+      )}${query ? `?${query}` : ""}`
+    );
+  }
 
   return (
     <main>

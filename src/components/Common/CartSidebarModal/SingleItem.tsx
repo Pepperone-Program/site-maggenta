@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import Image from "next/image";
 import Link from "next/link";
-import { formatPrice, productPath } from "@/lib/products";
+import { productPath } from "@/lib/products";
 
 const SingleItem = ({ item, removeItemFromCart }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -23,9 +23,6 @@ const SingleItem = ({ item, removeItemFromCart }) => {
           <h3 className="font-medium text-dark mb-1 ease-out duration-200 hover:text-blue">
             <Link href={productPath(item)}> {item.title} </Link>
           </h3>
-          <p className="text-custom-sm">
-            Preco: {formatPrice(item.discountedPrice)}
-          </p>
         </div>
       </div>
 

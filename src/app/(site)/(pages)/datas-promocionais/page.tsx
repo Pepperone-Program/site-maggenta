@@ -1,7 +1,9 @@
 import React from "react";
 import { Metadata } from "next";
+import { permanentRedirect } from "next/navigation";
 import ShopWithSidebar from "@/components/ShopWithSidebar";
 import {
+  friendlyParam,
   getCatalogoDataPromocional,
   getCatalogoCategorias,
   getDatasPromocionais,
@@ -49,6 +51,22 @@ const DatasPromocionaísPage = async ({ searchParams }: DatasPromocionaísPagePr
 
   const dataPromocional = datasPromocionais.find((d) => d.id === dataPromocionalId);
   const pageTitle = `Brindes para ${dataPromocional?.title || "Data Promocional"}`;
+
+  if (firstParam(params.data_promocional)) {
+    const redirectParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      const firstValue = firstParam(value);
+      if (key !== "data_promocional" && firstValue) {
+        redirectParams.set(key, firstValue);
+      }
+    });
+    const query = redirectParams.toString();
+    permanentRedirect(
+      `/datas-promocionais/${encodeURIComponent(
+        friendlyParam(dataPromocionalId, dataPromocional?.title || "data-promocional")
+      )}${query ? `?${query}` : ""}`
+    );
+  }
 
   return (
     <main>

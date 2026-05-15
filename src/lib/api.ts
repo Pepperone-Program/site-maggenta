@@ -1316,20 +1316,20 @@ const toMenuItems = <T extends Record<string, unknown>>(
       title: String(item[titleKey]),
       path:
         filterKey === "categoria"
-          ? `/brindes-personalizados?categoria=${encodeURIComponent(
+          ? `/categorias/${encodeURIComponent(
               friendlyParam(String(item[idKey]), String(item[titleKey]), "personalizados")
             )}`
-          : filterKey === "publico"
-            ? `/publicos-alvos?publico_alvo=${encodeURIComponent(
+        : filterKey === "publico"
+            ? `/publicos-alvos/${encodeURIComponent(
                 friendlyParam(String(item[idKey]), String(item[titleKey]))
               )}`
             : filterKey === "data"
-              ? `/datas-promocionais?data_promocional=${encodeURIComponent(
+              ? `/datas-promocionais/${encodeURIComponent(
                   friendlyParam(String(item[idKey]), String(item[titleKey]))
                 )}`
               : filterKey === "tipo"
-                ? `/brindes-para-empresas?tipo=${encodeURIComponent(
-                    friendlyParam(String(item[idKey]), String(item[titleKey]))
+                ? `/brindes-para-empresas/${encodeURIComponent(
+                    friendlyParam(String(item[idKey]), String(item[titleKey]), "personalizadas")
                   )}`
               : "/brindes-personalizados",
     }));
@@ -1354,7 +1354,7 @@ export async function getMenuGroups(): Promise<ApiMenuGroup[]> {
       items: categorias.map((category) => ({
         id: String(category.id),
         title: category.title,
-        path: `/brindes-personalizados?categoria=${encodeURIComponent(
+        path: `/categorias/${encodeURIComponent(
           friendlyParam(category.id, category.title, "personalizados")
         )}`,
       })),
@@ -1370,7 +1370,7 @@ export async function getMenuGroups(): Promise<ApiMenuGroup[]> {
       items: publicos.map((publico) => ({
         id: String(publico.id),
         title: publico.title,
-        path: `/publicos-alvos?publico_alvo=${encodeURIComponent(
+        path: `/publicos-alvos/${encodeURIComponent(
           friendlyParam(publico.id, publico.title)
         )}`,
       })),
@@ -1381,7 +1381,7 @@ export async function getMenuGroups(): Promise<ApiMenuGroup[]> {
       items: datas.map((data) => ({
         id: String(data.id),
         title: data.title,
-        path: `/datas-promocionais?data_promocional=${encodeURIComponent(
+        path: `/datas-promocionais/${encodeURIComponent(
           friendlyParam(data.id, data.title)
         )}`,
       })),

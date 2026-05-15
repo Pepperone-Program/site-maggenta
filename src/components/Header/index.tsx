@@ -45,7 +45,7 @@ const defaultMenuGroups: HeaderMenuGroup[] = [
   {
     id: "publicos",
     title: "Publicos alvos",
-    items: [{ id: "1", title: "Empresas", path: "/publicos-alvos?publico_alvo=1" }],
+    items: [{ id: "1", title: "Empresas", path: "/publicos-alvos/1-empresas" }],
   },
   {
     id: "datas",
