@@ -132,14 +132,14 @@ export default function RootLayout({
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <link rel="alternate" type="text/plain" href="/llms.txt" title="LLMs.txt" />
-      </head>
-      <body>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify([organizationSchema, websiteSchema]),
           }}
         />
+      </head>
+      <body>
         <ClientShell>{children}</ClientShell>
       </body>
     </html>

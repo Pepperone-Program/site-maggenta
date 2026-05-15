@@ -449,7 +449,7 @@ const ShopWithSidebar = ({
 
   return (
     <>
-      <Breadcrumb title={pageTitle} pages={["brindes personalizados"]} />
+      <Breadcrumb title={pageTitle} pages={["brindes personalizados"]} titleAs="div" />
       <section className="relative overflow-hidden bg-[#f3f4f6] pb-20 pt-5 lg:pt-12 xl:pt-16">
         <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
           <div className="flex gap-6 xl:gap-8">

@@ -62,6 +62,9 @@ const Hero = ({ banners = [] }: HeroProps) => {
 
   return (
     <section className="overflow-hidden bg-white pt-[124px] sm:pt-[112px]">
+      {banners.length > 0 && (
+        <h1 className="sr-only">Pepperone Brindes Corporativos Personalizados para Empresas</h1>
+      )}
       <div className="w-full">
         <Swiper
           loop
