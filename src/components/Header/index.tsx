@@ -11,7 +11,6 @@ import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import { selectTotalPrice } from "@/redux/features/cart-slice";
 import { formatDisplayPrice } from "@/lib/products";
 import { useAppSelector } from "@/redux/store";
-import { useThrottle } from "@/lib/performance";
 import "swiper/css";
 
 type HeaderMenuGroup = {
@@ -95,14 +94,35 @@ const Header = () => {
     }, 160);
   };
 
-  const scrollY = useThrottle(
-    typeof window !== "undefined" ? window.scrollY : 0,
-    100
-  );
-
   useEffect(() => {
-    setStickyMenu(scrollY >= 24);
-  }, [scrollY]);
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const updateStickyMenu = () => {
+      setStickyMenu(window.scrollY >= 24);
+    };
+
+    const handleScroll = () => {
+      if (timer) {
+        return;
+      }
+
+      timer = setTimeout(() => {
+        updateStickyMenu();
+        timer = null;
+      }, 100);
+    };
+
+    updateStickyMenu();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   useEffect(() => {
     const query = searchQuery.trim();
@@ -281,7 +301,6 @@ const Header = () => {
                         <span className="relative before:absolute before:left-0 before:-top-2 before:h-[3px] before:w-0 before:rounded-b-[3px] before:bg-blue before:duration-200 sm:group-hover:before:w-full">
                           {menuItem.title}
                         </span>
-                        <span className="text-xs">⌄</span>
                       </button>
 
                       <div

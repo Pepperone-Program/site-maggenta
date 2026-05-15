@@ -3,7 +3,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { isValidImageSrc } from "@/lib/images";
-import { friendlyParam } from "@/lib/api";
+import { friendlyParam } from "@/lib/slugs";
 
 const SingleItem = ({ item, priority = false }: { item: Category; priority?: boolean }) => {
   const hasImage = isValidImageSrc(item.img);

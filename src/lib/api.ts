@@ -3,6 +3,9 @@ import categoryData from "@/components/Home/Categories/categoryData";
 import { Product } from "@/types/product";
 import { Category } from "@/types/category";
 import { isValidImageSrc, safeImageSrc } from "@/lib/images";
+import { friendlyParam, slugify } from "@/lib/slugs";
+
+export { friendlyParam, slugify };
 
 type ApiFlag = "S" | "N" | string | null | undefined;
 
@@ -30,6 +33,7 @@ export type ProdutoApi = {
   habilitado?: ApiFlag;
   cod_forn?: string | null;
   imagens?: ProdutoImageApi[];
+  id_categoria?: number | null;
   categoria?: string | null;
   categorias?: CatalogoCategoria[];
   subcategorias?: CatalogoSubcategoria[];
@@ -222,8 +226,6 @@ type DataPromocionalProdutoApi = {
 };
 
 const API_BASE_PATH = "/api/v1";
-const REQUEST_TIMEOUT_MS = 800;
-
 const mockProdutos: ProdutoApi[] = shopData.map((product, index) => ({
   id_produto: product.id,
   id_tipo_produto: index % 4,
@@ -235,7 +237,7 @@ const mockProdutos: ProdutoApi[] = shopData.map((product, index) => ({
   profundidade: product.specs.find((spec) => /profundidade/i.test(spec.label))?.value,
   peso: product.specs.find((spec) => /peso/i.test(spec.label))?.value,
   imagem: product.imgs.previews[0],
-  data_inclusao: new Date(Date.now() - index * 86400000).toISOString(),
+  data_inclusao: new Date(Date.UTC(2026, 0, 1) - index * 86400000).toISOString(),
   obs: product.shortDescription,
   site: "S",
   lancamento: index < 3 ? "S" : "N",
@@ -288,19 +290,6 @@ const sortByOrderAndName = <T extends Record<string, unknown>>(
   });
 };
 
-export const slugify = (value: string) =>
-  value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-
-export const friendlyParam = (id: number | string, title: string, suffix = "") => {
-  const slug = slugify(`${title}${suffix ? ` ${suffix}` : ""}`);
-  return slug ? `${id}-${slug}` : String(id);
-};
-
 const isEnabled = (value?: ApiFlag) => !value || value === "S";
 const isYes = (value?: ApiFlag) => value === "S" || value === "s";
 const parseIdList = (value?: string) =>
@@ -341,23 +330,18 @@ const apiRequest = async (path: string, init: RequestInit = {}) => {
   }
 
   try {
-    const request = fetch(url, {
+    const method = (init.method || "GET").toUpperCase();
+    const isGet = method === "GET";
+    const response = await fetch(url, {
       ...init,
-      cache: "no-store",
+      cache: isGet ? undefined : "no-store",
+      next: isGet ? { revalidate: 300 } : undefined,
       headers: {
         "Content-Type": "application/json",
         ...authHeaders(),
         ...(init.headers || {}),
       },
-    }).catch(() => null);
-    const timeout = new Promise<null>((resolve) => {
-      setTimeout(() => resolve(null), REQUEST_TIMEOUT_MS);
     });
-    const response = await Promise.race([request, timeout]);
-
-    if (!response) {
-      return null;
-    }
 
     if (!response.ok) {
       return null;
@@ -579,7 +563,6 @@ export const mapApiProdutoToProduct = (
   images: ProdutoImageApi[] = [],
   categoryName?: string
 ): Product => {
-  const mock = shopData[(product.id_produto - 1) % shopData.length];
   const productImages = product.imagens?.length ? product.imagens : images;
   const apiPreviews = normalizeProductImages(product, productImages, "alta");
   const apiThumbs = normalizeProductImages(product, productImages, "thumb");
@@ -593,7 +576,7 @@ export const mapApiProdutoToProduct = (
     [mainThumb, ...apiThumbs],
     mainThumb || mainImage
   );
-  const title = product.produto || mock.title;
+  const title = product.produto || `Produto ${product.id_produto}`;
   const codigo = product.codigo || `PEP-${product.id_produto}`;
   const apiCategoryName =
     categoryName ||
@@ -610,18 +593,22 @@ export const mapApiProdutoToProduct = (
       ? "Lancamento"
       : isYes(product.premium)
         ? "Premium"
-        : mock.badge;
+        : undefined;
 
   return {
     id: product.id_produto,
     codigo,
     idTipoProduto: product.id_tipo_produto,
+    categoryId:
+      product.categorias?.find((category) => Number.isFinite(Number(category?.id_categoria)))
+        ?.id_categoria ||
+      (Number.isFinite(Number(product.id_categoria)) ? Number(product.id_categoria) : undefined),
     quantidadeMinima: Number(quantidadeMinima) || undefined,
     title,
     slug: `${product.id_produto}-${slugify(title)}`,
     category: apiCategoryName,
-    shortDescription: product.obs || product.descricao || mock.shortDescription,
-    description: product.descricao || product.obs || mock.description,
+    shortDescription: product.obs || product.descricao || "",
+    description: product.descricao || product.obs || "",
     features: [
       product.codigo ? `Codigo ${product.codigo}` : "",
       product.altura ? `Altura: ${product.altura}` : "",
@@ -643,7 +630,7 @@ export const mapApiProdutoToProduct = (
         : null,
       product.ncm ? { label: "NCM", value: product.ncm } : null,
     ].filter(Boolean) as Product["specs"],
-    reviews: mock.reviews,
+    reviews: 0,
     price: 0,
     discountedPrice: 0,
     badge,
@@ -662,8 +649,7 @@ export async function getProdutos(limit = 100): Promise<Product[]> {
   const pageSize = Math.min(Math.max(limit, 1), 100);
   const maxPages = Math.max(1, Math.ceil(limit / pageSize));
   const produtos =
-    (await apiFetchAllPages<ProdutoApi>("/produtos", pageSize, maxPages)) ||
-    mockProdutos;
+    (await apiFetchAllPages<ProdutoApi>("/produtos", pageSize, maxPages)) || [];
 
   return produtos
     .filter((product) => isEnabled(product.habilitado) && isEnabled(product.site))
@@ -1141,8 +1127,7 @@ export async function getProdutosIdsByDatasPromocionais(
 
 export async function getProdutosForSitemap(limit = 5000): Promise<Product[]> {
   const produtos =
-    (await apiFetchAllPages<ProdutoApi>("/produtos/site?empresaId=1", 500, 10)) ||
-    mockProdutos;
+    (await apiFetchAllPages<ProdutoApi>("/produtos/site?empresaId=1", 500, 10)) || [];
 
   return produtos
     .filter((product) => isEnabled(product.habilitado) && isEnabled(product.site))
@@ -1158,7 +1143,7 @@ export async function getProdutosSite(limit = 12): Promise<Product[]> {
       "/produtos?empresaId=1",
       pageSize,
       maxPages
-    )) || mockProdutos.slice(0, limit);
+    )) || [];
 
   return produtos
     .filter((product) => isEnabled(product.habilitado) && isEnabled(product.site))
@@ -1216,32 +1201,7 @@ export async function getProdutoBySlug(slug: string): Promise<Product | null> {
     }
   }
 
-  const searchTerm = normalizedSlug.replace(/-/g, " ");
-  const searchedProducts = searchTerm
-    ? await searchProdutosSite(searchTerm, 8)
-    : [];
-  const searchedProduct = searchedProducts.find(
-    (product) =>
-      product.id === id ||
-      product.slug === slug ||
-      slugify(product.title) === normalizedSlug
-  );
-
-  if (searchedProduct) {
-    return searchedProduct;
-  }
-
-  const products = await getProdutos(100);
-
-  return (
-    products.find(
-      (product) =>
-        product.slug === slug ||
-        product.id === id ||
-        product.slug === `${id}-${normalizedSlug}` ||
-        slugify(product.title) === normalizedSlug
-    ) || null
-  );
+  return null;
 }
 
 export async function getRelatedProducts(product: Product, limit = 4) {
