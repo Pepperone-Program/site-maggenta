@@ -11,7 +11,6 @@ const routes = [
   "/cart",
   "/orcamento",
   "/wishlist",
-  "/contact",
   "/fale-conosco",
   "/empresa-de-brindes",
   "/termos-de-uso",

@@ -5,7 +5,6 @@ import ShopDetails from "@/components/ShopDetails";
 import { productPath } from "@/lib/products";
 import {
   getProdutoBySlug,
-  getProdutosForSitemap,
   getRelatedProducts,
 } from "@/lib/api";
 
@@ -21,11 +20,7 @@ type ProductPageProps = {
 };
 
 export const generateStaticParams = async () => {
-  const products = await getProdutosForSitemap(500);
-
-  return products.map((product) => ({
-    slug: product.slug,
-  }));
+  return [];
 };
 
 export async function generateMetadata({
@@ -55,7 +50,7 @@ export async function generateMetadata({
 
   return {
     title: {
-      absolute: product.title,
+      absolute: `${product.title} - ${product.codigo || product.id} - ${product.title} | Peppperone Brindes`,
     },
     description,
     keywords: [

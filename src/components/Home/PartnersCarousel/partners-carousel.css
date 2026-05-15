@@ -1,0 +1,4 @@
+.partners-carousel .swiper-wrapper {
+  align-items: stretch;
+  transition-timing-function: linear !important;
+}

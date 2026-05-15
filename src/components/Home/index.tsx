@@ -4,6 +4,7 @@ import Hero from "./Hero";
 import Categories from "./Categories";
 import NewArrival from "./NewArrivals";
 import PromoBanner from "./PromoBanner";
+import PartnersCarousel from "./PartnersCarousel";
 import Newsletter from "../Common/Newsletter";
 import { getActiveBanners, getHomeCategories, getProductSections } from "@/lib/api";
 
@@ -19,11 +20,12 @@ const PersonalizedGiftsSeo = dynamic(() => import("./PersonalizedGiftsSeo"), {
 });
 
 const Home = async () => {
-  const [productSections, categories, megaBanners, homeMegaBanners] = await Promise.all([
+  const [productSections, categories, megaBanners, homeMegaBanners, mediumBanners] = await Promise.all([
     getProductSections(),
     getHomeCategories(),
     getActiveBanners("mega_banner"),
     getActiveBanners("home_mega"),
+    getActiveBanners("banner_medio"),
   ]);
 
   return (
@@ -39,6 +41,7 @@ const Home = async () => {
         />
       ))}
       <PromoBanner banners={homeMegaBanners} />
+      <PartnersCarousel />
       {productSections.slice(2).map((section) => (
         <NewArrival
           key={section.id}
@@ -48,7 +51,7 @@ const Home = async () => {
         />
       ))}
       <Suspense fallback={<div className="h-32 bg-gray-1" />}>
-        <CounDown />
+        <CounDown banners={mediumBanners} />
       </Suspense>
       <Suspense fallback={<div className="h-96 bg-gray-1" />}>
         <Testimonials />
