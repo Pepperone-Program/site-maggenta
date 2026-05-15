@@ -15,43 +15,57 @@ type PromoBannerProps = {
 
 const PromoBanner = ({ banners = [] }: PromoBannerProps) => {
   if (banners.length) {
+    const desktopBanners = banners.filter((banner) => banner.tamanho_tela !== "mobile");
+    const mobileBanners = banners.filter((banner) => banner.tamanho_tela === "mobile");
+    const visibleDesktopBanners = desktopBanners.length ? desktopBanners : banners;
+    const hasMobileBanners = mobileBanners.length > 0;
+    const renderBanners = (items: BannerApi[], mobile = false) => (
+      <Swiper
+        loop={items.length > 1}
+        autoplay={{
+          delay: 4200,
+          disableOnInteraction: false,
+        }}
+        pagination={{ clickable: true }}
+        modules={[Autoplay, Pagination]}
+        className="promo-banner-carousel"
+      >
+        {items.map((banner, index) => (
+          <SwiperSlide key={`${mobile ? "mobile" : "desktop"}-${banner.id_banner}`}>
+            <div className="relative min-h-[360px] overflow-hidden bg-[#eef2ea] px-4 py-12.5 sm:px-7.5 lg:min-h-[430px] lg:px-14 lg:py-17.5 xl:px-19 xl:py-22.5">
+              <Image
+                src={banner.url_banner || ""}
+                alt={banner.titulo || "Banner Pepperone"}
+                fill
+                priority={index === 0}
+                sizes="100vw"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-white/92 via-white/70 to-white/8" />
+              {banner.url && (
+                <Link
+                  href={banner.url}
+                  aria-label={banner.titulo || "Ver campanha"}
+                  className="absolute inset-0 z-10"
+                />
+              )}
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    );
+
     return (
       <section className="overflow-hidden py-20">
         <div className="w-full">
-          <Swiper
-            loop={banners.length > 1}
-            autoplay={{
-              delay: 4200,
-              disableOnInteraction: false,
-            }}
-            pagination={{ clickable: true }}
-            modules={[Autoplay, Pagination]}
-            className="promo-banner-carousel"
-          >
-            {banners.map((banner, index) => (
-              <SwiperSlide key={banner.id_banner}>
-                <div className="relative min-h-[360px] overflow-hidden bg-[#eef2ea] px-4 py-12.5 sm:px-7.5 lg:min-h-[430px] lg:px-14 lg:py-17.5 xl:px-19 xl:py-22.5">
-                  <Image
-                    src={banner.url_banner || ""}
-                    alt={banner.titulo || "Banner Pepperone"}
-                    fill
-                    priority={index === 0}
-                    sizes="100vw"
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/92 via-white/70 to-white/8" />
-                  {banner.url && (
-                    <Link
-                      href={banner.url}
-                      aria-label={banner.titulo || "Ver campanha"}
-                      className="absolute inset-0 z-10"
-                    />
-                  )}
-
-                </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
+          <div className={hasMobileBanners ? "hidden sm:block" : ""}>
+            {renderBanners(visibleDesktopBanners)}
+          </div>
+          {hasMobileBanners && (
+            <div className="sm:hidden">
+              {renderBanners(mobileBanners, true)}
+            </div>
+          )}
         </div>
       </section>
     );

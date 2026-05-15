@@ -16,7 +16,7 @@ const SingleItem = ({ item }: { item: Product }) => {
     dispatch(
       addItemToCart({
         ...item,
-        quantity: 1,
+        quantity: Math.max(1, Number(item.quantidadeMinima || 1)),
       })
     );
   };

@@ -77,6 +77,7 @@ export type BannerApi = {
   habilitado?: ApiFlag;
   cliques?: number | null;
   url_banner?: string | null;
+  tamanho_tela?: "desktop" | "mobile" | string | null;
 };
 
 type ProdutoImageApi = {
