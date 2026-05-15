@@ -217,7 +217,7 @@ const Header = () => {
       }`}
     >
       <div className="bg-[#249230] text-white">
-        <div className="mx-auto w-full max-w-[1800px] px-2 py-2 text-center text-xs font-semibold sm:hidden">
+        <div className="mx-auto w-full max-w-[1800px] px-2 py-2 text-center text-sm font-semibold sm:hidden">
           <Swiper
             loop
             autoplay={{ delay: 2600, disableOnInteraction: false }}
@@ -276,7 +276,7 @@ const Header = () => {
                             current === menuItem.id ? null : menuItem.id
                           )
                         }
-                        className="flex items-center gap-1 py-2 text-left text-custom-sm font-medium text-dark hover:text-blue sm:py-0"
+                        className="flex min-h-11 items-center gap-1 py-2 text-left text-sm font-medium text-dark hover:text-blue sm:min-h-0 sm:py-0"
                       >
                         <span className="relative before:absolute before:left-0 before:-top-2 before:h-[3px] before:w-0 before:rounded-b-[3px] before:bg-blue before:duration-200 sm:group-hover:before:w-full">
                           {menuItem.title}
@@ -303,7 +303,7 @@ const Header = () => {
                                     <Link
                                       href={item.path}
                                       onClick={() => setNavigationOpen(false)}
-                                      className="block rounded px-2 py-1.5 text-xs font-light uppercase text-dark hover:bg-gray-1 hover:text-blue"
+                                      className="block min-h-11 rounded px-2 py-3 text-sm font-light uppercase text-dark hover:bg-gray-1 hover:text-blue sm:min-h-0 sm:py-1.5 sm:text-xs"
                                     >
                                       {item.title}
                                     </Link>
@@ -319,7 +319,7 @@ const Header = () => {
                     <Link
                       href={menuItem.path || "/"}
                       onClick={() => setNavigationOpen(false)}
-                      className="relative flex py-2 text-custom-sm font-medium text-dark hover:text-blue before:absolute before:left-0 before:-top-2 before:h-[3px] before:w-0 before:rounded-b-[3px] before:bg-blue before:duration-200 sm:hover:before:w-full sm:py-0"
+                      className="relative flex min-h-11 items-center py-2 text-sm font-medium text-dark hover:text-blue before:absolute before:left-0 before:-top-2 before:h-[3px] before:w-0 before:rounded-b-[3px] before:bg-blue before:duration-200 sm:min-h-0 sm:hover:before:w-full sm:py-0"
                     >
                       {menuItem.title}
                     </Link>

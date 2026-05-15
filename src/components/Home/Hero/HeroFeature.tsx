@@ -33,7 +33,7 @@ const FeatureItem = ({ item }: { item: (typeof featureData)[number] }) => (
   <div className="flex items-center justify-center gap-4 border-gray-3 lg:border-r lg:last:border-r-0">
     <Image src={item.img} alt={`Icone de ${item.title}`} width={32} height={32} />
     <div>
-      <h3 className="text-lg font-medium text-dark">{item.title}</h3>
+      <p className="text-lg font-medium text-dark">{item.title}</p>
       <p className="text-sm">{item.description}</p>
     </div>
   </div>

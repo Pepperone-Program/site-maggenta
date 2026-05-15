@@ -16,6 +16,7 @@ const routes = [
   "/empresa-de-brindes",
   "/termos-de-uso",
   "/politicas-de-privacidade",
+  "/llms.txt",
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

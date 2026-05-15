@@ -134,9 +134,9 @@ const Categories = ({ categories = data }: { categories?: Category[] }) => {
               },
             }}
           >
-            {categories.map((item) => (
+            {categories.map((item, index) => (
               <SwiperSlide key={item.id}>
-                <SingleItem item={item} />
+                <SingleItem item={item} priority={index < 6} />
               </SwiperSlide>
             ))}
           </Swiper>

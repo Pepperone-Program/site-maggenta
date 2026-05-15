@@ -24,7 +24,7 @@ const firstParam = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
 
 const toNumber = (value: string | string[] | undefined) => {
-  const parsed = Number(firstParam(value));
+  const parsed = parseInt(String(firstParam(value) || ""), 10);
   return Number.isFinite(parsed) ? parsed : undefined;
 };
 

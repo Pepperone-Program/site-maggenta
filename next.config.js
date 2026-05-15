@@ -25,6 +25,19 @@ const apiRemotePattern = (() => {
 const nextConfig = {
   compress: true,
   poweredByHeader: false,
+  async headers() {
+    return [
+      {
+        source: "/_next/image",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 31536000,

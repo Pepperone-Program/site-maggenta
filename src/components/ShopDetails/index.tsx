@@ -18,8 +18,9 @@ const ShopDetails = ({
   relatedProducts: Product[];
 }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const minimumQuantity = Math.max(1, Number(product.quantidadeMinima || 1));
   const [previewImg, setPreviewImg] = useState(0);
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(minimumQuantity);
   const [showTags, setShowTags] = useState(false);
   const mainImageRef = useRef<HTMLDivElement>(null);
   const wheelLockRef = useRef(0);
@@ -28,7 +29,8 @@ const ShopDetails = ({
   useEffect(() => {
     setPreviewImg(0);
     setShowTags(false);
-  }, [product.id]);
+    setQuantity(minimumQuantity);
+  }, [product.id, minimumQuantity]);
 
   useEffect(() => {
     if (previewImg >= product.imgs.previews.length) {
@@ -193,8 +195,9 @@ const ShopDetails = ({
                 <div className="flex h-12 w-full items-center justify-between rounded-md border border-gray-3 bg-white sm:w-36">
                   <button
                     type="button"
-                    onClick={() => setQuantity((value) => Math.max(1, value - 1))}
+                    onClick={() => setQuantity((value) => Math.max(minimumQuantity, value - 1))}
                     className="h-full w-11 text-xl text-dark duration-200 hover:bg-gray-1"
+                    disabled={quantity <= minimumQuantity}
                     aria-label="Diminuir quantidade"
                   >
                     -

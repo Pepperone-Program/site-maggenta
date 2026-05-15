@@ -53,7 +53,7 @@ const ProductItem = ({ item }: { item: Product }) => {
 
       <p className="mb-1 text-custom-sm font-medium text-blue">{item.category}</p>
 
-      <h3
+      <p
         className="mb-1 min-h-[48px] overflow-hidden font-medium leading-6 text-dark ease-out duration-200 hover:text-blue"
         style={{
           display: "-webkit-box",
@@ -62,7 +62,7 @@ const ProductItem = ({ item }: { item: Product }) => {
         }}
       >
         <Link href={productPath(item)}> {item.title} </Link>
-      </h3>
+      </p>
 
       <p className="mb-5 text-normal text-dark-4 hover:text-dark transition-all cursor-pointer">Código: {item.codigo}</p>
 
