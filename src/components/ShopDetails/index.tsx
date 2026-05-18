@@ -189,7 +189,7 @@ const ShopDetails = ({
                     {`, ${product.description}`}
                   </p>
                 ) : (
-                  <p>{product.shortDescription}</p>
+                  <p>{product.description || product.shortDescription}</p>
                 )}
               </div>
               <ul className="mt-8 grid gap-3 text-dark sm:grid-cols-2">

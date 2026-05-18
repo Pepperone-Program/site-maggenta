@@ -5,15 +5,15 @@ const PersonalizedGiftsSeo = () => {
     <section className="bg-white py-16">
       <div className="mx-auto w-full max-w-[1190px] px-4 sm:px-6">
         <div className="text-center">
-          <h1 className="mb-3 text-lg font-semibold uppercase tracking-wide text-blue">
+          <h2 className="mb-3 text-lg font-semibold uppercase tracking-wide text-blue">
             Brindes Personalizados
-          </h1>
-          <h2 className="text-2xl font-semibold text-dark sm:text-3xl">
-            Qual é a importância dos brindes personalizados ?
           </h2>
-          <h3 className="pt-2 text-xl font-semibold text-dark">
-            Brindes corporativos para campanhas e eventos
+          <h3 className="text-2xl font-semibold text-dark sm:text-3xl">
+            Qual é a importância dos brindes personalizados ?
           </h3>
+          <h4 className="pt-2 text-xl font-semibold text-dark">
+            Brindes corporativos para campanhas e eventos
+          </h4>
           <p className="mt-8 space-y-6 text-justify text-base leading-8">
             A Pepperone atende empresas que precisam de brindes personalizados para
             feiras, congressos, datas promocionais, ações internas, programas de
@@ -51,9 +51,9 @@ const PersonalizedGiftsSeo = () => {
             de presentear seus colabores com brindes.
           </p>
 
-          <h3 className="pt-2 text-xl font-semibold text-dark">
+          <h4 className="pt-2 text-xl font-semibold text-dark">
             Como escolher o brinde ideal?
-          </h3>
+          </h4>
           <p>
             Para escolher os brindes certos e elaborar ações promocionais de sucesso
             é preciso saber qual será o impacto que os brindes causarão no seu
@@ -77,9 +77,9 @@ const PersonalizedGiftsSeo = () => {
             identificada no target que irá definir qual será o brinde ideal.
           </p>
 
-          <h3 className="pt-2 text-xl font-semibold text-dark">
+          <h4 className="pt-2 text-xl font-semibold text-dark">
             A importância da qualidade dos brindes personalizados
-          </h3>
+          </h4>
           <p>
             Em uma campanha promocional o brinde é usado para representar a imagem
             da marca que está sendo divulgada, portanto, na hora de escolher o brinde

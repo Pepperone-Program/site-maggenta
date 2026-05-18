@@ -451,7 +451,7 @@ const ShopWithSidebar = ({
 
   return (
     <>
-      <Breadcrumb title={pageTitle} pages={["brindes personalizados"]} titleAs="div" />
+      <Breadcrumb title={pageTitle} pages={["brindes personalizados"]} />
       <section className="relative overflow-hidden bg-[#f3f4f6] pb-20 pt-5 lg:pt-12 xl:pt-16">
         <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
           <div className="flex gap-6 xl:gap-8">
@@ -699,9 +699,9 @@ const ShopWithSidebar = ({
 
               {categoryDescription && (
                 <section className="mx-auto mt-16 max-w-[1500px] rounded-md border border-gray-3 bg-white px-5 py-8 text-center shadow-1 sm:px-8 lg:px-12">
-                  <h1 className="mb-8 text-center text-3xl font-semibold leading-tight text-dark sm:text-4xl">
+                  <h2 className="mb-8 text-center text-3xl font-semibold leading-tight text-dark sm:text-4xl">
                     {categoryName}
-                  </h1>
+                  </h2>
                   <div
                     className="text-justify text-base leading-8 text-dark-4 [&_h2]:mb-4 [&_h2]:mt-8 [&_h2]:text-center [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:text-dark"
                     style={{ whiteSpace: "pre-line" }}
