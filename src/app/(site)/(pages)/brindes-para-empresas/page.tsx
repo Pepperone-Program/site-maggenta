@@ -3,16 +3,29 @@ import { Metadata } from "next";
 import { permanentRedirect } from "next/navigation";
 import ShopWithoutSidebar from "@/components/ShopWithoutSidebar";
 import { friendlyParam, getCatalogoTipoProduto } from "@/lib/api";
+import { buildSeoOther, contextualKeywords, siteUrl } from "@/lib/seo";
 
 export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "Brindes para empresas",
   description:
-    "Conheca brindes para empresas e produtos promocionais personalizados para a sua marca.",
+    "Brindes para Empresas, Querendo comprar produtos promocionais personalizados? É aqui na Pepperone Brindes",
+  keywords: contextualKeywords("brindes para empresas", [
+    "produtos promocionais para empresas",
+    "brindes corporativos com logomarca",
+    "orçamento de brindes para empresas",
+  ]),
   alternates: {
     canonical: "/brindes-para-empresas",
   },
+  other: buildSeoOther({
+    title: "Brindes para empresas",
+    description:
+      "Brindes para Empresas, Querendo comprar produtos promocionais personalizados? É aqui na Pepperone Brindes",
+    canonical: `${siteUrl}/brindes-para-empresas`,
+    subject: "brindes para empresas e produtos promocionais",
+  }),
 };
 
 type PageProps = {

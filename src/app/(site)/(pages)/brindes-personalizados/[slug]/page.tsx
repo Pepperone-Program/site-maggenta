@@ -7,8 +7,7 @@ import {
   getProdutoBySlug,
   getRelatedProducts,
 } from "@/lib/api";
-
-const siteUrl = "https://www.pepperone.com.br";
+import { buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -44,26 +43,21 @@ export async function generateMetadata({
     product.description ||
     product.shortDescription ||
     `Solicite orcamento para ${product.title} personalizado na Pepperone.`;
+  const title = `${product.title} - ${product.codigo || product.id} - ${product.title} | Pepperone Brindes`;
 
   return {
     title: {
-      absolute: `${product.title} - ${product.codigo || product.id} - ${product.title} | Pepperone Brindes`,
+      absolute: title,
     },
     description,
-    keywords: [
-      product.title,
-      `${product.title} personalizado`,
+    keywords: contextualKeywords(product.title, [
       product.category,
       product.codigo || "",
-      "brindes personalizados",
-      "brindes corporativos",
-      "brindes promocionais",
-      "brindes para empresas",
-      "produto personalizado",
-      "orcamento de brindes personalizados",
-      "marketing promocional",
-      "campanhas promocionais",
-    ].filter(Boolean),
+      `${product.title} ${product.codigo || ""}`,
+      `${product.category} personalizados`,
+      `${product.title} com logo`,
+      `${product.title} quantidade minima ${product.quantidadeMinima || ""}`,
+    ]),
     alternates: {
       canonical,
       languages: {
@@ -87,7 +81,7 @@ export async function generateMetadata({
       description,
       type: "website",
       url: canonical,
-      siteName: "Pepperone Brindes",
+      siteName,
       locale: "pt_BR",
       images: [
         {
@@ -105,11 +99,16 @@ export async function generateMetadata({
       images: [image],
     },
     other: {
+      ...buildSeoOther({
+        title,
+        description,
+        canonical,
+        subject: `${product.title}, ${product.category}, ${product.codigo || product.id}`,
+      }),
       "og:image:secure_url": image,
       "og:image:type": image.includes(".png") ? "image/png" : "image/jpeg",
       "product:category": product.category,
       "product:retailer_item_id": product.codigo || String(product.id),
-      "ai-content": "index, follow",
     },
   };
 }

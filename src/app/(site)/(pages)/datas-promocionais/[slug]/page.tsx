@@ -7,6 +7,7 @@ import {
   getDatasPromocionais,
   getPublicosAlvos,
 } from "@/lib/api";
+import { buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
 
 export const revalidate = 120;
 
@@ -15,23 +16,45 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-const siteUrl = "https://www.pepperone.com.br";
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const routeParams = (await params) || {};
   const slug = routeParams.slug || "";
+  const dataPromocionalId = toNumber(slug) || 1;
+  const catalogo = await getCatalogoDataPromocional(dataPromocionalId, { page: 1, limit: 1 });
+  const dataName = catalogo.categoria?.categoria || "Data Promocional";
+  const title = `Brindes para ${dataName} Personalizados e Promocionais`;
+  const description = `${dataName}, Querendo comprar Brindes Personalizados? É aqui na Pepperone Brindes`;
+  const canonical = new URL(`/datas-promocionais/${slug}`, siteUrl).toString();
 
   return {
-    title: "Brindes para datas promocionais",
-    description:
-      "Brindes personalizados para datas promocionais, campanhas sazonais e eventos corporativos.",
+    title,
+    description,
+    keywords: contextualKeywords(`brindes para ${dataName}`, [
+      `${dataName} brindes`,
+      `${dataName} lembranças corporativas`,
+      `${dataName} campanha promocional`,
+    ]),
     alternates: {
-      canonical: new URL(`/datas-promocionais/${slug}`, siteUrl).toString(),
+      canonical,
     },
     robots: {
       index: true,
       follow: true,
     },
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      url: canonical,
+      siteName,
+      locale: "pt_BR",
+    },
+    other: buildSeoOther({
+      title,
+      description,
+      canonical,
+      subject: `${dataName}, brindes para datas promocionais`,
+    }),
   };
 }
 
