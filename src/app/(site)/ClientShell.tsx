@@ -11,6 +11,7 @@ import PreviewSliderModal from "@/components/Common/PreviewSlider";
 import ScrollToTop from "@/components/Common/ScrollToTop";
 import ClarityInit from "@/components/Common/ClarityInit";
 import WhatsAppButton from "@/components/Common/WhatsAppButton";
+import { Toaster } from "sonner";
 
 const ClientShell = ({ children }: { children: ReactNode }) => {
   return (
@@ -23,6 +24,16 @@ const ClientShell = ({ children }: { children: ReactNode }) => {
             {children}
             <CartSidebarModal />
             <PreviewSliderModal />
+            <Toaster
+              richColors
+              closeButton
+              position="bottom-right"
+              toastOptions={{
+                style: {
+                  zIndex: 2147483647,
+                },
+              }}
+            />
           </PreviewSliderProvider>
         </CartModalProvider>
       </ReduxProvider>

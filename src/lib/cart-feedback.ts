@@ -1,15 +1,10 @@
 "use client";
 
-import { message } from "antd";
+import { toast } from "sonner";
 
 export const showAddedToCartMessage = (title: string, quantity: number) => {
-  message.config({
-    top: 0,
-    maxCount: 3,
-  });
-
-  message.success({
-    content: `${title} adicionado ao orçamento. Quantidade: ${quantity}`,
-    duration: 2.5,
+  toast.success("Produto adicionado ao orçamento", {
+    description: `${title} - Quantidade: ${quantity}`,
+    duration: 2500,
   });
 };
