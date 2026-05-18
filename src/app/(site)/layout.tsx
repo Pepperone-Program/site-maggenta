@@ -3,27 +3,11 @@ import "../css/style.css";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import ClientShell from "./ClientShell";
+import { buildSeoOther, marketKeywords, siteName, siteUrl } from "@/lib/seo";
 
-const siteUrl = "https://www.pepperone.com.br";
-const marketKeywords = [
-  "brindes personalizados",
-  "brindes corporativos",
-  "brindes promocionais",
-  "brindes para empresas",
-  "produtos personalizados",
-  "presentes corporativos",
-  "marketing promocional",
-  "campanhas promocionais",
-  "datas comemorativas corporativas",
-  "orcamento de brindes",
-  "brindes para eventos",
-  "brindes sustentaveis",
-  "canetas personalizadas",
-  "copos personalizados",
-  "squeezes personalizados",
-  "mochilas personalizadas",
-  "blocos de anotacoes personalizados",
-];
+const defaultTitle = "Pepperone Brindes Corporativos Personalizados para Empresas";
+const defaultDescription =
+  "Brindes corporativos personalizados, produtos promocionais e orcamentos para empresas em todo o Brasil.";
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
@@ -68,13 +52,12 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Pepperone Brindes Corporativos Personalizados para Empresas",
+    default: defaultTitle,
     template: "%s | Pepperone Brindes",
   },
-  description:
-    "Brindes corporativos personalizados, produtos promocionais e orcamentos para empresas em todo o Brasil.",
+  description: defaultDescription,
   keywords: marketKeywords,
-  applicationName: "Pepperone Brindes",
+  applicationName: siteName,
   verification: {
     google: "mgvzGTTx3EwBN_LTzrGsWq3yl0ClkS3KGvwLkNC-lU4",
   },
@@ -92,10 +75,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    siteName: "Pepperone Brindes",
-    title: "Pepperone Brindes Corporativos Personalizados para Empresas",
-    description:
-      "Brindes corporativos personalizados, produtos promocionais e orcamentos para empresas.",
+    siteName,
+    title: defaultTitle,
+    description: defaultDescription,
     url: "/",
     images: [
       {
@@ -106,14 +88,15 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pepperone Brindes Corporativos Personalizados para Empresas",
-    description:
-      "Brindes corporativos personalizados, produtos promocionais e orcamentos para empresas.",
+    title: defaultTitle,
+    description: defaultDescription,
   },
-  other: {
-    "ai-content": "index, follow",
-    "llms": `${siteUrl}/llms.txt`,
-  },
+  other: buildSeoOther({
+    title: defaultTitle,
+    description: defaultDescription,
+    canonical: siteUrl,
+    subject: "brindes personalizados, brindes corporativos, produtos promocionais",
+  }),
 };
 
 export default function RootLayout({

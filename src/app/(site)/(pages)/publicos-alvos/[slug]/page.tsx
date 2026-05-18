@@ -7,6 +7,7 @@ import {
   getDatasPromocionais,
   getPublicosAlvos,
 } from "@/lib/api";
+import { buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
 
 export const revalidate = 120;
 
@@ -15,23 +16,45 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-const siteUrl = "https://www.pepperone.com.br";
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const routeParams = (await params) || {};
   const slug = routeParams.slug || "";
+  const publicoAlvoId = toNumber(slug) || 1;
+  const catalogo = await getCatalogoPublicoAlvo(publicoAlvoId, { page: 1, limit: 1 });
+  const publicoName = catalogo.categoria?.categoria || "Público Alvo";
+  const title = `Brindes para ${publicoName} Personalizados e Corporativos`;
+  const description = `Brindes para ${publicoName}, Querendo comprar Brindes Personalizados? É aqui na Pepperone Brindes`;
+  const canonical = new URL(`/publicos-alvos/${slug}`, siteUrl).toString();
 
   return {
-    title: "Brindes por publico-alvo",
-    description:
-      "Brindes personalizados filtrados por publico-alvo para campanhas corporativas.",
+    title,
+    description,
+    keywords: contextualKeywords(`brindes para ${publicoName}`, [
+      `${publicoName} brindes corporativos`,
+      `${publicoName} produtos promocionais`,
+      `${publicoName} campanhas promocionais`,
+    ]),
     alternates: {
-      canonical: new URL(`/publicos-alvos/${slug}`, siteUrl).toString(),
+      canonical,
     },
     robots: {
       index: true,
       follow: true,
     },
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      url: canonical,
+      siteName,
+      locale: "pt_BR",
+    },
+    other: buildSeoOther({
+      title,
+      description,
+      canonical,
+      subject: `${publicoName}, brindes por publico-alvo`,
+    }),
   };
 }
 

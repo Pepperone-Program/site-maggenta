@@ -9,6 +9,7 @@ import {
   getDatasPromocionais,
   getPublicosAlvos,
 } from "@/lib/api";
+import { buildSeoOther, contextualKeywords, siteUrl } from "@/lib/seo";
 
 export const revalidate = 120;
 
@@ -18,7 +19,19 @@ export const metadata: Metadata = {
     canonical: "/brindes-personalizados",
   },
   description:
-    "Encontre brindes personalizados por categoria, subcategoria, publico-alvo e quantidade minima.",
+    "Brindes Personalizados, Querendo comprar produtos promocionais para empresas? É aqui na Pepperone Brindes",
+  keywords: contextualKeywords("brindes personalizados", [
+    "catálogo de brindes personalizados",
+    "brindes personalizados por categoria",
+    "brindes com quantidade mínima",
+  ]),
+  other: buildSeoOther({
+    title: "Brindes personalizados",
+    description:
+      "Brindes Personalizados, Querendo comprar produtos promocionais para empresas? É aqui na Pepperone Brindes",
+    canonical: `${siteUrl}/brindes-personalizados`,
+    subject: "catálogo de brindes personalizados",
+  }),
 };
 
 type CatalogPageProps = {
