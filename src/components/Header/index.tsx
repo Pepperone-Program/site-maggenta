@@ -30,6 +30,13 @@ type SearchSuggestion = {
   path: string;
 };
 
+type SearchPayload = {
+  data?: SearchSuggestion[];
+  destino_busca?: {
+    path?: string | null;
+  } | null;
+};
+
 const defaultMenuGroups: HeaderMenuGroup[] = [
   { id: "inicio", title: "Inicio", path: "/" },
   {
@@ -186,8 +193,15 @@ const Header = () => {
           return;
         }
 
-        const payload = response.ok ? await response.json() : null;
+        const payload: SearchPayload | null = response.ok ? await response.json() : null;
+        const destinationPath = payload?.destino_busca?.path;
         const firstSuggestion = Array.isArray(payload?.data) ? payload.data[0] : null;
+
+        if (destinationPath) {
+          router.push(destinationPath);
+          setSearchFocused(false);
+          return;
+        }
 
         if (firstSuggestion?.path) {
           router.push(firstSuggestion.path);
