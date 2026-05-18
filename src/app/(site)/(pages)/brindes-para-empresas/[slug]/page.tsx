@@ -5,15 +5,29 @@ import { getCatalogoTipoProduto } from "@/lib/api";
 
 export const revalidate = 120;
 
-export const metadata: Metadata = {
-  title: "Brindes para empresas personalizados | Pepperone",
-  description:
-    "Conheca tipos de produtos personalizados para empresas, eventos, campanhas e acoes promocionais.",
-};
-
 type PageProps = {
   params?: Promise<{ slug?: string }>;
 };
+
+const siteUrl = "https://www.pepperone.com.br";
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const routeParams = (await params) || {};
+  const slug = routeParams.slug || "";
+
+  return {
+    title: "Brindes para empresas personalizados",
+    description:
+      "Conheca tipos de produtos personalizados para empresas, eventos, campanhas e acoes promocionais.",
+    alternates: {
+      canonical: new URL(`/brindes-para-empresas/${slug}`, siteUrl).toString(),
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 const toNumber = (value: string | undefined) => {
   const parsed = parseInt(String(value || ""), 10);

@@ -7,17 +7,20 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import Link from "next/link";
 import { formatDisplayPrice, productPath } from "@/lib/products";
+import { showAddedToCartMessage } from "@/lib/cart-feedback";
 
 const ProductItem = ({ item }: { item: Product }) => {
   const dispatch = useDispatch<AppDispatch>();
 
   const handleAddToCart = useCallback(() => {
+    const quantity = Math.max(1, Number(item.quantidadeMinima || 1));
     dispatch(
       addItemToCart({
         ...item,
-        quantity: Math.max(1, Number(item.quantidadeMinima || 1)),
+        quantity,
       })
     );
+    showAddedToCartMessage(item.title, quantity);
   }, [dispatch, item]);
 
   return (

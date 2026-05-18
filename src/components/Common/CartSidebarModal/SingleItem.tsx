@@ -1,15 +1,41 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
+import { updateCartItemQuantity } from "@/redux/features/cart-slice";
 import Image from "next/image";
 import Link from "next/link";
 import { productPath } from "@/lib/products";
 
 const SingleItem = ({ item, removeItemFromCart }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const minimumQuantity = Math.max(1, Number(item.quantidadeMinima || 1));
+  const [quantityInput, setQuantityInput] = useState(String(item.quantity));
+
+  useEffect(() => {
+    setQuantityInput(String(item.quantity));
+  }, [item.quantity]);
 
   const handleRemoveFromCart = () => {
     dispatch(removeItemFromCart(item.id));
+  };
+
+  const updateQuantity = (value: number) => {
+    const safeQuantity = Math.max(minimumQuantity, Math.floor(value || minimumQuantity));
+
+    dispatch(
+      updateCartItemQuantity({
+        id: item.id,
+        quantity: safeQuantity,
+      })
+    );
+    setQuantityInput(String(safeQuantity));
+  };
+
+  const commitQuantityInput = () => {
+    const parsed = Number(quantityInput.replace(/\D/g, ""));
+    updateQuantity(Number.isFinite(parsed) ? parsed : minimumQuantity);
   };
 
   return (
@@ -23,6 +49,39 @@ const SingleItem = ({ item, removeItemFromCart }) => {
           <h3 className="font-medium text-dark mb-1 ease-out duration-200 hover:text-blue">
             <Link href={productPath(item)}> {item.title} </Link>
           </h3>
+          <div className="mt-2 inline-flex h-9 items-center overflow-hidden rounded-md border border-gray-3 bg-white">
+            <button
+              type="button"
+              onClick={() => updateQuantity(item.quantity - 1)}
+              disabled={item.quantity <= minimumQuantity}
+              aria-label="Diminuir quantidade"
+              className="flex h-full w-9 items-center justify-center text-lg font-medium text-dark duration-200 hover:bg-gray-2 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              -
+            </button>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={quantityInput}
+              onChange={(event) => setQuantityInput(event.target.value)}
+              onBlur={commitQuantityInput}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.currentTarget.blur();
+                }
+              }}
+              aria-label={`Quantidade de ${item.title}`}
+              className="h-full w-20 border-x border-gray-3 text-center text-custom-sm font-medium text-dark outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            />
+            <button
+              type="button"
+              onClick={() => updateQuantity(item.quantity + 1)}
+              aria-label="Aumentar quantidade"
+              className="flex h-full w-9 items-center justify-center text-lg font-medium text-dark duration-200 hover:bg-gray-2"
+            >
+              +
+            </button>
+          </div>
         </div>
       </div>
 

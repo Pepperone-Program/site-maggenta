@@ -1,18 +1,20 @@
-import React from "react";
+const whatsappUrl = "https://wzap.me/349273426667";
 
 const WhatsAppButton = () => {
   return (
     <a
-      href="https://wa.me/11989597801"
+      href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Fale conosco pelo WhatsApp"
-      className="fixed bottom-6 right-6 z-50 mb-[env(safe-area-inset-bottom,0px)] flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2"
+      style={{ zIndex: 2147483647 }}
+      className="fixed bottom-6 right-6 mb-[env(safe-area-inset-bottom,0px)] flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         className="h-10 w-10"
         viewBox="0 0 448 512"
+        aria-hidden="true"
       >
         <path
           fill="rgb(255, 255, 255)"

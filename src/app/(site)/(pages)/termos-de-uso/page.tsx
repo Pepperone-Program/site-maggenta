@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import InstitutionalPage from "@/components/InstitutionalPage";
 
 export const metadata: Metadata = {
-  title: "Termos de Uso | Pepperone",
+  title: "Termos de Uso",
   description: "Termos e condições de uso dos sites e serviços Pepperone.",
   alternates: {
     canonical: "/termos-de-uso",

@@ -10,16 +10,30 @@ import {
 
 export const revalidate = 120;
 
-export const metadata: Metadata = {
-  title: "Brindes para datas promocionais | Pepperone",
-  description:
-    "Brindes personalizados para datas promocionais, campanhas sazonais e eventos corporativos.",
-};
-
 type PageProps = {
   params?: Promise<{ slug?: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+const siteUrl = "https://www.pepperone.com.br";
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const routeParams = (await params) || {};
+  const slug = routeParams.slug || "";
+
+  return {
+    title: "Brindes para datas promocionais",
+    description:
+      "Brindes personalizados para datas promocionais, campanhas sazonais e eventos corporativos.",
+    alternates: {
+      canonical: new URL(`/datas-promocionais/${slug}`, siteUrl).toString(),
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 const firstParam = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;

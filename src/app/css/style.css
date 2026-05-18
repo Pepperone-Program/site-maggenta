@@ -199,3 +199,8 @@ input[type='search']::-webkit-search-results-decoration {
 .range-slider__range {
   @apply !bg-blue;
 }
+
+[data-sonner-toaster],
+[data-sonner-toast] {
+  z-index: 2147483647 !important;
+}

@@ -8,17 +8,20 @@ import { addItemToCart } from "@/redux/features/cart-slice";
 import { AppDispatch } from "@/redux/store";
 import { productPath } from "@/lib/products";
 import { Product } from "@/types/product";
+import { showAddedToCartMessage } from "@/lib/cart-feedback";
 
 const SingleListItem = ({ item }: { item: Product }) => {
   const dispatch = useDispatch<AppDispatch>();
 
   const handleAddToCart = () => {
+    const quantity = Math.max(1, Number(item.quantidadeMinima || 1));
     dispatch(
       addItemToCart({
         ...item,
-        quantity: Math.max(1, Number(item.quantidadeMinima || 1)),
+        quantity,
       })
     );
+    showAddedToCartMessage(item.title, quantity);
   };
 
   return (

@@ -4,7 +4,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import ClientShell from "./ClientShell";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.pepperone.com.br";
+const siteUrl = "https://www.pepperone.com.br";
 const marketKeywords = [
   "brindes personalizados",
   "brindes corporativos",
@@ -69,19 +69,12 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
     default: "Pepperone Brindes Corporativos Personalizados para Empresas",
-    template: "%s | Pepperone",
+    template: "%s | Pepperone Brindes",
   },
   description:
     "Brindes corporativos personalizados, produtos promocionais e orcamentos para empresas em todo o Brasil.",
   keywords: marketKeywords,
-  applicationName: "Pepperone",
-  alternates: {
-    canonical: "/",
-    languages: {
-      "pt-BR": "/",
-      "x-default": "/",
-    },
-  },
+  applicationName: "Pepperone Brindes",
   verification: {
     google: "mgvzGTTx3EwBN_LTzrGsWq3yl0ClkS3KGvwLkNC-lU4",
   },
@@ -99,7 +92,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    siteName: "Pepperone",
+    siteName: "Pepperone Brindes",
     title: "Pepperone Brindes Corporativos Personalizados para Empresas",
     description:
       "Brindes corporativos personalizados, produtos promocionais e orcamentos para empresas.",

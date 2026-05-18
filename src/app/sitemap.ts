@@ -1,8 +1,8 @@
 import { MetadataRoute } from "next";
 import { productPath } from "@/lib/products";
-import { getProdutosForSitemap } from "@/lib/api";
+import { getMenuGroups, getProdutosForSitemap } from "@/lib/api";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.pepperone.com.br";
+const siteUrl = "https://www.pepperone.com.br";
 
 const routes = [
   "",
@@ -27,6 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const products = await getProdutosForSitemap();
+  const menuGroups = await getMenuGroups();
   const productRoutes = products.map((product) => ({
     url: `${siteUrl}${productPath(product)}`,
     lastModified: product.dataInclusao ? new Date(product.dataInclusao) : new Date(),
@@ -36,6 +37,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .filter((image) => image.startsWith("http"))
       .slice(0, 3),
   }));
+  const menuRoutes = menuGroups
+    .flatMap((group) => group.items || [])
+    .filter((item) => item.path && item.path !== "/")
+    .map((item) => ({
+      url: `${siteUrl}${item.path}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.85,
+    }));
 
-  return [...staticRoutes, ...productRoutes];
+  const uniqueRoutes = new Map(
+    [...staticRoutes, ...menuRoutes, ...productRoutes].map((route) => [route.url, route])
+  );
+
+  return Array.from(uniqueRoutes.values());
 }

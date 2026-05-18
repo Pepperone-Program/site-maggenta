@@ -10,16 +10,30 @@ import {
 
 export const revalidate = 120;
 
-export const metadata: Metadata = {
-  title: "Categoria de brindes personalizados | Pepperone",
-  description:
-    "Veja produtos personalizados por categoria com filtros de subcategoria, publico-alvo, data promocional e quantidade minima.",
-};
-
 type PageProps = {
   params?: Promise<{ slug?: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+const siteUrl = "https://www.pepperone.com.br";
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const routeParams = (await params) || {};
+  const slug = routeParams.slug || "";
+
+  return {
+    title: "Categoria de brindes personalizados",
+    description:
+      "Veja produtos personalizados por categoria com filtros de subcategoria, publico-alvo, data promocional e quantidade minima.",
+    alternates: {
+      canonical: new URL(`/categorias/${slug}`, siteUrl).toString(),
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 const firstParam = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
