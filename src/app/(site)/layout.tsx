@@ -3,11 +3,15 @@ import "../css/style.css";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import ClientShell from "./ClientShell";
-import { buildSeoOther, marketKeywords, siteName, siteUrl } from "@/lib/seo";
+import { buildSeoOther, marketKeywords, ogImageUrl, siteName, siteUrl } from "@/lib/seo";
 
 const defaultTitle = "Pepperone Brindes Corporativos Personalizados para Empresas";
 const defaultDescription =
   "Brindes corporativos personalizados, produtos promocionais e orcamentos para empresas em todo o Brasil.";
+const defaultOgImage = ogImageUrl({
+  title: "Pepperone Brindes",
+  subtitle: "Brindes corporativos personalizados para empresas",
+});
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
@@ -81,8 +85,10 @@ export const metadata: Metadata = {
     url: "/",
     images: [
       {
-        url: "/images/logo/logo.svg",
+        url: defaultOgImage,
         alt: "Pepperone Brindes Corporativos",
+        width: 1200,
+        height: 630,
       },
     ],
   },
@@ -90,6 +96,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: defaultTitle,
     description: defaultDescription,
+    images: [defaultOgImage],
   },
   other: buildSeoOther({
     title: defaultTitle,

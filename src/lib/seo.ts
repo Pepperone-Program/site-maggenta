@@ -58,6 +58,30 @@ export const contextualKeywords = (primary: string, context: string[] = []) =>
     marketKeywords
   );
 
+export const ogImageUrl = ({
+  title,
+  subtitle,
+  image,
+}: {
+  title: string;
+  subtitle?: string;
+  image?: string;
+}) => {
+  const params = new URLSearchParams({
+    title,
+  });
+
+  if (subtitle) {
+    params.set("subtitle", subtitle);
+  }
+
+  if (image) {
+    params.set("image", image);
+  }
+
+  return `${siteUrl}/api/og?${params.toString()}`;
+};
+
 export const buildSeoOther = ({
   title,
   description,
