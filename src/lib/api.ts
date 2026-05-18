@@ -212,6 +212,20 @@ export type CatalogoOption = {
   title: string;
 };
 
+export type SearchDestinationApi = {
+  tipo?: "categoria" | "tipo_produto" | string | null;
+  id_categoria?: number | null;
+  categoria?: string | null;
+  id_tipo_produto?: number | null;
+  tipo_produto?: string | null;
+  url_sugerida?: string | null;
+};
+
+export type SearchProdutosSiteResult = {
+  products: Product[];
+  destinoBusca: SearchDestinationApi | null;
+};
+
 type DataPromocionalApi = {
   id_data_promocional: number;
   data_promocional: string;
@@ -1153,21 +1167,33 @@ export async function getProdutosSite(limit = 12): Promise<Product[]> {
 }
 
 export async function searchProdutosSite(query: string, limit = 10): Promise<Product[]> {
+  const result = await searchProdutosSiteWithDestination(query, limit);
+  return result.products;
+}
+
+export async function searchProdutosSiteWithDestination(
+  query: string,
+  limit = 10
+): Promise<SearchProdutosSiteResult> {
   const search = query.trim();
 
   if (!search) {
-    return [];
+    return { products: [], destinoBusca: null };
   }
 
-  const produtos =
-    (await apiFetch<ProdutoApi[]>(
-      `/produtos/site/busca?q=${encodeURIComponent(
-        search
-      )}&empresaId=1&page=1&limit=${limit}`
-    )) || [];
+  const payload = await apiRequest(
+    `/produtos/site/busca?q=${encodeURIComponent(
+      search
+    )}&empresaId=1&page=1&limit=${limit}`
+  );
+  const data =
+    payload && typeof payload === "object" && "data" in payload
+      ? (payload.data as { items?: ProdutoApi[]; destino_busca?: SearchDestinationApi | null })
+      : null;
+  const produtos = data?.items || [];
   const normalizedSearch = slugify(search);
 
-  return produtos
+  const products = produtos
     .map((product) => mapApiProdutoToProduct(product))
     .sort((a, b) => {
       const aTitle = slugify(a.title);
@@ -1182,6 +1208,11 @@ export async function searchProdutosSite(query: string, limit = 10): Promise<Pro
       return a.title.localeCompare(b.title, "pt-BR", { sensitivity: "base" });
     })
     .slice(0, limit);
+
+  return {
+    products,
+    destinoBusca: data?.destino_busca || null,
+  };
 }
 
 export async function getProdutoBySlug(slug: string): Promise<Product | null> {
