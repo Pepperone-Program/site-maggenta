@@ -7,7 +7,7 @@ import { friendlyParam, getCatalogoTipoProduto } from "@/lib/api";
 export const revalidate = 120;
 
 export const metadata: Metadata = {
-  title: "Brindes para empresas | Pepperone",
+  title: "Brindes para empresas",
   description:
     "Conheca brindes para empresas e produtos promocionais personalizados para a sua marca.",
   alternates: {

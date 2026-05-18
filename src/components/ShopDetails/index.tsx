@@ -10,6 +10,7 @@ import ProductItem from "@/components/Common/ProductItem";
 import Newsletter from "@/components/Common/Newsletter";
 import { Product } from "@/types/product";
 import { friendlyParam } from "@/lib/slugs";
+import { showAddedToCartMessage } from "@/lib/cart-feedback";
 
 const ShopDetails = ({
   product,
@@ -22,6 +23,7 @@ const ShopDetails = ({
   const minimumQuantity = Math.max(1, Number(product.quantidadeMinima || 1));
   const [previewImg, setPreviewImg] = useState(0);
   const [quantity, setQuantity] = useState(minimumQuantity);
+  const [quantityInput, setQuantityInput] = useState(String(minimumQuantity));
   const [showTags, setShowTags] = useState(false);
   const mainImageRef = useRef<HTMLDivElement>(null);
   const wheelLockRef = useRef(0);
@@ -35,6 +37,7 @@ const ShopDetails = ({
     setPreviewImg(0);
     setShowTags(false);
     setQuantity(minimumQuantity);
+    setQuantityInput(String(minimumQuantity));
   }, [product.id, minimumQuantity]);
 
   useEffect(() => {
@@ -80,17 +83,35 @@ const ShopDetails = ({
   }, [product.imgs.previews.length]);
 
   const handleAddToCart = () => {
+    const parsedQuantity = Number(quantityInput.replace(/\D/g, ""));
+    const safeQuantity = Math.max(
+      minimumQuantity,
+      Number.isFinite(parsedQuantity) ? Math.floor(parsedQuantity) : minimumQuantity
+    );
+
+    setQuantity(safeQuantity);
+    setQuantityInput(String(safeQuantity));
     dispatch(
       addItemToCart({
         ...product,
-        quantity,
+        quantity: safeQuantity,
       })
     );
+    showAddedToCartMessage(product.title, safeQuantity);
   };
 
   const updateQuantity = (value: string) => {
     const parsed = Number(value.replace(/\D/g, ""));
-    setQuantity(Number.isFinite(parsed) ? Math.max(minimumQuantity, parsed) : minimumQuantity);
+    const safeQuantity = Number.isFinite(parsed)
+      ? Math.max(minimumQuantity, parsed)
+      : minimumQuantity;
+
+    setQuantity(safeQuantity);
+    setQuantityInput(String(safeQuantity));
+  };
+
+  const commitQuantityInput = () => {
+    updateQuantity(quantityInput);
   };
 
   return (
@@ -205,7 +226,13 @@ const ShopDetails = ({
                 <div className="flex h-12 w-full items-center justify-between rounded-md border border-gray-3 bg-white sm:w-36">
                   <button
                     type="button"
-                    onClick={() => setQuantity((value) => Math.max(minimumQuantity, value - 1))}
+                    onClick={() =>
+                      setQuantity((value) => {
+                        const nextQuantity = Math.max(minimumQuantity, value - 1);
+                        setQuantityInput(String(nextQuantity));
+                        return nextQuantity;
+                      })
+                    }
                     className="h-full w-11 text-xl text-dark duration-200 hover:bg-gray-1"
                     disabled={quantity <= minimumQuantity}
                     aria-label="Diminuir quantidade"
@@ -213,20 +240,28 @@ const ShopDetails = ({
                     -
                   </button>
                   <input
-                    type="number"
+                    type="text"
                     inputMode="numeric"
-                    min={minimumQuantity}
-                    value={quantity}
-                    onChange={(event) => updateQuantity(event.target.value)}
-                    onBlur={() =>
-                      setQuantity((value) => Math.max(minimumQuantity, Number(value) || minimumQuantity))
-                    }
+                    value={quantityInput}
+                    onChange={(event) => setQuantityInput(event.target.value)}
+                    onBlur={commitQuantityInput}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.currentTarget.blur();
+                      }
+                    }}
                     aria-label="Quantidade"
                     className="h-full min-w-0 flex-1 border-0 bg-transparent text-center font-semibold text-dark outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   />
                   <button
                     type="button"
-                    onClick={() => setQuantity((value) => value + 1)}
+                    onClick={() =>
+                      setQuantity((value) => {
+                        const nextQuantity = value + 1;
+                        setQuantityInput(String(nextQuantity));
+                        return nextQuantity;
+                      })
+                    }
                     className="h-full w-11 text-xl text-dark duration-200 hover:bg-gray-1"
                     aria-label="Aumentar quantidade"
                   >

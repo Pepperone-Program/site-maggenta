@@ -13,6 +13,7 @@ type CartItem = {
   price: number;
   discountedPrice: number;
   quantity: number;
+  quantidadeMinima?: number;
   imgs?: {
     thumbnails: string[];
     previews: string[];
@@ -28,12 +29,15 @@ export const cart = createSlice({
   initialState,
   reducers: {
     addItemToCart: (state, action: PayloadAction<CartItem>) => {
-      const { id, title, slug, codigo, price, quantity, discountedPrice, imgs } =
+      const { id, title, slug, codigo, price, quantity, discountedPrice, quantidadeMinima, imgs } =
         action.payload;
+      const minimumQuantity = Math.max(1, Number(quantidadeMinima || 1));
+      const safeQuantity = Math.max(minimumQuantity, Number(quantity || minimumQuantity));
       const existingItem = state.items.find((item) => item.id === id);
 
       if (existingItem) {
-        existingItem.quantity += quantity;
+        existingItem.quantity += safeQuantity;
+        existingItem.quantidadeMinima = minimumQuantity;
       } else {
         state.items.push({
           id,
@@ -41,8 +45,9 @@ export const cart = createSlice({
           slug,
           codigo,
           price,
-          quantity,
+          quantity: safeQuantity,
           discountedPrice,
+          quantidadeMinima: minimumQuantity,
           imgs,
         });
       }
@@ -59,7 +64,8 @@ export const cart = createSlice({
       const existingItem = state.items.find((item) => item.id === id);
 
       if (existingItem) {
-        existingItem.quantity = quantity;
+        const minimumQuantity = Math.max(1, Number(existingItem.quantidadeMinima || 1));
+        existingItem.quantity = Math.max(minimumQuantity, Number(quantity || minimumQuantity));
       }
     },
 

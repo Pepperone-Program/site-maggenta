@@ -8,7 +8,7 @@ import {
   getRelatedProducts,
 } from "@/lib/api";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.pepperone.com.br";
+const siteUrl = "https://www.pepperone.com.br";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -28,7 +28,7 @@ export async function generateMetadata({
 
   if (!product) {
     return {
-      title: "Produto nao encontrado | Pepperone",
+      title: "Produto nao encontrado",
       robots: {
         index: false,
         follow: true,
@@ -47,7 +47,7 @@ export async function generateMetadata({
 
   return {
     title: {
-      absolute: `${product.title} - ${product.codigo || product.id} - ${product.title} | Peppperone Brindes`,
+      absolute: `${product.title} - ${product.codigo || product.id} - ${product.title} | Pepperone Brindes`,
     },
     description,
     keywords: [
@@ -87,7 +87,7 @@ export async function generateMetadata({
       description,
       type: "website",
       url: canonical,
-      siteName: "Pepperone",
+      siteName: "Pepperone Brindes",
       locale: "pt_BR",
       images: [
         {

@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import InstitutionalPage from "@/components/InstitutionalPage";
 
 export const metadata: Metadata = {
-  title: "Empresa de Brindes | Pepperone Promocional",
+  title: "Empresa de Brindes",
   description:
     "Conheça a Pepperone Promocional, nossos serviços de gravação, políticas de frete e garantia.",
   alternates: {

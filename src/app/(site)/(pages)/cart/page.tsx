@@ -3,7 +3,10 @@ import Cart from "@/components/Cart";
 
 import { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Orçamento | Pepperone",
+  title: "Orçamento",
+  alternates: {
+    canonical: "/cart",
+  },
   description: "Revise os produtos do seu orçamento Pepperone.",
 };
 

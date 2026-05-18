@@ -9,6 +9,7 @@ import Image from "next/image";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { resetQuickView } from "@/redux/features/quickView-slice";
 import { updateproductDetails } from "@/redux/features/product-details";
+import { showAddedToCartMessage } from "@/lib/cart-feedback";
 
 const QuickViewModal = () => {
   const { isModalOpen, closeModal } = useModalContext();
@@ -47,6 +48,7 @@ const QuickViewModal = () => {
         quantity,
       })
     );
+    showAddedToCartMessage(product.title, quantity);
 
     closeModal();
   };

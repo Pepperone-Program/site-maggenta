@@ -199,3 +199,20 @@ input[type='search']::-webkit-search-results-decoration {
 .range-slider__range {
   @apply !bg-blue;
 }
+
+.ant-message,
+.ant-message-notice-wrapper,
+.ant-message-notice {
+  z-index: 999999999 !important;
+}
+
+.ant-message {
+  position: fixed !important;
+  top: auto !important;
+  bottom: 24px !important;
+  pointer-events: none;
+}
+
+.ant-message-notice {
+  pointer-events: auto;
+}

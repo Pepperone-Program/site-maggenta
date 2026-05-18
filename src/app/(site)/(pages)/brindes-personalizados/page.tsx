@@ -13,7 +13,10 @@ import {
 export const revalidate = 120;
 
 export const metadata: Metadata = {
-  title: "Brindes personalizados | Pepperone",
+  title: "Brindes personalizados",
+  alternates: {
+    canonical: "/brindes-personalizados",
+  },
   description:
     "Encontre brindes personalizados por categoria, subcategoria, publico-alvo e quantidade minima.",
 };

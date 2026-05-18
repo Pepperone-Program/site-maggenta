@@ -40,6 +40,22 @@ const nextConfig = {
         destination: `https://${canonicalHost}/:path*`,
         permanent: true,
       },
+      {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "site-peppeerone.vercel.app",
+          },
+        ],
+        destination: `https://${canonicalHost}/:path*`,
+        permanent: true,
+      },
+      {
+        source: "/home",
+        destination: "/",
+        permanent: true,
+      },
     ];
   },
   async headers() {

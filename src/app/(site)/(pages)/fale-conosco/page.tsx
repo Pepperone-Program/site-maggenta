@@ -2,7 +2,7 @@ import Contact from "@/components/Contact";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Fale conosco | Pepperone",
+  title: "Fale conosco",
   description:
     "Entre em contato com a Pepperone para orcamentos de brindes personalizados, atendimento comercial e suporte.",
   alternates: {

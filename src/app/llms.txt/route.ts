@@ -1,4 +1,4 @@
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.pepperone.com.br";
+const siteUrl = "https://www.pepperone.com.br";
 
 export const revalidate = 86400;
 

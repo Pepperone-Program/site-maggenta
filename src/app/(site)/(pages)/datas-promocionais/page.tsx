@@ -13,7 +13,10 @@ import {
 export const revalidate = 120;
 
 export const metadata: Metadata = {
-  title: "Brindes para Datas Promocionais | Pepperone",
+  title: "Brindes para Datas Promocionais",
+  alternates: {
+    canonical: "/datas-promocionais",
+  },
   description:
     "Brindes personalizados para datas especiais e campanhas promocionais. Encontre produtos para suas estratégias sazonais.",
 };

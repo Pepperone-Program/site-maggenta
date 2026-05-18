@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import InstitutionalPage from "@/components/InstitutionalPage";
 
 export const metadata: Metadata = {
-  title: "Políticas de Privacidade | Pepperone",
+  title: "Políticas de Privacidade",
   description: "Política de privacidade e tratamento de dados da Pepperone.",
   alternates: {
     canonical: "/politicas-de-privacidade",

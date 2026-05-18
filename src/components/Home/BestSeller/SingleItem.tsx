@@ -8,17 +8,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { addItemToWishlist } from "@/redux/features/wishlist-slice";
 import { formatPrice, productPath } from "@/lib/products";
+import { showAddedToCartMessage } from "@/lib/cart-feedback";
 
 const SingleItem = ({ item }: { item: Product }) => {
   const dispatch = useDispatch<AppDispatch>();
 
   const handleAddToCart = () => {
+    const quantity = Math.max(1, Number(item.quantidadeMinima || 1));
     dispatch(
       addItemToCart({
         ...item,
-        quantity: Math.max(1, Number(item.quantidadeMinima || 1)),
+        quantity,
       })
     );
+    showAddedToCartMessage(item.title, quantity);
   };
 
   const handleItemToWishList = () => {

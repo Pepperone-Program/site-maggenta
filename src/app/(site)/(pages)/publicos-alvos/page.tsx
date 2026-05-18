@@ -13,7 +13,10 @@ import {
 export const revalidate = 120;
 
 export const metadata: Metadata = {
-  title: "Brindes por Público Alvo | Pepperone",
+  title: "Brindes por Público Alvo",
+  alternates: {
+    canonical: "/publicos-alvos",
+  },
   description:
     "Brindes personalizados filtrados por público-alvo. Encontre o presente corporativo ideal para seu cliente.",
 };
