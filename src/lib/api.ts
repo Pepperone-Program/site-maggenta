@@ -573,6 +573,15 @@ const ensureProductImages = (images: string[], fallback: string) => {
   return [safeFallback, safeFallback];
 };
 
+const withUnit = (value: string | number | null | undefined, unit: string) => {
+  if (value === undefined || value === null || value === "") {
+    return "";
+  }
+
+  const text = String(value).trim();
+  return text.toLowerCase().endsWith(unit.toLowerCase()) ? text : `${text} ${unit}`;
+};
+
 export const mapApiProdutoToProduct = (
   product: ProdutoApi,
   images: ProdutoImageApi[] = [],
@@ -622,26 +631,26 @@ export const mapApiProdutoToProduct = (
     title,
     slug: `${product.id_produto}-${slugify(title)}`,
     category: apiCategoryName,
-    shortDescription: product.obs || product.descricao || "",
+    shortDescription: product.descricao || product.obs || "",
     description: product.descricao || product.obs || "",
     features: [
-      product.codigo ? `Codigo ${product.codigo}` : "",
-      product.altura ? `Altura: ${product.altura}` : "",
-      product.largura ? `Largura: ${product.largura}` : "",
-      product.profundidade ? `Profundidade: ${product.profundidade}` : "",
-      product.peso ? `Peso: ${product.peso}` : "",
-      quantidadeMinima ? `Quantidade minima: ${quantidadeMinima}` : "",
+      product.codigo ? `Código ${product.codigo}` : "",
+      product.altura ? `Altura: ${withUnit(product.altura, "cm")}` : "",
+      product.largura ? `Largura: ${withUnit(product.largura, "cm")}` : "",
+      product.profundidade ? `Profundidade: ${withUnit(product.profundidade, "cm")}` : "",
+      product.peso ? `Peso: ${withUnit(product.peso, "g")}` : "",
+      quantidadeMinima ? `Quantidade mínima: ${withUnit(quantidadeMinima, "un")}` : "",
     ].filter(Boolean),
     specs: [
-      { label: "Codigo", value: codigo },
-      product.altura ? { label: "Altura", value: product.altura } : null,
-      product.largura ? { label: "Largura", value: product.largura } : null,
+      { label: "Código", value: codigo },
+      product.altura ? { label: "Altura", value: withUnit(product.altura, "cm") } : null,
+      product.largura ? { label: "Largura", value: withUnit(product.largura, "cm") } : null,
       product.profundidade
-        ? { label: "Profundidade", value: product.profundidade }
+        ? { label: "Profundidade", value: withUnit(product.profundidade, "cm") }
         : null,
-      product.peso ? { label: "Peso", value: product.peso } : null,
+      product.peso ? { label: "Peso", value: withUnit(product.peso, "g") } : null,
       quantidadeMinima
-        ? { label: "Quantidade minima", value: quantidadeMinima }
+        ? { label: "Quantidade mínima", value: withUnit(quantidadeMinima, "un") }
         : null,
       product.ncm ? { label: "NCM", value: product.ncm } : null,
     ].filter(Boolean) as Product["specs"],
