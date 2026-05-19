@@ -7,7 +7,7 @@ import {
   getProdutoBySlug,
   getRelatedProducts,
 } from "@/lib/api";
-import { buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
+import { buildSeoOther, contextualKeywords, ogImageUrl, siteName, siteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -36,9 +36,16 @@ export async function generateMetadata({
   }
 
   const canonical = new URL(productPath(product), siteUrl).toString();
-  const image = product.imgs.previews[0]
+  const productImage = product.imgs.previews[0]
     ? new URL(product.imgs.previews[0], siteUrl).toString()
     : new URL("/images/logo/logo.svg", siteUrl).toString();
+  const image = ogImageUrl({
+    title: product.title,
+    subtitle: product.codigo
+      ? `Código ${product.codigo} | ${product.category}`
+      : product.category,
+    image: productImage,
+  });
   const description =
     product.description ||
     product.shortDescription ||
