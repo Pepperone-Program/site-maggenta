@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { productPath } from "@/lib/products";
-import { friendlyParam, searchProdutosSiteWithDestination } from "@/lib/api";
+import { friendlyParam, searchProdutosSiteWithDestination, slugify } from "@/lib/api";
 
 const suffixIfNeeded = (title: string, suffix: string) =>
   /personalizad/i.test(title) ? "" : suffix;
@@ -23,6 +23,13 @@ const destinationPath = (
     const title = destino.tipo_produto || "brindes";
     return `/brindes-para-empresas/${encodeURIComponent(
       friendlyParam(destino.id_tipo_produto, title, suffixIfNeeded(title, "personalizadas"))
+    )}`;
+  }
+
+  if (destino.tipo === "subcategoria" && destino.id_subcategoria) {
+    const title = destino.subcategoria || "brindes";
+    return `/subcategorias/${encodeURIComponent(
+      friendlyParam(destino.id_subcategoria, title, suffixIfNeeded(title, "personalizado"))
     )}`;
   }
 

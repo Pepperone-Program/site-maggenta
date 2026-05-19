@@ -319,12 +319,13 @@ const ShopWithSidebar = ({
     selectedDatas.length > 0 ||
     activeFilters.quantidade_minima_min ||
     activeFilters.quantidade_minima_max;
+  const isSubcategoryRoute = basePath.startsWith("/subcategorias/");
 
   const buildCatalogHref = (
     updates: Record<string, string | number | null | undefined>
   ) => {
     const params = new URLSearchParams();
-    const isCleanCategoryRoute = basePath.startsWith("/categorias/");
+  const isCleanCategoryRoute = basePath.startsWith("/categorias/");
     const isCleanPublicRoute = basePath.startsWith("/publicos-alvos/");
     const isCleanDateRoute = basePath.startsWith("/datas-promocionais/");
     const current: Record<string, string | undefined> = {
@@ -407,6 +408,15 @@ const ShopWithSidebar = ({
       : [...current, id];
 
     navigateWith({ [key]: next.join(",") || null });
+  };
+
+  const selectSubcategory = (id: number) => {
+    const selectedSubcategory = subcategoryOptions.find((option) => option.id === id);
+    const subcategoryParam = selectedSubcategory
+      ? friendlyParam(id, selectedSubcategory.label, "personalizado")
+      : String(id);
+
+    router.push(`/subcategorias/${encodeURIComponent(subcategoryParam)}`);
   };
 
   const selectCategory = (id: number) => {
@@ -508,34 +518,36 @@ const ShopWithSidebar = ({
                     </div>
                   </div>
 
-                  <div className="rounded-md border border-gray-3 bg-white shadow-1">
-                    <label
-                      htmlFor="catalog-category"
-                      className="block py-3 pl-6 pr-5.5 font-medium text-dark shadow-filter"
-                    >
-                      Categoria
-                    </label>
-                    <div className="p-5">
-                      <select
-                        id="catalog-category"
-                        value={activeCategoryId}
-                        onChange={(event) => selectCategory(Number(event.target.value))}
-                        className="h-11 w-full rounded-md border border-gray-3 bg-white px-3 text-custom-sm text-dark outline-none duration-200 focus:border-blue"
+                  {!isSubcategoryRoute && (
+                    <div className="rounded-md border border-gray-3 bg-white shadow-1">
+                      <label
+                        htmlFor="catalog-category"
+                        className="block py-3 pl-6 pr-5.5 font-medium text-dark shadow-filter"
                       >
-                        {categories.map((category) => (
-                          <option key={category.id} value={category.id}>
-                            {category.title}
-                          </option>
-                        ))}
-                      </select>
+                        Categoria
+                      </label>
+                      <div className="p-5">
+                        <select
+                          id="catalog-category"
+                          value={activeCategoryId}
+                          onChange={(event) => selectCategory(Number(event.target.value))}
+                          className="h-11 w-full rounded-md border border-gray-3 bg-white px-3 text-custom-sm text-dark outline-none duration-200 focus:border-blue"
+                        >
+                          {categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                              {category.title}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <FilterGroup
                     title="Subcategorias"
                     options={subcategoryOptions}
                     selectedIds={selectedSubcategorias}
-                    onToggle={(id) => toggleMultiFilter("subcategorias", id)}
+                    onToggle={selectSubcategory}
                   />
 
                   <FilterGroup

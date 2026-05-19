@@ -213,9 +213,11 @@ export type CatalogoOption = {
 };
 
 export type SearchDestinationApi = {
-  tipo?: "categoria" | "tipo_produto" | string | null;
+  tipo?: "categoria" | "tipo_produto" | "subcategoria" | string | null;
   id_categoria?: number | null;
+  id_subcategoria?: number | null;
   categoria?: string | null;
+  subcategoria?: string | null;
   id_tipo_produto?: number | null;
   tipo_produto?: string | null;
   url_sugerida?: string | null;
@@ -237,6 +239,12 @@ type DataPromocionalApi = {
 
 type DataPromocionalProdutoApi = {
   id_data_promocional: number;
+  id_produto: number;
+};
+
+type SubcategoriaProdutoApi = {
+  id_empresa?: number;
+  id_subcategoria: number;
   id_produto: number;
 };
 
@@ -695,8 +703,8 @@ const sanitizeCatalogPage = (value?: number) =>
   Number.isFinite(value) && Number(value) > 0 ? Math.floor(Number(value)) : 1;
 
 const sanitizeCatalogLimit = (value?: number) => {
-  const limit = Number.isFinite(value) && Number(value) > 0 ? Math.floor(Number(value)) : 24;
-  return Math.min(Math.max(limit, 1), 60);
+  const limit = Number.isFinite(value) && Number(value) > 0 ? Math.floor(Number(value)) : 100;
+  return Math.min(Math.max(limit, 1), 500);
 };
 
 const sanitizeWideCatalogLimit = (value?: number) => {
@@ -716,11 +724,62 @@ const appendCatalogParam = (
   params.set(key, String(value));
 };
 
+const fetchRemainingCatalogItems = async (
+  endpoint: string,
+  params: URLSearchParams,
+  firstItems: ProdutoApi[],
+  total = firstItems.length,
+  totalPages = 1,
+  limit = 100
+) => {
+  let items = firstItems;
+  const safeTotalPages = Math.max(Number(totalPages || 1), 1);
+  const restPages = Array.from(
+    { length: Math.max(safeTotalPages - 1, 0) },
+    (_, index) => index + 2
+  );
+
+  if (restPages.length) {
+    const restItems = await Promise.all(
+      restPages.map(async (nextPage) => {
+        const pageParams = new URLSearchParams(params);
+        pageParams.set("page", String(nextPage));
+        const pagePayload = await apiRequest(`${endpoint}?${pageParams.toString()}`);
+        const pageData =
+          pagePayload && typeof pagePayload === "object" && "data" in pagePayload
+            ? (pagePayload.data as { items?: ProdutoApi[] })
+            : null;
+
+        return pageData?.items || [];
+      })
+    );
+
+    items = [...items, ...restItems.flat()];
+  }
+
+  if (Number(total || 0) > items.length && safeTotalPages <= 1) {
+    const wideParams = new URLSearchParams(params);
+    wideParams.set("page", "1");
+    wideParams.set("limit", String(Math.min(Math.max(Number(total), limit), 500)));
+    const widePayload = await apiRequest(`${endpoint}?${wideParams.toString()}`);
+    const wideData =
+      widePayload && typeof widePayload === "object" && "data" in widePayload
+        ? (widePayload.data as { items?: ProdutoApi[] })
+        : null;
+
+    if ((wideData?.items?.length || 0) > items.length) {
+      items = wideData?.items || items;
+    }
+  }
+
+  return items;
+};
+
 export async function getCatalogoCategoria(
   idCategoria = 1,
   query: CatalogoProdutosQuery = {}
 ): Promise<CatalogoProdutos> {
-  const page = sanitizeCatalogPage(query.page);
+  const page = 1;
   const limit = sanitizeCatalogLimit(query.limit);
   const params = new URLSearchParams({
     empresaId: String(query.empresaId || 1),
@@ -779,15 +838,24 @@ export async function getCatalogoCategoria(
   }
 
   const categoryName = data.categoria?.categoria;
+  const reportedTotal = Number(data.total || 0);
+  const allItems = await fetchRemainingCatalogItems(
+    `/categorias/${encodeURIComponent(String(idCategoria))}/catalogo`,
+    params,
+    data.items || [],
+    reportedTotal,
+    Number(data.totalPages || 1),
+    limit
+  );
   const selectedDataIds = parseIdList(query.datas_promocionais || query.data_promocional);
   const dataProductIds = selectedDataIds.length
     ? await getProdutosIdsByDatasPromocionais(selectedDataIds)
     : null;
   const dataProductSet = dataProductIds ? new Set(dataProductIds) : null;
   const sourceItems =
-    dataProductSet && data.items?.length
-      ? data.items.filter((product) => dataProductSet.has(product.id_produto))
-      : data.items || [];
+    dataProductSet && allItems.length
+      ? allItems.filter((product) => dataProductSet.has(product.id_produto))
+      : allItems;
 
   return {
     categoria: data.categoria || null,
@@ -802,12 +870,12 @@ export async function getCatalogoCategoria(
       mapApiProdutoToProduct(product, [], categoryName)
     ),
     total:
-      dataProductSet && data.items?.length
+      dataProductSet && allItems.length
         ? sourceItems.length
-        : Number(data.total || sourceItems.length || 0),
-    page: Number(data.page || page),
-    limit: Number(data.limit || limit),
-    totalPages: Number(data.totalPages || 0),
+        : Number(reportedTotal || sourceItems.length || 0),
+    page,
+    limit: sourceItems.length || Number(data.limit || limit),
+    totalPages: 1,
   };
 }
 
@@ -890,9 +958,24 @@ export async function getCatalogoPublicoAlvo(
       ? (payload.data as CatalogoPublicoAlvoResponse)
       : null;
   const titulo = data?.publico_alvo?.publico_alvo || "Publico-alvo";
+  const dataWithAllItems = data
+    ? {
+        ...data,
+        items: await fetchRemainingCatalogItems(
+          `/publicos-alvos/${encodeURIComponent(String(idPublicoAlvo))}/catalogo`,
+          params,
+          data.items || [],
+          Number(data.total || 0),
+          Number(data.totalPages || 1),
+          limit
+        ),
+        page: 1,
+        totalPages: 1,
+      }
+    : null;
   const mapped = mapCatalogDataToProdutos({
-    data,
-    page,
+    data: dataWithAllItems,
+    page: 1,
     limit,
     fallbackTitle: titulo,
     fallbackDescription: data?.publico_alvo?.descricao || null,
@@ -950,9 +1033,24 @@ export async function getCatalogoDataPromocional(
       ? (payload.data as CatalogoDataPromocionalResponse)
       : null;
   const titulo = data?.data_promocional?.data_promocional || "Data promocional";
+  const dataWithAllItems = data
+    ? {
+        ...data,
+        items: await fetchRemainingCatalogItems(
+          `/datas-promocionais/${encodeURIComponent(String(idDataPromocional))}/catalogo`,
+          params,
+          data.items || [],
+          Number(data.total || 0),
+          Number(data.totalPages || 1),
+          limit
+        ),
+        page: 1,
+        totalPages: 1,
+      }
+    : null;
   const mapped = mapCatalogDataToProdutos({
-    data,
-    page,
+    data: dataWithAllItems,
+    page: 1,
     limit,
     fallbackTitle: titulo,
     fallbackDescription: data?.data_promocional?.descricao || null,
@@ -1149,9 +1247,11 @@ export async function getProdutosIdsByDatasPromocionais(
   );
 }
 
-export async function getProdutosForSitemap(limit = 5000): Promise<Product[]> {
+export async function getProdutosForSitemap(limit = 10000): Promise<Product[]> {
+  const pageSize = 500;
+  const maxPages = Math.max(1, Math.ceil(limit / pageSize));
   const produtos =
-    (await apiFetchAllPages<ProdutoApi>("/produtos/site?empresaId=1", 500, 10)) || [];
+    (await apiFetchAllPages<ProdutoApi>("/produtos/site?empresaId=1", pageSize, maxPages)) || [];
 
   return produtos
     .filter((product) => isEnabled(product.habilitado) && isEnabled(product.site))
@@ -1178,6 +1278,209 @@ export async function getProdutosSite(limit = 12): Promise<Product[]> {
 export async function searchProdutosSite(query: string, limit = 10): Promise<Product[]> {
   const result = await searchProdutosSiteWithDestination(query, limit);
   return result.products;
+}
+
+export async function getProdutoById(id: number): Promise<Product | null> {
+  const product =
+    (await apiFetchItem<ProdutoApi>(`/produtos/${id}`)) ||
+    (await apiFetchItem<ProdutoApi>(`/produtos/site/${id}`));
+
+  if (!product?.id_produto) {
+    return null;
+  }
+
+  const images = product.imagens?.length
+    ? product.imagens
+    : (await apiFetch<ProdutoImageApi[]>(`/produtos/${id}/images`)) || [];
+
+  return mapApiProdutoToProduct(product, images);
+}
+
+export async function getProdutosIdsBySubcategoria(idSubcategoria: number): Promise<number[]> {
+  const produtos = await apiFetchAllPages<SubcategoriaProdutoApi>(
+    `/subcategorias/${encodeURIComponent(String(idSubcategoria))}/produtos`,
+    100,
+    50
+  );
+
+  return Array.from(
+    new Set(
+      (produtos || [])
+        .map((item) => Number(item.id_produto))
+        .filter((id) => Number.isFinite(id) && id > 0)
+    )
+  );
+}
+
+export async function getCatalogoSubcategoriaProdutos(
+  idSubcategoria: number,
+  subcategoriaNome = "Subcategoria"
+): Promise<CatalogoProdutos> {
+  const ids = await getProdutosIdsBySubcategoria(idSubcategoria);
+  const allProducts = await getProdutosForSitemap(10000);
+  const byId = new Map(allProducts.map((product) => [product.id, product]));
+  const missingIds = ids.filter((id) => !byId.has(id));
+  const missingProducts = await Promise.all(missingIds.map((id) => getProdutoById(id)));
+
+  missingProducts.forEach((product) => {
+    if (product) {
+      byId.set(product.id, product);
+    }
+  });
+
+  const items = ids.map((id) => byId.get(id)).filter(Boolean) as Product[];
+  const quantities = items
+    .map((item) => Number(item.quantidadeMinima || 0))
+    .filter((value) => Number.isFinite(value) && value > 0);
+
+  return {
+    categoria: {
+      id_empresa: 1,
+      id_categoria: idSubcategoria,
+      categoria: subcategoriaNome,
+      descricao: null,
+      icon: null,
+      habilitado: "S",
+      url_capa: null,
+    },
+    filtros: {
+      subcategorias: [
+        {
+          id_subcategoria: idSubcategoria,
+          subcategoria: subcategoriaNome,
+          total: ids.length || items.length,
+        },
+      ],
+      publicos_alvos: [],
+      datas_promocionais: [],
+      quantidade_minima: {
+        min: quantities.length ? Math.min(...quantities) : 0,
+        max: quantities.length ? Math.max(...quantities) : 0,
+      },
+    },
+    items,
+    total: ids.length || items.length,
+    page: 1,
+    limit: items.length || 100,
+    totalPages: 1,
+  };
+}
+
+export async function getCatalogoSubcategoria(
+  idSubcategoria: number,
+  query: Pick<CatalogoProdutosQuery, "empresaId"> & { idCategoria?: number } = {}
+): Promise<CatalogoTipoProduto> {
+  const limit = 100;
+  const params = new URLSearchParams({
+    empresaId: String(query.empresaId || 1),
+    page: "1",
+    limit: String(limit),
+  });
+  const firstPayload = await apiRequest(
+    `/subcategorias/${encodeURIComponent(String(idSubcategoria))}/catalogo?${params.toString()}`
+  );
+  const firstData =
+    firstPayload && typeof firstPayload === "object" && "data" in firstPayload
+      ? (firstPayload.data as {
+          subcategoria?: CatalogoSubcategoria | null;
+          filtros?: Partial<CatalogoFiltros>;
+          items?: ProdutoApi[];
+          total?: number;
+          page?: number;
+          limit?: number;
+          totalPages?: number;
+        })
+      : null;
+
+  if (firstData) {
+    const totalPages = Math.max(Number(firstData.totalPages || 1), 1);
+    const restPages = Array.from({ length: Math.max(totalPages - 1, 0) }, (_, index) => index + 2);
+    const restItems = await Promise.all(
+      restPages.map(async (page) => {
+        const pageParams = new URLSearchParams(params);
+        pageParams.set("page", String(page));
+        const payload = await apiRequest(
+          `/subcategorias/${encodeURIComponent(String(idSubcategoria))}/catalogo?${pageParams.toString()}`
+        );
+        const data =
+          payload && typeof payload === "object" && "data" in payload
+            ? (payload.data as { items?: ProdutoApi[] })
+            : null;
+
+        return data?.items || [];
+      })
+    );
+    const subcategoriaNome = firstData.subcategoria?.subcategoria || "Subcategoria";
+    const items = [...(firstData.items || []), ...restItems.flat()];
+
+    return {
+      tipo_produto: {
+        id_empresa: 1,
+        id_tipo_produto: idSubcategoria,
+        tipo_produto: subcategoriaNome,
+        descricao: null,
+        habilitado: "S",
+      },
+      filtros: {
+        subcategorias: firstData.filtros?.subcategorias || [],
+        publicos_alvos: firstData.filtros?.publicos_alvos || [],
+        datas_promocionais: firstData.filtros?.datas_promocionais || [],
+        quantidade_minima:
+          firstData.filtros?.quantidade_minima || emptyCatalogoFiltros.quantidade_minima,
+      },
+      items: items.map((product) => mapApiProdutoToProduct(product, [], subcategoriaNome)),
+      total: Number(firstData.total || items.length),
+      page: 1,
+      limit: items.length || limit,
+      totalPages: 1,
+    };
+  }
+
+  if (query.idCategoria) {
+    const catalogo = await getCatalogoCategoria(query.idCategoria, {
+      empresaId: query.empresaId || 1,
+      page: 1,
+      limit,
+      subcategorias: String(idSubcategoria),
+    });
+    const subcategoriaNome =
+      catalogo.filtros.subcategorias.find((item) => item.id_subcategoria === idSubcategoria)
+        ?.subcategoria || catalogo.items[0]?.category || "Subcategoria";
+
+    return {
+      tipo_produto: {
+        id_empresa: 1,
+        id_tipo_produto: idSubcategoria,
+        tipo_produto: subcategoriaNome,
+        descricao: catalogo.categoria?.descricao || null,
+        habilitado: "S",
+      },
+      filtros: catalogo.filtros,
+      items: catalogo.items,
+      total: catalogo.total,
+      page: catalogo.page,
+      limit: catalogo.limit,
+      totalPages: catalogo.totalPages,
+    };
+  }
+
+  const fallback = await getProdutos(limit);
+
+  return {
+    tipo_produto: {
+      id_empresa: 1,
+      id_tipo_produto: idSubcategoria,
+      tipo_produto: "Brindes para empresas",
+      descricao: null,
+      habilitado: "S",
+    },
+    filtros: emptyCatalogoFiltros,
+    items: fallback,
+    total: fallback.length,
+    page: 1,
+    limit,
+    totalPages: 1,
+  };
 }
 
 export async function searchProdutosSiteWithDestination(
@@ -1229,17 +1532,7 @@ export async function getProdutoBySlug(slug: string): Promise<Product | null> {
   const normalizedSlug = slugify(slug.replace(/^\d+-?/, ""));
 
   if (id) {
-    const product =
-      (await apiFetchItem<ProdutoApi>(`/produtos/${id}`)) ||
-      (await apiFetchItem<ProdutoApi>(`/produtos/site/${id}`));
-
-    if (product?.id_produto) {
-      const images = product.imagens?.length
-        ? product.imagens
-        : (await apiFetch<ProdutoImageApi[]>(`/produtos/${id}/images`)) || [];
-
-      return mapApiProdutoToProduct(product, images);
-    }
+    return getProdutoById(id);
   }
 
   return null;
@@ -1336,9 +1629,9 @@ export async function getHomeCategories(): Promise<Category[]> {
 
 export async function getActiveBanners(tipo?: BannerTipo): Promise<BannerApi[]> {
   const query = tipo ? `?tipo=${encodeURIComponent(tipo)}` : "";
-  const banners = (await apiFetch<BannerApi[]>(`/banners/ativos${query}`)) || [];
+  const banners = (await apiFetchAllPages<BannerApi[]>(`/banners/ativos${query}`, 100)) || [];
 
-  return banners
+  return banners.flat()
     .filter((banner) => banner.habilitado === "S" && isValidImageSrc(banner.url_banner))
     .sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
 }
