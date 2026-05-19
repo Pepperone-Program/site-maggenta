@@ -1280,6 +1280,25 @@ export async function searchProdutosSite(query: string, limit = 10): Promise<Pro
   return result.products;
 }
 
+export async function searchProdutosSiteAll(query: string): Promise<Product[]> {
+  const search = query.trim();
+
+  if (!search) {
+    return [];
+  }
+
+  const produtos =
+    (await apiFetchAllPages<ProdutoApi>(
+      `/produtos/site/busca?q=${encodeURIComponent(search)}`,
+      100,
+      80
+    )) || [];
+
+  return produtos
+    .filter((product) => isEnabled(product.habilitado) && isEnabled(product.site))
+    .map((product) => mapApiProdutoToProduct(product));
+}
+
 export async function getProdutoById(id: number): Promise<Product | null> {
   const product =
     (await apiFetchItem<ProdutoApi>(`/produtos/${id}`)) ||

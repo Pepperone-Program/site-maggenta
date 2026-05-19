@@ -30,13 +30,6 @@ type SearchSuggestion = {
   path: string;
 };
 
-type SearchPayload = {
-  data?: SearchSuggestion[];
-  destino_busca?: {
-    path?: string | null;
-  } | null;
-};
-
 const defaultMenuGroups: HeaderMenuGroup[] = [
   { id: "inicio", title: "Inicio", path: "/" },
   {
@@ -82,41 +75,9 @@ const normalizeSearchText = (value: string) =>
     .replace(/\s+/g, " ")
     .trim();
 
-const singularPrefixMatch = (word: string, term: string) => {
-  const normalizedWord = normalizeSearchText(word);
-  const normalizedTerm = normalizeSearchText(term);
-
-  if (!normalizedWord || !normalizedTerm) {
-    return false;
-  }
-
-  return (
-    normalizedWord === normalizedTerm ||
-    normalizedWord.startsWith(normalizedTerm) ||
-    normalizedTerm.startsWith(normalizedWord)
-  );
-};
-
-const findMenuDestination = (groups: HeaderMenuGroup[], query: string) => {
-  const terms = normalizeSearchText(query).split(" ").filter(Boolean);
-
-  if (!terms.length) {
-    return null;
-  }
-
-  const findInGroup = (groupId: string) => {
-    const items = groups.find((group) => group.id === groupId)?.items || [];
-
-    return items.find((item) => {
-      const titleWords = normalizeSearchText(item.title).split(" ").filter(Boolean);
-
-      return terms.every((term) =>
-        titleWords.some((word) => singularPrefixMatch(word, term))
-      );
-    });
-  };
-
-  return findInGroup("categorias") || findInGroup("brindes") || null;
+const searchPathFromQuery = (query: string) => {
+  const slug = normalizeSearchText(query).replace(/\s+/g, "-");
+  return slug ? `/brindes-para-empresas/${encodeURIComponent(slug)}` : "/";
 };
 
 const Header = () => {
@@ -228,49 +189,11 @@ const Header = () => {
         return;
       }
 
-      const menuDestination = findMenuDestination(menuGroups, query);
-
-      if (menuDestination?.path) {
-        router.push(menuDestination.path);
-        setSearchFocused(false);
-        setSearchSuggestions([]);
-        return;
-      }
-
-      try {
-        const response = await fetch(
-          `/api/produtos/busca?q=${encodeURIComponent(query)}&limit=1`
-        );
-
-        if (response.status === 404) {
-          setSearchFocused(false);
-          setSearchSuggestions([]);
-          window.location.assign("/");
-          return;
-        }
-
-        const payload: SearchPayload | null = response.ok ? await response.json() : null;
-        const destinationPath = payload?.destino_busca?.path;
-        const firstSuggestion = Array.isArray(payload?.data) ? payload.data[0] : null;
-
-        if (destinationPath) {
-          router.push(destinationPath);
-          setSearchFocused(false);
-          return;
-        }
-
-        if (firstSuggestion?.path) {
-          router.push(firstSuggestion.path);
-          setSearchFocused(false);
-          return;
-        }
-      } catch {
-        // Keep the search flow deterministic even when the suggestion endpoint fails.
-      }
-
-      window.location.assign("/");
+      router.push(searchPathFromQuery(query));
+      setSearchFocused(false);
+      setSearchSuggestions([]);
     },
-    [searchQuery, router, menuGroups]
+    [searchQuery, router]
   );
 
   useEffect(() => {
