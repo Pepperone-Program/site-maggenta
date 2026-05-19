@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 
 import SingleGridItem from "../Shop/SingleGridItem";
@@ -19,6 +19,14 @@ const ShopWithoutSidebar = ({
   description?: string;
 }) => {
   const [productStyle, setProductStyle] = useState("grid");
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 24;
+  const totalPages = Math.max(Math.ceil(products.length / productsPerPage), 1);
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const visibleProducts = useMemo(() => {
+    const start = (safeCurrentPage - 1) * productsPerPage;
+    return products.slice(start, start + productsPerPage);
+  }, [products, safeCurrentPage]);
 
   const options = [
     { label: "Mais recentes", value: "0" },
@@ -42,8 +50,11 @@ const ShopWithoutSidebar = ({
                   {/* <!-- top bar left --> */}
                   <div className="flex flex-wrap items-center gap-4">
                     <p>
-                      Mostrando <span className="text-dark">{products.length}</span>{" "}
-                      produtos
+                      Mostrando{" "}
+                      <span className="text-dark">
+                        {visibleProducts.length}
+                      </span>{" "}
+                      de <span className="text-dark">{products.length}</span> produtos
                     </p>
                   </div>
 
@@ -136,7 +147,7 @@ const ShopWithoutSidebar = ({
                     : "flex flex-col gap-7.5"
                 }`}
               >
-                {products.map((item) =>
+                {visibleProducts.map((item) =>
                   productStyle === "grid" ? (
                     <SingleGridItem item={item} key={item.id} />
                   ) : (
@@ -145,6 +156,65 @@ const ShopWithoutSidebar = ({
                 )}
               </div>
               {/* <!-- Products Grid Tab Content End --> */}
+
+              {totalPages > 1 && (
+                <nav
+                  className="mt-12 flex flex-wrap items-center justify-center gap-2"
+                  aria-label="Paginacao de produtos"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
+                    disabled={safeCurrentPage === 1}
+                    className="min-h-11 rounded-md border border-gray-3 bg-white px-4 text-sm font-medium text-dark disabled:cursor-not-allowed disabled:opacity-50 hover:border-blue hover:text-blue"
+                  >
+                    Anterior
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, index) => index + 1)
+                    .filter(
+                      (page) =>
+                        page === 1 ||
+                        page === totalPages ||
+                        Math.abs(page - safeCurrentPage) <= 2
+                    )
+                    .map((page, index, pages) => {
+                      const previous = pages[index - 1];
+                      const showGap = previous && page - previous > 1;
+
+                      return (
+                        <React.Fragment key={page}>
+                          {showGap && (
+                            <span className="px-2 text-sm text-dark-4">...</span>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => setCurrentPage(page)}
+                            className={`min-h-11 min-w-11 rounded-md border px-3 text-sm font-medium ${
+                              safeCurrentPage === page
+                                ? "border-blue bg-blue text-white"
+                                : "border-gray-3 bg-white text-dark hover:border-blue hover:text-blue"
+                            }`}
+                            aria-current={safeCurrentPage === page ? "page" : undefined}
+                          >
+                            {page}
+                          </button>
+                        </React.Fragment>
+                      );
+                    })}
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCurrentPage((page) => Math.min(page + 1, totalPages))
+                    }
+                    disabled={safeCurrentPage === totalPages}
+                    className="min-h-11 rounded-md border border-gray-3 bg-white px-4 text-sm font-medium text-dark disabled:cursor-not-allowed disabled:opacity-50 hover:border-blue hover:text-blue"
+                  >
+                    Proxima
+                  </button>
+                </nav>
+              )}
 
               {description && (
                 <div className="mx-auto mt-16 max-w-[980px] rounded-md border border-gray-3 bg-white px-5 py-8 text-justify leading-8 text-dark-4 shadow-1 sm:px-8">
