@@ -1,20 +1,28 @@
 "use client";
 
-import React, { FormEvent, FocusEvent, useState } from "react";
+import React, { FormEvent, FocusEvent, useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
 import { useAppSelector } from "@/redux/store";
 import { formatDisplayPrice } from "@/lib/products";
+import {
+  type AttributionParams,
+  attributionToObsSuffix,
+  getPersistedAttribution,
+  persistAttribution,
+  readAttributionParams,
+  trackEvent,
+} from "@/lib/tracking";
 
 const fields = [
   { name: "fantasia", label: "Empresa ou nome", placeholder: "Ex.: Pepperone Brindes", required: true },
-  { name: "contato", label: "Contato", placeholder: "Nome do responsavel", required: true },
+  { name: "contato", label: "Contato", placeholder: "Nome do responsável", required: true },
   { name: "email", label: "E-mail", type: "email", placeholder: "vendas@empresa.com.br", required: true },
   { name: "tel", label: "Telefone", placeholder: "(11) 99999-9999", required: true },
-  { name: "endereco", label: "Endereco", placeholder: "Rua, avenida ou travessa", required: true },
-  { name: "endereco_n", label: "Numero", placeholder: "43" },
-  { name: "endereco_compl", label: "Complemento", placeholder: "Sala, bloco ou referencia" },
+  { name: "endereco", label: "Endereço", placeholder: "Rua, avenida ou travessa", required: true },
+  { name: "endereco_n", label: "Número", placeholder: "43" },
+  { name: "endereco_compl", label: "Complemento", placeholder: "Sala, bloco ou referência" },
   { name: "bairro", label: "Bairro", placeholder: "Casa Verde" },
   { name: "cep", label: "CEP", placeholder: "02515-010" },
   { name: "cidade", label: "Cidade", placeholder: "Sao Paulo", required: true },
@@ -29,11 +37,22 @@ const Checkout = () => {
   );
   const [message, setMessage] = useState("");
   const [cepLoading, setCepLoading] = useState(false);
+  const [attribution, setAttribution] = useState<AttributionParams>({});
 
   const total = cartItems.reduce(
     (sum, item) => sum + item.discountedPrice * item.quantity,
     0
   );
+
+  useEffect(() => {
+    const queryAttribution = readAttributionParams(new URLSearchParams(window.location.search));
+    const storedAttribution = getPersistedAttribution();
+    persistAttribution(queryAttribution);
+    setAttribution({
+      ...storedAttribution,
+      ...queryAttribution,
+    });
+  }, []);
 
   const handleCepBlur = async (event: FocusEvent<HTMLInputElement>) => {
     const cep = event.currentTarget.value.replace(/\D/g, "");
@@ -85,7 +104,7 @@ const Checkout = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customer,
-          obs: formData.get("obs") || "",
+          obs: `${String(formData.get("obs") || "")}${attributionToObsSuffix(attribution)}`,
           items: cartItems,
         }),
       });
@@ -101,6 +120,11 @@ const Checkout = () => {
           ? "Recebemos sua solicitacao localmente. A API nao respondeu agora, mas os dados foram mantidos no formato correto."
           : "Solicitacao enviada com sucesso. Em breve entraremos em contato."
       );
+      trackEvent("lead_submit", {
+        source: "orcamento_form",
+        items: cartItems.length,
+        value: Number(total.toFixed(2)),
+      });
       router.push("/orcamentos-obrigado");
     } catch (error) {
       setStatus("error");
@@ -112,7 +136,7 @@ const Checkout = () => {
 
   return (
     <>
-      <Breadcrumb title="Solicitar orcamento" pages={["orcamento"]} />
+      <Breadcrumb title="Solicitar orçamento" pages={["orcamento"]} />
       <section className="min-h-[calc(100vh-220px)] overflow-hidden bg-gray-2 py-10 lg:py-14">
         <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
           <form onSubmit={handleSubmit}>
@@ -125,12 +149,12 @@ const Checkout = () => {
                         Solicitacao comercial
                       </span>
                       <h2 className="mt-2 text-2xl font-semibold text-dark">
-                        Dados para orcamento
+                        Dados para orçamento
                       </h2>
                     </div>
                     <p className="max-w-[420px] text-sm leading-6 text-dark-4">
                       Preencha seus dados para que nossa equipe retorne com prazos,
-                      gravacao e disponibilidade.
+                      gravação e disponibilidade.
                     </p>
                   </div>
 
@@ -162,11 +186,11 @@ const Checkout = () => {
                   </div>
 
                   <label className="mt-5 block">
-                    <span className="mb-2.5 block text-dark">Observacoes</span>
+                    <span className="mb-2.5 block text-dark">Observações</span>
                     <textarea
                       name="obs"
                       rows={6}
-                      placeholder="Quantidade desejada, personalizacao, prazo, entrega ou qualquer detalhe importante."
+                      placeholder="Quantidade desejada, personalização, prazo, entrega ou qualquer detalhe importante."
                       className="w-full rounded-md border border-gray-3 bg-gray-1 p-5 outline-none duration-200 placeholder:text-dark-5 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </label>
@@ -187,7 +211,7 @@ const Checkout = () => {
                   <div className="max-h-[52vh] overflow-auto px-4 pb-6 pt-2.5 sm:px-8.5">
                     {cartItems.length === 0 ? (
                       <p className="py-6 text-dark-4">
-                        Adicione produtos para solicitar um orcamento.
+                        Adicione produtos para solicitar um orçamento.
                       </p>
                     ) : (
                       cartItems.map((item) => (
@@ -206,10 +230,10 @@ const Checkout = () => {
                               />
                             </div>
                             <div className="min-w-0">
-                            <p className="font-medium text-dark">{item.title}</p>
-                            <p className="mt-1 text-sm text-dark-4">
-                              Codigo: {item.codigo || item.id} - Qtd: {item.quantity}
-                            </p>
+                              <p className="font-medium text-dark">{item.title}</p>
+                              <p className="mt-1 text-sm text-dark-4">
+                                Codigo: {item.codigo || item.id} - Qtd: {item.quantity}
+                              </p>
                             </div>
                           </div>
                           <p className="text-right text-dark">
@@ -247,7 +271,7 @@ const Checkout = () => {
                     >
                       {status === "loading"
                         ? "Enviando..."
-                        : "Enviar solicitacao de orcamento"}
+                        : "Enviar solicitação de orçamento"}
                     </button>
                   </div>
                 </div>

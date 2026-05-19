@@ -331,6 +331,8 @@ const Header = () => {
                       <div
                         onMouseEnter={() => openMenu(menuItem.id)}
                         onMouseLeave={closeMenu}
+                        data-active={activeMenuId === menuItem.id ? "true" : undefined}
+                        data-dropdown-id={menuItem.id}
                         className={`static pt-0 sm:absolute sm:left-[calc(50%+140px)] sm:top-full sm:z-9999 sm:w-auto sm:max-w-[calc(100vw-32px)] sm:-translate-x-1/2 sm:pt-0 ${
                           activeMenuId === menuItem.id ? "block" : "hidden"
                         }`}
@@ -342,12 +344,12 @@ const Header = () => {
                                 key={`${menuItem.id}-${columnIndex}`}
                                 className="flex min-w-[240px] flex-col gap-y-1"
                               >
-                                {column.map((item) => (
-                                  <li key={item.id}>
+                                {column.map((item, itemIndex) => (
+                                  <li key={item.id} className={itemIndex === 0 ? "pt-[5px]" : undefined}>
                                     <Link
                                       href={item.path}
                                       onClick={() => setNavigationOpen(false)}
-                                      className="block min-h-11 rounded px-2 py-3 text-sm font-light uppercase text-dark hover:bg-gray-1 hover:text-blue sm:min-h-0 sm:py-1.5 sm:text-xs"
+                                      className="block min-h-11 rounded px-1 py-0.5 text-sm font-light uppercase text-dark hover:bg-gray-1 hover:text-blue sm:min-h-0 sm:py-0.5 sm:text-xs"
                                     >
                                       {item.title}
                                     </Link>

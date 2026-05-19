@@ -73,7 +73,7 @@ const Categories = ({ categories = data }: { categories?: Category[] }) => {
                 Categorias
               </span>
               <h2 className="font-semibold text-xl xl:text-heading-5 text-black">
-                O que você precisa para a próxima aventura?
+                Quais brindes sua empresa precisa hoje?
               </h2>
             </div>
 

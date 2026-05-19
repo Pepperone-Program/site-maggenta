@@ -45,11 +45,11 @@ const Newsletter = () => {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 px-4 sm:px-7.5 xl:pl-12.5 xl:pr-14 py-11">
             <div className="max-w-[491px] w-full">
               <h2 className="max-w-[399px] text-white font-bold text-lg sm:text-xl xl:text-heading-4 mb-3">
-                Receba novidades e ofertas outdoor
+                Receba novidades e ofertas em brindes corporativos
               </h2>
               <p className="text-white">
-                Cadastre seu email para acompanhar lançamentos, cupons e
-                conteúdos para sua próxima viagem.
+                Cadastre seu email para acompanhar lançamentos, campanhas e
+                conteúdos sobre brindes personalizados para empresas.
               </p>
             </div>
 

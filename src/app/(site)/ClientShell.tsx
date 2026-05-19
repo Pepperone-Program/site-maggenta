@@ -11,11 +11,13 @@ import PreviewSliderModal from "@/components/Common/PreviewSlider";
 import ScrollToTop from "@/components/Common/ScrollToTop";
 import ClarityInit from "@/components/Common/ClarityInit";
 import WhatsAppButton from "@/components/Common/WhatsAppButton";
+import MarketingPixels from "@/components/Common/MarketingPixels";
 import { Toaster } from "sonner";
 
 const ClientShell = ({ children }: { children: ReactNode }) => {
   return (
     <>
+      <MarketingPixels />
       <ClarityInit />
       <ReduxProvider>
         <CartModalProvider>

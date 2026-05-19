@@ -7,7 +7,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/wishlist",
   },
-  description: "Veja seus produtos outdoor favoritos na Pepperone.",
+  description: "Veja seus produtos favoritos de brindes personalizados na Pepperone.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 const WishlistPage = () => {

@@ -8,6 +8,10 @@ export const metadata: Metadata = {
     canonical: "/cart",
   },
   description: "Revise os produtos do seu orçamento Pepperone.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 const CartPage = () => {

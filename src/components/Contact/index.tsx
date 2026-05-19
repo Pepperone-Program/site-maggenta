@@ -2,6 +2,7 @@
 
 import React, { FormEvent, useState } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
+import { trackEvent } from "@/lib/tracking";
 
 const hours = [
   "Segunda-feira: 09:00 AM - 18:00 PM",
@@ -75,10 +76,25 @@ const Contact = () => {
                   <p className="mb-2 text-sm font-semibold uppercase text-dark-4">
                     Contato
                   </p>
-                  <p className="text-lg font-medium text-dark">
-                    (11) 2971-5252 / (11) 2950-3923
-                  </p>
+                  <div className="text-lg font-medium text-dark">
+                    <a
+                      href="tel:+551129715252"
+                      onClick={() => trackEvent("phone_click", { source: "contact_page" })}
+                      className="hover:text-blue"
+                    >
+                      (11) 2971-5252
+                    </a>
+                    <span> / </span>
+                    <a
+                      href="tel:+551129503923"
+                      onClick={() => trackEvent("phone_click", { source: "contact_page" })}
+                      className="hover:text-blue"
+                    >
+                      (11) 2950-3923
+                    </a>
+                  </div>
                   <a
+                    onClick={() => trackEvent("email_click", { source: "contact_page" })}
                     className="mt-2 inline-flex text-blue hover:text-blue-dark"
                     href="mailto:vendas@pepperone.com.br"
                   >
@@ -88,7 +104,7 @@ const Contact = () => {
 
                 <div>
                   <p className="mb-2 text-sm font-semibold uppercase text-dark-4">
-                    Endereco
+                    Endereço
                   </p>
                   <address className="not-italic leading-7 text-dark">
                     R. Jaguarete, 43
@@ -97,13 +113,13 @@ const Contact = () => {
                     <br />
                     CEP 02515-010
                     <br />
-                    Sao Paulo - SP
+                    São Paulo - SP
                   </address>
                 </div>
 
                 <div>
                   <p className="mb-3 text-sm font-semibold uppercase text-dark-4">
-                    Horario
+                    Horário
                   </p>
                   <ul className="space-y-2 text-dark">
                     {hours.map((item) => (
@@ -119,7 +135,7 @@ const Contact = () => {
             <div className="rounded-md bg-white p-5 shadow-1 sm:p-8.5 xl:p-10">
               <div className="mb-7 border-b border-gray-3 pb-6">
                 <span className="text-sm font-semibold uppercase tracking-wide text-blue">
-                  Formulario
+                  Formulário
                 </span>
                 <h2 className="mt-2 text-2xl font-semibold text-dark">
                   Envie sua mensagem

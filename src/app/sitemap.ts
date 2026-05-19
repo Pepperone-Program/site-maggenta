@@ -8,20 +8,21 @@ const routes = [
   "",
   "/brindes-personalizados",
   "/brindes-para-empresas",
-  "/cart",
   "/orcamento",
-  "/wishlist",
   "/fale-conosco",
   "/empresa-de-brindes",
   "/termos-de-uso",
   "/politicas-de-privacidade",
-  "/llms.txt",
 ];
+
+const staticLastModified = new Date(
+  process.env.SITEMAP_STATIC_LASTMOD || "2026-05-19T00:00:00.000Z"
+);
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = routes.map((route) => ({
     url: `${siteUrl}${route}`,
-    lastModified: new Date(),
+    lastModified: staticLastModified,
     changeFrequency: route === "" ? ("daily" as const) : ("weekly" as const),
     priority: route === "" ? 1 : 0.8,
   }));
@@ -39,10 +40,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
   const menuRoutes = menuGroups
     .flatMap((group) => group.items || [])
-    .filter((item) => item.path && item.path !== "/")
+    .filter(
+      (item) => item.path && !["/", "/cart", "/wishlist", "/llms.txt"].includes(item.path)
+    )
     .map((item) => ({
       url: `${siteUrl}${item.path}`,
-      lastModified: new Date(),
+      lastModified: staticLastModified,
       changeFrequency: "weekly" as const,
       priority: 0.85,
     }));

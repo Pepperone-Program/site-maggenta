@@ -3,12 +3,14 @@ import { MetadataRoute } from "next";
 const siteUrl = "https://www.pepperone.com.br";
 
 export default function robots(): MetadataRoute.Robots {
+  const defaultDisallow = ["/api/"];
+
   return {
     rules: [
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/_next/"],
+        disallow: defaultDisallow,
       },
       {
         userAgent: [
@@ -22,12 +24,12 @@ export default function robots(): MetadataRoute.Robots {
           "Google-Extended",
         ],
         allow: "/",
-        disallow: ["/api/", "/_next/"],
+        disallow: defaultDisallow,
       },
       {
         userAgent: "Googlebot",
         allow: "/",
-        disallow: ["/api/", "/_next/"],
+        disallow: defaultDisallow,
       },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,
