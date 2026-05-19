@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { addItemToCart } from "@/redux/features/cart-slice";
 import { AppDispatch } from "@/redux/store";
@@ -11,7 +12,13 @@ import { Product } from "@/types/product";
 import { showAddedToCartMessage } from "@/lib/cart-feedback";
 
 const SingleListItem = ({ item }: { item: Product }) => {
+  const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
+  const href = productPath(item);
+
+  const prefetchProduct = () => {
+    router.prefetch(href);
+  };
 
   const handleAddToCart = () => {
     const quantity = Math.max(1, Number(item.quantidadeMinima || 1));
@@ -29,9 +36,13 @@ const SingleListItem = ({ item }: { item: Product }) => {
       <div className="flex flex-col sm:flex-row">
         <div className="shadow-list relative flex aspect-square w-full max-w-full items-center justify-center overflow-hidden p-4 sm:max-w-[270px]">
           <Link
-            href={productPath(item)}
+            href={href}
             aria-label={`Ver detalhes de ${item.title}`}
             className="relative block h-full w-full"
+            prefetch
+            onMouseEnter={prefetchProduct}
+            onFocus={prefetchProduct}
+            onTouchStart={prefetchProduct}
           >
             <Image
               src={item.imgs.previews[0]}
@@ -52,7 +63,15 @@ const SingleListItem = ({ item }: { item: Product }) => {
 
         <div className="flex w-full flex-col items-center justify-center px-4 py-5 text-center sm:items-start sm:px-7.5 sm:text-left lg:pl-11 lg:pr-12">
           <p className="mb-1.5 font-medium text-dark duration-200 hover:text-blue">
-            <Link href={productPath(item)}>{item.title}</Link>
+            <Link
+              href={href}
+              prefetch
+              onMouseEnter={prefetchProduct}
+              onFocus={prefetchProduct}
+              onTouchStart={prefetchProduct}
+            >
+              {item.title}
+            </Link>
           </p>
 
           <p className="mb-4 text-custom-sm font-medium text-dark-4">

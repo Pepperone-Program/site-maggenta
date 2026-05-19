@@ -1,3 +1,5 @@
+import { trackEvent } from "@/lib/tracking";
+
 const whatsappUrl = "https://wzap.me/349273426667";
 
 const WhatsAppButton = () => {
@@ -6,6 +8,11 @@ const WhatsAppButton = () => {
       href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={() =>
+        trackEvent("whatsapp_click", {
+          source: "floating_button",
+        })
+      }
       aria-label="Fale conosco pelo WhatsApp"
       style={{ zIndex: 2147483647 }}
       className="fixed bottom-6 right-6 mb-[env(safe-area-inset-bottom,0px)] flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2"

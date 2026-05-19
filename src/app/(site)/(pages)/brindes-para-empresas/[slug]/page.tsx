@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const displayName = personalizedTitle(tipoName);
   const title = `${displayName} para Empresas e Eventos`;
   const description = `${displayName}, Querendo comprar Brindes Personalizados? E aqui na Pepperone Brindes`;
-  const canonical = new URL(`/brindes-para-empresas/${slug}`, siteUrl).toString();
+  const canonical = new URL(`/categorias/${slug}`, siteUrl).toString();
 
   return {
     title,

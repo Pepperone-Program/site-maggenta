@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { addItemToCart } from "@/redux/features/cart-slice";
 import { AppDispatch } from "@/redux/store";
@@ -11,7 +12,13 @@ import { Product } from "@/types/product";
 import { showAddedToCartMessage } from "@/lib/cart-feedback";
 
 const SingleGridItem = ({ item }: { item: Product }) => {
+  const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
+  const href = productPath(item);
+
+  const prefetchProduct = () => {
+    router.prefetch(href);
+  };
 
   const handleAddToCart = () => {
     const quantity = Math.max(1, Number(item.quantidadeMinima || 1));
@@ -28,9 +35,13 @@ const SingleGridItem = ({ item }: { item: Product }) => {
     <div className="group flex h-full flex-col">
       <div className="relative mb-4 flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg bg-white p-2 shadow-1">
         <Link
-          href={productPath(item)}
+          href={href}
           aria-label={`Ver detalhes de ${item.title}`}
           className="relative block h-full w-full"
+          prefetch
+          onMouseEnter={prefetchProduct}
+          onFocus={prefetchProduct}
+          onTouchStart={prefetchProduct}
         >
           <Image
             src={item.imgs.previews[0]}
@@ -73,7 +84,15 @@ const SingleGridItem = ({ item }: { item: Product }) => {
           WebkitLineClamp: 2,
         }}
       >
-        <Link href={productPath(item)}>{item.title}</Link>
+        <Link
+          href={href}
+          prefetch
+          onMouseEnter={prefetchProduct}
+          onFocus={prefetchProduct}
+          onTouchStart={prefetchProduct}
+        >
+          {item.title}
+        </Link>
       </p>
 
       <p className="mb-3 text-center text-custom-sm font-medium text-dark-4">

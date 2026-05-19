@@ -5,7 +5,6 @@ import ShopWithoutSidebar from "@/components/ShopWithoutSidebar";
 import {
   friendlyPersonalizedParam,
   getCatalogoTipoProduto,
-  personalizedTitle,
 } from "@/lib/api";
 import { buildSeoOther, contextualKeywords, siteUrl } from "@/lib/seo";
 
@@ -64,9 +63,7 @@ const BrindesParaEmpresasPage = async ({ searchParams }: PageProps) => {
     <main>
       <ShopWithoutSidebar
         products={catalogo.items}
-        title={personalizedTitle(
-          catalogo.tipo_produto?.tipo_produto || "Brindes para empresas"
-        )}
+        title="Brindes para empresas"
         description={catalogo.tipo_produto?.descricao || ""}
       />
     </main>
