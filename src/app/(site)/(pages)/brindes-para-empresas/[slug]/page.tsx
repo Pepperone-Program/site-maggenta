@@ -4,6 +4,7 @@ import ShopWithoutSidebar from "@/components/ShopWithoutSidebar";
 import {
   getCatalogoSubcategoria,
   getCatalogoTipoProduto,
+  personalizedTitle,
   searchProdutosSiteAll,
   searchProdutosSiteWithDestination,
 } from "@/lib/api";
@@ -21,15 +22,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const slug = routeParams.slug || "";
   const catalogo = await resolveCatalogo(slug);
   const tipoName = catalogo.tipo_produto?.tipo_produto || "Brindes para empresas";
-  const title = `${tipoName} Personalizados para Empresas e Eventos`;
-  const description = `${tipoName}, Querendo comprar Brindes Personalizados? É aqui na Pepperone Brindes`;
+  const displayName = personalizedTitle(tipoName);
+  const title = `${displayName} para Empresas e Eventos`;
+  const description = `${displayName}, Querendo comprar Brindes Personalizados? E aqui na Pepperone Brindes`;
   const canonical = new URL(`/brindes-para-empresas/${slug}`, siteUrl).toString();
 
   return {
     title,
     description,
-    keywords: contextualKeywords(tipoName, [
-      `${tipoName} personalizado para empresa`,
+    keywords: contextualKeywords(displayName, [
+      `${displayName} para empresa`,
       `${tipoName} promocional`,
       `${tipoName} com logomarca`,
     ]),
@@ -52,7 +54,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title,
       description,
       canonical,
-      subject: `${tipoName}, tipos de produtos personalizados`,
+      subject: `${displayName}, tipos de produtos personalizados`,
     }),
   };
 }
@@ -71,23 +73,11 @@ const titleFromSlug = (slug: string) =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 
-const personalizedTerm = (value: string) => {
-  const term = value.trim() || "Brinde";
-  const normalized = term
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-  const suffix = normalized.endsWith("a") ? "personalizada" : "personalizado";
-
-  return `${term} ${suffix}`;
-};
-
 const searchCatalogo = (term: string, products: Product[]) => ({
   tipo_produto: {
     id_empresa: 1,
     id_tipo_produto: 0,
-    tipo_produto: personalizedTerm(term),
+    tipo_produto: term,
     descricao: `Resultados encontrados para "${term}" com base no nome do produto.`,
     habilitado: "S",
   },
@@ -135,12 +125,13 @@ const resolveCatalogo = async (slug: string) => {
 const BrindesParaEmpresasTipoPage = async ({ params }: PageProps) => {
   const routeParams = (await params) || {};
   const catalogo = await resolveCatalogo(routeParams.slug || "");
+  const title = catalogo.tipo_produto?.tipo_produto || "Brindes para empresas";
 
   return (
     <main>
       <ShopWithoutSidebar
         products={catalogo.items}
-        title={catalogo.tipo_produto?.tipo_produto || "Brindes para empresas"}
+        title={personalizedTitle(title)}
         description={catalogo.tipo_produto?.descricao || ""}
       />
     </main>

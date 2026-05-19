@@ -10,6 +10,7 @@ import { useSelector } from "react-redux";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import { selectTotalPrice } from "@/redux/features/cart-slice";
 import { formatDisplayPrice } from "@/lib/products";
+import { personalizedSuffix } from "@/lib/slugs";
 import { useAppSelector } from "@/redux/store";
 import "swiper/css";
 
@@ -28,6 +29,14 @@ type SearchSuggestion = {
   id: number;
   label: string;
   path: string;
+};
+
+type SearchSubmitPayload = {
+  data?: SearchSuggestion[];
+  destino_busca?: {
+    tipo?: string | null;
+    path?: string | null;
+  } | null;
 };
 
 const defaultMenuGroups: HeaderMenuGroup[] = [
@@ -77,7 +86,11 @@ const normalizeSearchText = (value: string) =>
 
 const searchPathFromQuery = (query: string) => {
   const slug = normalizeSearchText(query).replace(/\s+/g, "-");
-  return slug ? `/brindes-para-empresas/${encodeURIComponent(slug)}` : "/";
+  const suffix = personalizedSuffix(query);
+
+  return slug
+    ? `/brindes-para-empresas/${encodeURIComponent(`${slug}-${suffix}`)}`
+    : "/";
 };
 
 const Header = () => {
@@ -187,6 +200,25 @@ const Header = () => {
       if (!query) {
         window.location.assign("/");
         return;
+      }
+
+      try {
+        const response = await fetch(
+          `/api/produtos/busca?q=${encodeURIComponent(query)}&limit=1`
+        );
+        const payload: SearchSubmitPayload | null = response.ok
+          ? await response.json()
+          : null;
+        const destinationPath = payload?.destino_busca?.path;
+
+        if (payload?.destino_busca?.tipo === "produto" && destinationPath) {
+          router.push(destinationPath);
+          setSearchFocused(false);
+          setSearchSuggestions([]);
+          return;
+        }
+      } catch {
+        // If the exact-code lookup fails, the normal search page still works.
       }
 
       router.push(searchPathFromQuery(query));

@@ -2,7 +2,11 @@ import React from "react";
 import { Metadata } from "next";
 import { permanentRedirect } from "next/navigation";
 import ShopWithoutSidebar from "@/components/ShopWithoutSidebar";
-import { friendlyParam, getCatalogoTipoProduto } from "@/lib/api";
+import {
+  friendlyPersonalizedParam,
+  getCatalogoTipoProduto,
+  personalizedTitle,
+} from "@/lib/api";
 import { buildSeoOther, contextualKeywords, siteUrl } from "@/lib/seo";
 
 export const revalidate = 120;
@@ -48,10 +52,9 @@ const BrindesParaEmpresasPage = async ({ searchParams }: PageProps) => {
   if (firstParam(params.tipo)) {
     permanentRedirect(
       `/brindes-para-empresas/${encodeURIComponent(
-        friendlyParam(
+        friendlyPersonalizedParam(
           tipoId,
-          catalogo.tipo_produto?.tipo_produto || "brindes",
-          "personalizadas"
+          catalogo.tipo_produto?.tipo_produto || "brindes"
         )
       )}`
     );
@@ -61,7 +64,9 @@ const BrindesParaEmpresasPage = async ({ searchParams }: PageProps) => {
     <main>
       <ShopWithoutSidebar
         products={catalogo.items}
-        title={catalogo.tipo_produto?.tipo_produto || "Brindes para empresas"}
+        title={personalizedTitle(
+          catalogo.tipo_produto?.tipo_produto || "Brindes para empresas"
+        )}
         description={catalogo.tipo_produto?.descricao || ""}
       />
     </main>

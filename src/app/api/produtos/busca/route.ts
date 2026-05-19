@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { productPath } from "@/lib/products";
-import { friendlyParam, searchProdutosSiteWithDestination, slugify } from "@/lib/api";
+import {
+  friendlyParam,
+  friendlyPersonalizedParam,
+  searchProdutosSiteWithDestination,
+} from "@/lib/api";
 
 const suffixIfNeeded = (title: string, suffix: string) =>
   /personalizad/i.test(title) ? "" : suffix;
@@ -22,7 +26,9 @@ const destinationPath = (
   if (destino.tipo === "tipo_produto" && destino.id_tipo_produto) {
     const title = destino.tipo_produto || "brindes";
     return `/brindes-para-empresas/${encodeURIComponent(
-      friendlyParam(destino.id_tipo_produto, title, suffixIfNeeded(title, "personalizadas"))
+      /personalizad/i.test(title)
+        ? friendlyParam(destino.id_tipo_produto, title)
+        : friendlyPersonalizedParam(destino.id_tipo_produto, title)
     )}`;
   }
 
@@ -39,13 +45,14 @@ const destinationPath = (
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("q") || "";
   const limit = Number(request.nextUrl.searchParams.get("limit") || 10);
-  const { products, destinoBusca } = await searchProdutosSiteWithDestination(
+  const { products, destinoBusca, exactProduct } = await searchProdutosSiteWithDestination(
     query,
     Number.isFinite(limit) ? limit : 10
   );
   const destinoPath = destinationPath(destinoBusca);
+  const exactProductPath = exactProduct ? productPath(exactProduct) : null;
 
-  if (products.length === 0 && !destinoPath) {
+  if (products.length === 0 && !destinoPath && !exactProductPath) {
     return NextResponse.json(
       { success: false, message: "Nenhum produto encontrado", data: [] },
       {
@@ -60,7 +67,14 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(
     {
       success: true,
-      destino_busca: destinoBusca
+      destino_busca: exactProductPath
+        ? {
+            tipo: "produto",
+            id_produto: exactProduct?.id,
+            codigo: exactProduct?.codigo,
+            path: exactProductPath,
+          }
+        : destinoBusca
         ? {
             ...destinoBusca,
             path: destinoPath,

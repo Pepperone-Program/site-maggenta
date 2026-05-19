@@ -2,7 +2,7 @@ import React from "react";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
-import { slugify } from "@/lib/api";
+import { personalizedSuffix, slugify } from "@/lib/api";
 
 export const revalidate = 120;
 
@@ -61,7 +61,11 @@ const BuscaPage = async ({ searchParams }: SearchPageProps) => {
   const params = (await searchParams) || {};
   const term = searchTerm(params);
 
-  redirect(term ? `/brindes-para-empresas/${slugify(term)}` : "/brindes-para-empresas");
+  redirect(
+    term
+      ? `/brindes-para-empresas/${slugify(`${term} ${personalizedSuffix(term)}`)}`
+      : "/brindes-para-empresas"
+  );
 };
 
 export default BuscaPage;
