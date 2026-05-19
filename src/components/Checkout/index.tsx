@@ -2,6 +2,7 @@
 
 import React, { FormEvent, FocusEvent, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
 import { useAppSelector } from "@/redux/store";
 import { formatDisplayPrice } from "@/lib/products";
@@ -21,6 +22,7 @@ const fields = [
 ];
 
 const Checkout = () => {
+  const router = useRouter();
   const cartItems = useAppSelector((state) => state.cartReducer.items);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
     "idle"
@@ -99,6 +101,7 @@ const Checkout = () => {
           ? "Recebemos sua solicitacao localmente. A API nao respondeu agora, mas os dados foram mantidos no formato correto."
           : "Solicitacao enviada com sucesso. Em breve entraremos em contato."
       );
+      router.push("/orcamentos-obrigado");
     } catch (error) {
       setStatus("error");
       setMessage(

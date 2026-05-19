@@ -3,9 +3,21 @@ import categoryData from "@/components/Home/Categories/categoryData";
 import { Product } from "@/types/product";
 import { Category } from "@/types/category";
 import { isValidImageSrc, safeImageSrc } from "@/lib/images";
-import { friendlyParam, slugify } from "@/lib/slugs";
+import {
+  friendlyParam,
+  friendlyPersonalizedParam,
+  personalizedSuffix,
+  personalizedTitle,
+  slugify,
+} from "@/lib/slugs";
 
-export { friendlyParam, slugify };
+export {
+  friendlyParam,
+  friendlyPersonalizedParam,
+  personalizedSuffix,
+  personalizedTitle,
+  slugify,
+};
 
 type ApiFlag = "S" | "N" | string | null | undefined;
 
@@ -226,6 +238,7 @@ export type SearchDestinationApi = {
 export type SearchProdutosSiteResult = {
   products: Product[];
   destinoBusca: SearchDestinationApi | null;
+  exactProduct?: Product | null;
 };
 
 type DataPromocionalApi = {
@@ -1519,8 +1532,25 @@ export async function searchProdutosSiteWithDestination(
   );
   const data =
     payload && typeof payload === "object" && "data" in payload
-      ? (payload.data as { items?: ProdutoApi[]; destino_busca?: SearchDestinationApi | null })
+      ? (payload.data as {
+          items?: ProdutoApi[];
+          destino_busca?: SearchDestinationApi | null;
+          match_exato_codigo?: boolean;
+          id_produto?: number;
+          codigo?: string;
+        })
       : null;
+
+  if (data?.match_exato_codigo && data.id_produto) {
+    const exactProduct = await getProdutoById(Number(data.id_produto));
+
+    return {
+      products: exactProduct ? [exactProduct] : [],
+      destinoBusca: null,
+      exactProduct,
+    };
+  }
+
   const produtos = data?.items || [];
   const normalizedSearch = slugify(search);
 
@@ -1681,7 +1711,7 @@ const toMenuItems = <T extends Record<string, unknown>>(
                 )}`
               : filterKey === "tipo"
                 ? `/brindes-para-empresas/${encodeURIComponent(
-                    friendlyParam(String(item[idKey]), String(item[titleKey]), "personalizadas")
+                    friendlyPersonalizedParam(String(item[idKey]), String(item[titleKey]))
                   )}`
               : "/brindes-personalizados",
     }));
