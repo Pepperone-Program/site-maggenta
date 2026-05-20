@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import RangeSlider from "react-range-slider-input";
@@ -196,6 +196,7 @@ const ShopWithSidebar = ({
   const [productStyle, setProductStyle] = useState("grid");
   const [productSidebar, setProductSidebar] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
+  const hasMountedRef = useRef(false);
 
   const categoryName = catalogo.categoria?.categoria || "Brindes";
   const categoryDescription = sanitizeCategoryDescription(
@@ -458,6 +459,18 @@ const ShopWithSidebar = ({
       return start + index;
     }
   ).filter((page) => page <= catalogo.totalPages);
+
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, [catalogo.page]);
 
   return (
     <>

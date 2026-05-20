@@ -136,7 +136,7 @@ const Checkout = () => {
 
   return (
     <>
-      <Breadcrumb title="Solicitar orçamento" pages={["orcamento"]} />
+      <Breadcrumb title="Solicitar orçamentos" pages={["orcamentos"]} />
       <section className="min-h-[calc(100vh-220px)] overflow-hidden bg-gray-2 py-10 lg:py-14">
         <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
           <form onSubmit={handleSubmit}>

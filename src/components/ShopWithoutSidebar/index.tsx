@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 
 import SingleGridItem from "../Shop/SingleGridItem";
@@ -23,6 +23,7 @@ const ShopWithoutSidebar = ({
   const productsPerPage = 24;
   const totalPages = Math.max(Math.ceil(products.length / productsPerPage), 1);
   const safeCurrentPage = Math.min(currentPage, totalPages);
+  const hasMountedRef = useRef(false);
   const visibleProducts = useMemo(() => {
     const start = (safeCurrentPage - 1) * productsPerPage;
     return products.slice(start, start + productsPerPage);
@@ -33,6 +34,18 @@ const ShopWithoutSidebar = ({
     { label: "Mais vendidos", value: "1" },
     { label: "Menor preço", value: "2" },
   ];
+
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, [safeCurrentPage]);
 
   return (
     <>

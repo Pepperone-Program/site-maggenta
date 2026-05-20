@@ -12,6 +12,7 @@ import { selectTotalPrice } from "@/redux/features/cart-slice";
 import { formatDisplayPrice } from "@/lib/products";
 import { personalizedSuffix } from "@/lib/slugs";
 import { useAppSelector } from "@/redux/store";
+import { toast } from "sonner";
 import "swiper/css";
 
 type HeaderMenuGroup = {
@@ -32,12 +33,39 @@ type SearchSuggestion = {
 };
 
 type SearchSubmitPayload = {
-  data?: SearchSuggestion[];
+  data?: {
+    items?: SearchSuggestion[];
+  };
   destino_busca?: {
     tipo?: string | null;
     path?: string | null;
   } | null;
 };
+
+const searchNotFoundToast = () =>
+  toast.custom(
+    () => (
+      <div className="fixed left-1/2 top-1/2 z-[2147483647] w-[min(92vw,420px)] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-gray-3 bg-white px-5 py-4 text-center shadow-[0_20px_80px_rgba(0,0,0,0.18)]">
+        <p className="text-sm font-semibold text-dark">Produto não encontrado</p>
+        <p className="mt-1 text-xs text-dark-4">Tente outro código, nome ou categoria.</p>
+      </div>
+    ),
+    {
+      duration: 2600,
+    }
+  );
+
+const SearchButtonIcon = ({ loading }: { loading: boolean }) =>
+  loading ? (
+    <span
+      aria-hidden="true"
+      className="block h-[18px] w-[18px] animate-spin rounded-full border-2 border-current border-t-transparent"
+    />
+  ) : (
+    <svg className="fill-current" width="19" height="19" viewBox="0 0 18 18" aria-hidden="true">
+      <path d="M17.27 15.67 12.63 11.9a6.72 6.72 0 1 0-.84.96l4.69 3.8a.64.64 0 0 0 .88-.08.64.64 0 0 0-.09-.91ZM7.2 13.39a5.46 5.46 0 1 1 0-10.92 5.46 5.46 0 0 1 0 10.92Z" />
+    </svg>
+  );
 
 const defaultMenuGroups: HeaderMenuGroup[] = [
   { id: "inicio", title: "Inicio", path: "/" },
@@ -102,6 +130,7 @@ const Header = () => {
   const [stickyMenu, setStickyMenu] = useState(false);
   const [menuGroups, setMenuGroups] = useState(defaultMenuGroups);
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [searching, setSearching] = useState(false);
   const menuCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestSearchQuery = useRef("");
   const { openCartModal } = useCartModalContext();
@@ -179,8 +208,10 @@ const Header = () => {
             return;
           }
 
-          if (Array.isArray(payload?.data)) {
-            setSearchSuggestions(payload.data);
+          const items = Array.isArray(payload?.data?.items) ? payload.data.items : [];
+
+          if (items.length > 0) {
+            setSearchSuggestions(items);
           }
         })
         .catch(() => undefined);
@@ -202,30 +233,42 @@ const Header = () => {
         return;
       }
 
+      if (searching) {
+        return;
+      }
+
+      setSearching(true);
+
       try {
         const response = await fetch(
           `/api/produtos/busca?q=${encodeURIComponent(query)}&limit=1`
         );
-        const payload: SearchSubmitPayload | null = response.ok
-          ? await response.json()
-          : null;
+        const payload: SearchSubmitPayload | null = response.ok ? await response.json() : null;
         const destinationPath = payload?.destino_busca?.path;
+        const items = Array.isArray(payload?.data?.items) ? payload.data.items : [];
 
-        if (payload?.destino_busca?.tipo === "produto" && destinationPath) {
+        if (destinationPath) {
           router.push(destinationPath);
           setSearchFocused(false);
           setSearchSuggestions([]);
           return;
         }
-      } catch {
-        // If the exact-code lookup fails, the normal search page still works.
-      }
 
-      router.push(searchPathFromQuery(query));
-      setSearchFocused(false);
-      setSearchSuggestions([]);
+        if (items.length > 0) {
+          router.push(searchPathFromQuery(query));
+          setSearchFocused(false);
+          setSearchSuggestions([]);
+          return;
+        }
+
+        searchNotFoundToast();
+      } catch {
+        searchNotFoundToast();
+      } finally {
+        setSearching(false);
+      }
     },
-    [searchQuery, router]
+    [searchQuery, router, searching]
   );
 
   useEffect(() => {
@@ -349,7 +392,7 @@ const Header = () => {
                                     <Link
                                       href={item.path}
                                       onClick={() => setNavigationOpen(false)}
-                                      className="block min-h-11 rounded px-1 py-0.5 text-sm font-light uppercase text-dark hover:bg-gray-1 hover:text-blue sm:min-h-0 sm:py-0.5 sm:text-xs"
+                                      className="block min-h-11 rounded px-1 py-0.5 text-sm font-light uppercase text-dark hover:bg-gray-1 hover:text-blue sm:min-h-0 sm:py-0.3 sm:text-xs"
                                     >
                                       {item.title}
                                     </Link>
@@ -394,11 +437,11 @@ const Header = () => {
               <button
                 type="submit"
                 aria-label="Buscar"
-                className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-md text-dark transition-colors duration-200 hover:bg-gray-2 hover:text-blue"
+                disabled={searching}
+                aria-busy={searching}
+                className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-md text-dark transition-colors duration-200 hover:bg-gray-2 hover:text-blue disabled:cursor-wait disabled:opacity-70"
               >
-                <svg className="fill-current" width="19" height="19" viewBox="0 0 18 18">
-                  <path d="M17.27 15.67 12.63 11.9a6.72 6.72 0 1 0-.84.96l4.69 3.8a.64.64 0 0 0 .88-.08.64.64 0 0 0-.09-.91ZM7.2 13.39a5.46 5.46 0 1 1 0-10.92 5.46 5.46 0 0 1 0 10.92Z" />
-                </svg>
+                <SearchButtonIcon loading={searching} />
               </button>
               {searchFocused && searchSuggestions.length > 0 && (
                 <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-md border border-gray-3 bg-white py-2 shadow-lg" onMouseDown={(e) => e.preventDefault()}>
@@ -442,11 +485,11 @@ const Header = () => {
               <button
                 type="submit"
                 aria-label="Buscar"
-                className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-md text-dark transition-colors duration-200 hover:bg-gray-2 hover:text-blue"
+                disabled={searching}
+                aria-busy={searching}
+                className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-md text-dark transition-colors duration-200 hover:bg-gray-2 hover:text-blue disabled:cursor-wait disabled:opacity-70"
               >
-                <svg className="fill-current" width="19" height="19" viewBox="0 0 18 18">
-                  <path d="M17.27 15.67 12.63 11.9a6.72 6.72 0 1 0-.84.96l4.69 3.8a.64.64 0 0 0 .88-.08.64.64 0 0 0-.09-.91ZM7.2 13.39a5.46 5.46 0 1 1 0-10.92 5.46 5.46 0 0 1 0 10.92Z" />
-                </svg>
+                <SearchButtonIcon loading={searching} />
               </button>
               {searchFocused && searchSuggestions.length > 0 && (
                 <div className="absolute right-0 top-full z-50 mt-1 w-[min(420px,calc(100vw-24px))] overflow-hidden rounded-md border border-gray-3 bg-white py-2 shadow-lg" onMouseDown={(e) => e.preventDefault()}>

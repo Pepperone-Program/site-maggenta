@@ -51,22 +51,18 @@ export async function GET(request: NextRequest) {
   );
   const destinoPath = destinationPath(destinoBusca);
   const exactProductPath = exactProduct ? productPath(exactProduct) : null;
-
-  if (products.length === 0 && !destinoPath && !exactProductPath) {
-    return NextResponse.json(
-      { success: false, message: "Nenhum produto encontrado", data: [] },
-      {
-        status: 404,
-        headers: {
-          "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=1800",
-        },
-      }
-    );
-  }
+  const items = products.map((product) => ({
+    id: product.id,
+    title: product.title,
+    codigo: product.codigo || String(product.id),
+    label: `${product.title} - ${product.codigo || product.id}`,
+    path: productPath(product),
+  }));
 
   return NextResponse.json(
     {
       success: true,
+      message: "Produtos encontrados com sucesso",
       destino_busca: exactProductPath
         ? {
             tipo: "produto",
@@ -80,13 +76,13 @@ export async function GET(request: NextRequest) {
             path: destinoPath,
           }
         : null,
-      data: products.map((product) => ({
-        id: product.id,
-        title: product.title,
-        codigo: product.codigo || String(product.id),
-        label: `${product.title} - ${product.codigo || product.id}`,
-        path: productPath(product),
-      })),
+      data: {
+        items,
+        total: items.length,
+        page: 1,
+        limit,
+        totalPages: items.length ? 1 : 0,
+      },
     },
     {
       headers: {

@@ -86,8 +86,8 @@ const Footer = () => {
               </Link>
             </li>
             <li>
-              <Link className="duration-200 hover:text-blue" href="/orcamento">
-                Orçamento
+              <Link className="duration-200 hover:text-blue" href="/orcamentos">
+                Orçamentos
               </Link>
             </li>
           </ul>
