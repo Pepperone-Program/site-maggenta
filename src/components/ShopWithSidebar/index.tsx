@@ -436,6 +436,13 @@ const ShopWithSidebar = ({
     });
   };
 
+  const scrollToTopSmooth = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   const clearFilters = () => {
     router.push(
       buildCatalogHref({
@@ -676,6 +683,8 @@ const ShopWithSidebar = ({
                           href={buildCatalogHref({
                             page: catalogo.page > 1 ? catalogo.page - 1 : catalogo.page,
                           })}
+                          scroll={false}
+                          onClick={scrollToTopSmooth}
                           className={`flex h-9 w-8 items-center justify-center rounded-[3px] duration-200 ${
                             catalogo.page <= 1
                               ? "pointer-events-none text-gray-4"
@@ -690,6 +699,8 @@ const ShopWithSidebar = ({
                         <li key={page}>
                           <Link
                             href={buildCatalogHref({ page })}
+                            scroll={false}
+                            onClick={scrollToTopSmooth}
                             className={`flex rounded-[3px] px-3.5 py-1.5 duration-200 hover:bg-blue hover:text-white ${
                               page === catalogo.page ? "bg-blue text-white" : ""
                             }`}
@@ -708,6 +719,8 @@ const ShopWithSidebar = ({
                                 ? catalogo.page + 1
                                 : catalogo.page,
                           })}
+                          scroll={false}
+                          onClick={scrollToTopSmooth}
                           className={`flex h-9 w-8 items-center justify-center rounded-[3px] duration-200 ${
                             catalogo.page >= catalogo.totalPages
                               ? "pointer-events-none text-gray-4"

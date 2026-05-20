@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 
 import SingleGridItem from "../Shop/SingleGridItem";
@@ -23,7 +23,6 @@ const ShopWithoutSidebar = ({
   const productsPerPage = 24;
   const totalPages = Math.max(Math.ceil(products.length / productsPerPage), 1);
   const safeCurrentPage = Math.min(currentPage, totalPages);
-  const hasMountedRef = useRef(false);
   const visibleProducts = useMemo(() => {
     const start = (safeCurrentPage - 1) * productsPerPage;
     return products.slice(start, start + productsPerPage);
@@ -35,17 +34,12 @@ const ShopWithoutSidebar = ({
     { label: "Menor preço", value: "2" },
   ];
 
-  useEffect(() => {
-    if (!hasMountedRef.current) {
-      hasMountedRef.current = true;
-      return;
-    }
-
+  const scrollToTopSmooth = () => {
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
-  }, [safeCurrentPage]);
+  };
 
   return (
     <>
@@ -177,7 +171,10 @@ const ShopWithoutSidebar = ({
                 >
                   <button
                     type="button"
-                    onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
+                    onClick={() => {
+                      setCurrentPage((page) => Math.max(page - 1, 1));
+                      scrollToTopSmooth();
+                    }}
                     disabled={safeCurrentPage === 1}
                     className="min-h-11 rounded-md border border-gray-3 bg-white px-4 text-sm font-medium text-dark disabled:cursor-not-allowed disabled:opacity-50 hover:border-blue hover:text-blue"
                   >
@@ -202,7 +199,10 @@ const ShopWithoutSidebar = ({
                           )}
                           <button
                             type="button"
-                            onClick={() => setCurrentPage(page)}
+                            onClick={() => {
+                              setCurrentPage(page);
+                              scrollToTopSmooth();
+                            }}
                             className={`min-h-11 min-w-11 rounded-md border px-3 text-sm font-medium ${
                               safeCurrentPage === page
                                 ? "border-blue bg-blue text-white"
@@ -218,9 +218,10 @@ const ShopWithoutSidebar = ({
 
                   <button
                     type="button"
-                    onClick={() =>
-                      setCurrentPage((page) => Math.min(page + 1, totalPages))
-                    }
+                    onClick={() => {
+                      setCurrentPage((page) => Math.min(page + 1, totalPages));
+                      scrollToTopSmooth();
+                    }}
                     disabled={safeCurrentPage === totalPages}
                     className="min-h-11 rounded-md border border-gray-3 bg-white px-4 text-sm font-medium text-dark disabled:cursor-not-allowed disabled:opacity-50 hover:border-blue hover:text-blue"
                   >
