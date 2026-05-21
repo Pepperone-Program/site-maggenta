@@ -28,10 +28,16 @@ const CounDown = ({ banners = [] }: { banners?: BannerApi[] }) => {
           <Image
             src={image}
             alt={banner?.titulo || "Banner de campanha Pepperone"}
-            fill
+            fill={!hasApiBanner}
+            width={1920}
+            height={650}
             priority={Boolean(banner)}
             sizes="100vw"
-            className={hasApiBanner ? "object-contain" : "object-cover opacity-70"}
+            className={
+              hasApiBanner
+                ? "absolute left-0 top-1/2 h-auto w-full -translate-y-1/2"
+                : "object-cover opacity-70"
+            }
           />
           {hasApiBanner && banner?.url && (
             <Link

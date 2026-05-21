@@ -91,12 +91,14 @@ const Hero = ({ banners = [] }: HeroProps) => {
             <Image
               src={slide.image}
               alt={slide.title}
-              fill
+              fill={!banners.length}
+              width={1920}
+              height={650}
               priority={index === 0}
               sizes="100vw"
               className={
                 banners.length
-                  ? "object-contain"
+                  ? "absolute left-0 top-1/2 h-auto w-full -translate-y-1/2"
                   : `object-cover ${
                       slide.image.includes("/products/")
                         ? "object-[78%_50%] opacity-70"

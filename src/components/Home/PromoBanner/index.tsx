@@ -36,10 +36,11 @@ const PromoBanner = ({ banners = [] }: PromoBannerProps) => {
               <Image
                 src={banner.url_banner || ""}
                 alt={banner.titulo || "Banner Pepperone"}
-                fill
+                width={1920}
+                height={430}
                 priority={index === 0}
                 sizes="100vw"
-                className="object-contain"
+                className="absolute left-0 top-1/2 h-auto w-full -translate-y-1/2"
               />
               {banner.url && (
                 <Link
