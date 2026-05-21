@@ -130,6 +130,13 @@ input[type='search']::-webkit-search-results-decoration {
   @apply xl:!bottom-5;
 }
 
+.hero-carousel .swiper-wrapper,
+.hero-carousel .swiper-slide,
+.promo-banner-carousel .swiper-wrapper,
+.promo-banner-carousel .swiper-slide {
+  height: 100%;
+}
+
 .common-carousel .swiper-button-next:after,
 .common-carousel .swiper-button-prev:after {
   @apply hidden;

@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Checkout",
   alternates: {
-    canonical: "/orcamento",
+    canonical: "/orcamentos",
   },
   robots: {
     index: false,
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 const CheckoutPage = () => {
-  redirect("/orcamento");
+  redirect("/orcamentos");
 };
 
 export default CheckoutPage;

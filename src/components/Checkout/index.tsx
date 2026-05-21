@@ -136,9 +136,11 @@ const Checkout = () => {
 
   return (
     <>
-      <Breadcrumb title="Solicitar orçamento" pages={["orcamento"]} />
-      <section className="min-h-[calc(100vh-220px)] overflow-hidden bg-gray-2 py-10 lg:py-14">
+      <Breadcrumb title="Solicitar orçamentos" pages={["orcamentos"]} />
+      <section className="min-h-[calc(100vh-220px)] overflow-hidden bg-gray-2 py-5 lg:py-8">
+        
         <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
+                    
           <form onSubmit={handleSubmit}>
             <div className="grid gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(420px,0.85fr)]">
               <div className="w-full">
@@ -198,7 +200,7 @@ const Checkout = () => {
               </div>
 
               <aside className="w-full">
-                <div className="sticky top-32 rounded-md bg-white shadow-1">
+                <div className="sticky top-16 rounded-md bg-white shadow-1">
                   <div className="border-b border-gray-3 px-4 py-5 sm:px-8.5">
                     <span className="text-sm font-semibold uppercase tracking-wide text-blue">
                       Resumo
@@ -274,9 +276,21 @@ const Checkout = () => {
                         : "Enviar solicitação de orçamento"}
                     </button>
                   </div>
+
+                  <div className="pb-6 px-4 sm:px-8.5">
+                    <div
+                      role="alert"
+                      className="rounded-md border-2 border-red bg-red-light-6 px-4 py-3 text-sm text-red"
+                    >
+                      <strong className="block font-medium">Atenção</strong>
+                      <span className="block">
+                        Não pagamos para testes de produtos, fique atento a golpes.
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </aside>
-            </div>
+              </aside>              
+            </div>          
           </form>
         </div>
       </section>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import RangeSlider from "react-range-slider-input";
@@ -196,6 +196,7 @@ const ShopWithSidebar = ({
   const [productStyle, setProductStyle] = useState("grid");
   const [productSidebar, setProductSidebar] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
+  const hasMountedRef = useRef(false);
 
   const categoryName = catalogo.categoria?.categoria || "Brindes";
   const categoryDescription = sanitizeCategoryDescription(
@@ -435,6 +436,13 @@ const ShopWithSidebar = ({
     });
   };
 
+  const scrollToTopSmooth = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   const clearFilters = () => {
     router.push(
       buildCatalogHref({
@@ -458,6 +466,18 @@ const ShopWithSidebar = ({
       return start + index;
     }
   ).filter((page) => page <= catalogo.totalPages);
+
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, [catalogo.page]);
 
   return (
     <>
@@ -663,6 +683,8 @@ const ShopWithSidebar = ({
                           href={buildCatalogHref({
                             page: catalogo.page > 1 ? catalogo.page - 1 : catalogo.page,
                           })}
+                          scroll={false}
+                          onClick={scrollToTopSmooth}
                           className={`flex h-9 w-8 items-center justify-center rounded-[3px] duration-200 ${
                             catalogo.page <= 1
                               ? "pointer-events-none text-gray-4"
@@ -677,6 +699,8 @@ const ShopWithSidebar = ({
                         <li key={page}>
                           <Link
                             href={buildCatalogHref({ page })}
+                            scroll={false}
+                            onClick={scrollToTopSmooth}
                             className={`flex rounded-[3px] px-3.5 py-1.5 duration-200 hover:bg-blue hover:text-white ${
                               page === catalogo.page ? "bg-blue text-white" : ""
                             }`}
@@ -695,6 +719,8 @@ const ShopWithSidebar = ({
                                 ? catalogo.page + 1
                                 : catalogo.page,
                           })}
+                          scroll={false}
+                          onClick={scrollToTopSmooth}
                           className={`flex h-9 w-8 items-center justify-center rounded-[3px] duration-200 ${
                             catalogo.page >= catalogo.totalPages
                               ? "pointer-events-none text-gray-4"

@@ -34,6 +34,13 @@ const ShopWithoutSidebar = ({
     { label: "Menor preço", value: "2" },
   ];
 
+  const scrollToTopSmooth = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   return (
     <>
       <Breadcrumb
@@ -164,7 +171,10 @@ const ShopWithoutSidebar = ({
                 >
                   <button
                     type="button"
-                    onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
+                    onClick={() => {
+                      setCurrentPage((page) => Math.max(page - 1, 1));
+                      scrollToTopSmooth();
+                    }}
                     disabled={safeCurrentPage === 1}
                     className="min-h-11 rounded-md border border-gray-3 bg-white px-4 text-sm font-medium text-dark disabled:cursor-not-allowed disabled:opacity-50 hover:border-blue hover:text-blue"
                   >
@@ -189,7 +199,10 @@ const ShopWithoutSidebar = ({
                           )}
                           <button
                             type="button"
-                            onClick={() => setCurrentPage(page)}
+                            onClick={() => {
+                              setCurrentPage(page);
+                              scrollToTopSmooth();
+                            }}
                             className={`min-h-11 min-w-11 rounded-md border px-3 text-sm font-medium ${
                               safeCurrentPage === page
                                 ? "border-blue bg-blue text-white"
@@ -205,9 +218,10 @@ const ShopWithoutSidebar = ({
 
                   <button
                     type="button"
-                    onClick={() =>
-                      setCurrentPage((page) => Math.min(page + 1, totalPages))
-                    }
+                    onClick={() => {
+                      setCurrentPage((page) => Math.min(page + 1, totalPages));
+                      scrollToTopSmooth();
+                    }}
                     disabled={safeCurrentPage === totalPages}
                     className="min-h-11 rounded-md border border-gray-3 bg-white px-4 text-sm font-medium text-dark disabled:cursor-not-allowed disabled:opacity-50 hover:border-blue hover:text-blue"
                   >
