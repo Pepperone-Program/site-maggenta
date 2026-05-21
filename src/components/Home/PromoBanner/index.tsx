@@ -28,20 +28,19 @@ const PromoBanner = ({ banners = [] }: PromoBannerProps) => {
         }}
         pagination={{ clickable: true }}
         modules={[Autoplay, Pagination]}
-        className="promo-banner-carousel"
+        className={`promo-banner-carousel ${mobile ? "h-[520px]" : "h-[430px]"}`}
       >
         {items.map((banner, index) => (
           <SwiperSlide key={`${mobile ? "mobile" : "desktop"}-${banner.id_banner}`}>
-            <div className="relative min-h-[360px] overflow-hidden bg-[#eef2ea] px-4 py-12.5 sm:px-7.5 lg:min-h-[430px] lg:px-14 lg:py-17.5 xl:px-19 xl:py-22.5">
+            <div className="relative h-full overflow-hidden bg-white">
               <Image
                 src={banner.url_banner || ""}
                 alt={banner.titulo || "Banner Pepperone"}
                 fill
                 priority={index === 0}
                 sizes="100vw"
-                className="object-cover"
+                className="object-contain"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-white/92 via-white/70 to-white/8" />
               {banner.url && (
                 <Link
                   href={banner.url}

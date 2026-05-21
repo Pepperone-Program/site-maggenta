@@ -75,26 +75,38 @@ const Hero = ({ banners = [] }: HeroProps) => {
       }}
       pagination={{ clickable: true }}
       modules={[Autoplay, Pagination]}
-      className="hero-carousel overflow-hidden"
+      className={`hero-carousel overflow-hidden ${
+        banners.length ? (mobile ? "h-[520px]" : "h-[650px]") : ""
+      }`}
     >
       {carouselSlides.map((slide, index) => (
         <SwiperSlide key={`${mobile ? "mobile" : "desktop"}-${slide.id}`}>
-          <div className="relative h-[420px] overflow-hidden bg-[#0b2f2b] sm:h-[520px] lg:h-[650px] 2xl:h-[750px]">
+          <div
+            className={
+              banners.length
+                ? "relative h-full overflow-hidden bg-white"
+                : "relative h-[420px] overflow-hidden bg-[#0b2f2b] sm:h-[520px] lg:h-[650px] 2xl:h-[750px]"
+            }
+          >
             <Image
               src={slide.image}
               alt={slide.title}
               fill
               priority={index === 0}
               sizes="100vw"
-              className={`object-cover ${
-                slide.image.includes("/products/")
-                  ? "object-[78%_50%] opacity-70"
-                  : banners.length
-                    ? "opacity-95"
-                    : "opacity-75"
-              }`}
+              className={
+                banners.length
+                  ? "object-contain"
+                  : `object-cover ${
+                      slide.image.includes("/products/")
+                        ? "object-[78%_50%] opacity-70"
+                        : "opacity-75"
+                    }`
+              }
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#061f1c]/82 via-[#061f1c]/44 to-[#061f1c]/8" />
+            {!banners.length && (
+              <div className="absolute inset-0 bg-gradient-to-r from-[#061f1c]/82 via-[#061f1c]/44 to-[#061f1c]/8" />
+            )}
             {banners.length > 0 && (
               <Link
                 href={slide.href}
