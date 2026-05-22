@@ -48,7 +48,6 @@ const ClientShell = ({ children }: { children: ReactNode }) => {
         </CartModalProvider>
       </ReduxProvider>
       <ScrollToTop />
-      <WhatsAppButton />
       <Footer />
     </>
   );
