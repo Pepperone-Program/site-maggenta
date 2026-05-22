@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import ClientShell from "./ClientShell";
 import { buildSeoOther, marketKeywords, ogImageUrl, siteName, siteUrl } from "@/lib/seo";
 
-const defaultTitle = "Pepperone Brindes Corporativos Personalizados para Empresas";
+const defaultTitle = "Brindes Personalizados | Pepperone Brindes ";
 const defaultDescription =
   "Brindes corporativos personalizados, produtos promocionais e orcamentos para empresas em todo o Brasil.";
 const defaultOgImage = ogImageUrl({
