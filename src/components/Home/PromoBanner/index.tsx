@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Autoplay, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -28,19 +27,16 @@ const PromoBanner = ({ banners = [] }: PromoBannerProps) => {
         }}
         pagination={{ clickable: true }}
         modules={[Autoplay, Pagination]}
-        className={`promo-banner-carousel ${mobile ? "h-[520px]" : "h-[430px]"}`}
+        className="promo-banner-carousel"
       >
         {items.map((banner, index) => (
           <SwiperSlide key={`${mobile ? "mobile" : "desktop"}-${banner.id_banner}`}>
-            <div className="relative h-full overflow-hidden bg-white">
-              <Image
+            <div className="relative w-full overflow-hidden bg-white">
+              <img
                 src={banner.url_banner || ""}
                 alt={banner.titulo || "Banner Pepperone"}
-                width={1920}
-                height={430}
-                priority={index === 0}
-                sizes="100vw"
-                className="absolute left-0 top-1/2 h-auto w-full -translate-y-1/2"
+                loading={index === 0 ? "eager" : "lazy"}
+                className="block h-auto w-full"
               />
               {banner.url && (
                 <Link
@@ -97,12 +93,10 @@ const PromoBanner = ({ banners = [] }: PromoBannerProps) => {
             </Link>
           </div>
 
-          <Image
+          <img
             src="/images/products/product-2-bg-1.png"
             alt="Jaqueta tecnica em oferta"
             className="absolute bottom-0 right-4 -z-1 hidden max-w-[330px] lg:block"
-            width={330}
-            height={350}
           />
         </div>
       </div>

@@ -23,6 +23,7 @@ export type Product = {
   promocao?: boolean;
   premium?: boolean;
   totalOrcamentos?: number;
+  video?: string | null;
   imgs: {
     thumbnails: string[];
     previews: string[];

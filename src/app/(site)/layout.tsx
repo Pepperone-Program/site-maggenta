@@ -122,7 +122,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body>
+      <body>        
         <ClientShell>{children}</ClientShell>
       </body>
     </html>
