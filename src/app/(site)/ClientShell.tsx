@@ -12,7 +12,6 @@ import PreviewSliderModal from "@/components/Common/PreviewSlider";
 import ScrollToTop from "@/components/Common/ScrollToTop";
 import ClarityInit from "@/components/Common/ClarityInit";
 import MarketingPixels from "@/components/Common/MarketingPixels";
-import WhatsAppButton from "@/components/Common/WhatsAppButton";
 import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "sonner";
 
