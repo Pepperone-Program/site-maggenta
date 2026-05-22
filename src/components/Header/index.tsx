@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
@@ -42,18 +42,12 @@ type SearchSubmitPayload = {
   } | null;
 };
 
-const searchNotFoundToast = () =>
-  toast.custom(
-    () => (
-      <div className="fixed left-1/2 top-1/2 z-[2147483647] w-[min(92vw,420px)] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-gray-3 bg-white px-5 py-4 text-center shadow-[0_20px_80px_rgba(0,0,0,0.18)]">
-        <p className="text-sm font-semibold text-dark">Produto não encontrado</p>
-        <p className="mt-1 text-xs text-dark-4">Tente outro código, nome ou categoria.</p>
-      </div>
-    ),
-    {
-      duration: 2600,
-    }
-  );
+const showSearchNotFoundMessage = () => {
+  toast.error("Busca não encontrada", {
+    description: "Tente outro código, nome ou categoria.",
+    duration: 2500,
+  });
+};
 
 const SearchButtonIcon = ({ loading }: { loading: boolean }) =>
   loading ? (
@@ -93,8 +87,8 @@ const defaultMenuGroups: HeaderMenuGroup[] = [
 
 const topbarItems = [
   "(11) 2971-5252 / (11) 2950-3923",
-  "Seja Bem-Vindo à Pepperone Brindes Corporativos!",
-  "Faturamento mínimo R$1.000,00",
+  "Seja Bem-Vindo Ã  Pepperone Brindes Corporativos!",
+  "Faturamento mÃ­nimo R$1.000,00",
 ];
 
 const menuColumns = <T,>(items: T[], rowsPerColumn = 12) =>
@@ -132,6 +126,7 @@ const Header = () => {
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const [searching, setSearching] = useState(false);
   const menuCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchMenuHandled = useRef(false);
   const latestSearchQuery = useRef("");
   const { openCartModal } = useCartModalContext();
   const cartItems = useAppSelector((state) => state.cartReducer.items);
@@ -143,6 +138,14 @@ const Header = () => {
     }
 
     setActiveMenuId(menuId);
+  };
+
+  const toggleMenu = (menuId: string) => {
+    if (menuCloseTimer.current) {
+      clearTimeout(menuCloseTimer.current);
+    }
+
+    setActiveMenuId((current) => (current === menuId ? null : menuId));
   };
 
   const closeMenu = () => {
@@ -261,9 +264,9 @@ const Header = () => {
           return;
         }
 
-        searchNotFoundToast();
+        showSearchNotFoundMessage();
       } catch {
-        searchNotFoundToast();
+        showSearchNotFoundMessage();
       } finally {
         setSearching(false);
       }
@@ -359,11 +362,24 @@ const Header = () => {
                     <>
                       <button
                         type="button"
-                        onClick={() =>
-                          setActiveMenuId((current) =>
-                            current === menuItem.id ? null : menuItem.id
-                          )
-                        }
+                        aria-expanded={activeMenuId === menuItem.id}
+                        onPointerDown={(event) => {
+                          if (event.pointerType === "mouse") {
+                            return;
+                          }
+
+                          event.preventDefault();
+                          touchMenuHandled.current = true;
+                          toggleMenu(menuItem.id);
+                        }}
+                        onClick={() => {
+                          if (touchMenuHandled.current) {
+                            touchMenuHandled.current = false;
+                            return;
+                          }
+
+                          toggleMenu(menuItem.id);
+                        }}
                         className="flex min-h-11 items-center gap-1 py-2 text-left text-sm font-medium text-dark hover:text-blue sm:min-h-0 sm:py-0"
                       >
                         <span className="relative before:absolute before:left-0 before:-top-2 before:h-[3px] before:w-0 before:rounded-b-[3px] before:bg-blue before:duration-200 sm:group-hover:before:w-full">
@@ -391,7 +407,10 @@ const Header = () => {
                                   <li key={item.id} className={itemIndex === 0 ? "pt-[5px]" : undefined}>
                                     <Link
                                       href={item.path}
-                                      onClick={() => setNavigationOpen(false)}
+                                      onClick={() => {
+                                        setNavigationOpen(false);
+                                        setActiveMenuId(null);
+                                      }}
                                       className="block min-h-11 rounded px-1 py-0.5 text-sm font-light uppercase text-dark hover:bg-gray-1 hover:text-blue sm:min-h-0 sm:py-0.3 sm:text-xs"
                                     >
                                       {item.title}
@@ -515,7 +534,7 @@ const Header = () => {
               type="button"
               onClick={openCartModal}
               className="flex h-11 items-center gap-2 rounded-md border border-gray-3 bg-white px-3 text-dark transition-colors duration-200 hover:border-blue hover:text-blue"
-              aria-label="Abrir orçamento"
+              aria-label="Abrir orÃ§amento"
             >
               <span className="relative inline-flex">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">

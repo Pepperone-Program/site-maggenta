@@ -44,6 +44,7 @@ export type ProdutoApi = {
   premium?: ApiFlag;
   habilitado?: ApiFlag;
   cod_forn?: string | null;
+  video?: string | null;
   imagens?: ProdutoImageApi[];
   id_categoria?: number | null;
   categoria?: string | null;
@@ -683,6 +684,7 @@ export const mapApiProdutoToProduct = (
     lancamento: isYes(product.lancamento),
     promocao: isYes(product.promocao),
     premium: isYes(product.premium),
+    video: product.video || undefined,
     imgs: {
       thumbnails: thumbnails.slice(0, 6),
       previews: previews.slice(0, 6),
@@ -1678,10 +1680,11 @@ export async function getHomeCategories(): Promise<Category[]> {
 
 export async function getActiveBanners(tipo?: BannerTipo): Promise<BannerApi[]> {
   const query = tipo ? `?tipo=${encodeURIComponent(tipo)}` : "";
-  const banners = (await apiFetchAllPages<BannerApi[]>(`/banners/ativos${query}`, 100)) || [];
+  const banners = (await apiFetchAllPages<BannerApi>(`/banners/ativos${query}`, 100)) || [];
 
-  return banners.flat()
+  return banners
     .filter((banner) => banner.habilitado === "S" && isValidImageSrc(banner.url_banner))
+    .filter((banner) => (tipo ? banner.tipo === tipo : true))
     .sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
 }
 
@@ -1720,9 +1723,9 @@ export async function getMenuGroups(): Promise<ApiMenuGroup[]> {
   const [categorias, tipos, publicos, datas] = await Promise.all([
     getCatalogoCategorias(),
     fetchAllFirstAvailable<(typeof mockTiposProdutos)[number]>([
-      "/tipos-produtos",
-      "/tipos_produtos",
-      "/tiposProdutos",
+      "/tipos-produtos/habilitados",
+      "/tipos_produtos/habilitados",
+      "/tiposProdutos/habilitados",
     ], 100),
     getPublicosAlvos(),
     getDatasPromocionais(),

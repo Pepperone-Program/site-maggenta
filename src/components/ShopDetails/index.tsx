@@ -12,6 +12,42 @@ import { Product } from "@/types/product";
 import { friendlyParam } from "@/lib/slugs";
 import { showAddedToCartMessage } from "@/lib/cart-feedback";
 
+const getYoutubeVideoId = (value?: string | null) => {
+  const video = value?.trim();
+
+  if (!video) {
+    return "";
+  }
+
+  const cleanId = (id: string) => id.trim().split(/[?&]/)[0] || "";
+
+  try {
+    const url = new URL(video);
+    const fromQuery = url.searchParams.get("v");
+
+    if (fromQuery) {
+      return cleanId(fromQuery);
+    }
+
+    const segments = url.pathname.split("/").filter(Boolean);
+    const embedIndex = segments.findIndex((segment) => segment === "embed");
+
+    if (embedIndex >= 0 && segments[embedIndex + 1]) {
+      return cleanId(segments[embedIndex + 1]);
+    }
+
+    return cleanId(segments[segments.length - 1] || "");
+  } catch {
+    const iframeSrcMatch = video.match(/src=["']([^"']+)["']/i);
+
+    if (iframeSrcMatch?.[1]) {
+      return getYoutubeVideoId(iframeSrcMatch[1]);
+    }
+
+    return cleanId(video.replace(/^.*(?:youtu\.be\/|v=|embed\/)/i, ""));
+  }
+};
+
 const ShopDetails = ({
   product,
   relatedProducts,
@@ -22,6 +58,8 @@ const ShopDetails = ({
   const dispatch = useDispatch<AppDispatch>();
   const minimumQuantity = Math.max(1, Number(product.quantidadeMinima || 1));
   const [previewImg, setPreviewImg] = useState(0);
+  const [activeMedia, setActiveMedia] = useState<"image" | "video">("image");
+  const [mediaReady, setMediaReady] = useState(false);
   const [quantity, setQuantity] = useState(minimumQuantity);
   const [quantityInput, setQuantityInput] = useState(String(minimumQuantity));
   const [showTags, setShowTags] = useState(false);
@@ -32,9 +70,19 @@ const ShopDetails = ({
         friendlyParam(product.categoryId, product.category, "personalizados")
       )}`
     : "/brindes-personalizados";
+  const youtubeVideoId = getYoutubeVideoId(product.video);
+  const hasVideo = mediaReady && Boolean(youtubeVideoId);
+  const youtubeEmbedUrl = hasVideo
+    ? `https://www.youtube.com/embed/${encodeURIComponent(youtubeVideoId)}`
+    : "";
+
+  useEffect(() => {
+    setMediaReady(true);
+  }, []);
 
   useEffect(() => {
     setPreviewImg(0);
+    setActiveMedia("image");
     setShowTags(false);
     setQuantity(minimumQuantity);
     setQuantityInput(String(minimumQuantity));
@@ -54,6 +102,10 @@ const ShopDetails = ({
     }
 
     const handleWheel = (event: WheelEvent) => {
+      if (activeMedia === "video") {
+        return;
+      }
+
       if (product.imgs.previews.length < 2) {
         return;
       }
@@ -80,7 +132,7 @@ const ShopDetails = ({
     return () => {
       element.removeEventListener("wheel", handleWheel);
     };
-  }, [product.imgs.previews.length]);
+  }, [activeMedia, product.imgs.previews.length]);
 
   const handleAddToCart = () => {
     const parsedQuantity = Number(quantityInput.replace(/\D/g, ""));
@@ -129,31 +181,52 @@ const ShopDetails = ({
                     {product.badge}
                   </span>
                 )}
-                <Image
-                  src={product.imgs.previews[previewImg]}
-                  alt={`${product.title} - imagem ${previewImg + 1}`}
-                  width={520}
-                  height={520}
-                  priority
-                  className="relative z-10 h-auto max-h-[460px] w-full object-contain"
-                />
-                <Image
-                  src="/images/logo/logo-vertical.svg"
-                  alt="Marca d'agua Pepperone"
-                  width={260}
-                  height={260}
-                  className="pointer-events-none absolute left-1/2 top-1/2 z-20 w-[38%] max-w-[260px] -translate-x-1/2 -translate-y-1/2 opacity-[0.08]"
-                />
+                {activeMedia === "video" && youtubeEmbedUrl ? (
+                  <iframe
+                    width="560"
+                    height="400"
+                    src={youtubeEmbedUrl}
+                    title={`${product.title} - video`}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                    className="relative z-10 aspect-video w-full max-w-[760px] rounded-md"
+                  />
+                ) : (
+                  <>
+                    <Image
+                      src={product.imgs.previews[previewImg]}
+                      alt={`${product.title} - imagem ${previewImg + 1}`}
+                      width={520}
+                      height={520}
+                      priority
+                      className="relative z-10 h-auto max-h-[460px] w-full object-contain"
+                    />
+                    <Image
+                      src="/images/logo/logo-vertical.svg"
+                      alt="Marca d'agua Pepperone"
+                      width={260}
+                      height={260}
+                      className="pointer-events-none absolute left-1/2 top-1/2 z-20 w-[38%] max-w-[260px] -translate-x-1/2 -translate-y-1/2 opacity-[0.08]"
+                    />
+                  </>
+                )}
               </div>
 
               <div className="mt-5 flex flex-wrap gap-3">
                 {product.imgs.thumbnails.map((item, key) => (
                   <button
                     type="button"
-                    onClick={() => setPreviewImg(key)}
+                    onClick={() => {
+                      setActiveMedia("image");
+                      setPreviewImg(key);
+                    }}
                     key={item}
                     className={`flex h-20 w-20 items-center justify-center rounded-md border bg-white p-2 shadow-1 duration-200 hover:border-blue sm:h-24 sm:w-24 ${
-                      key === previewImg ? "border-blue" : "border-transparent"
+                      activeMedia === "image" && key === previewImg
+                        ? "border-blue"
+                        : "border-transparent"
                     }`}
                     aria-label={`Ver imagem ${key + 1} de ${product.title}`}
                   >
@@ -166,6 +239,29 @@ const ShopDetails = ({
                     />
                   </button>
                 ))}
+                {hasVideo && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveMedia("video")}
+                    className={`flex h-20 w-20 items-center justify-center rounded-md border bg-white p-2 shadow-1 duration-200 hover:border-blue sm:h-24 sm:w-24 ${
+                      activeMedia === "video" ? "border-blue" : "border-transparent"
+                    }`}
+                    aria-label={`Assistir video de ${product.title}`}
+                  >
+                    <span className="flex h-11 w-11 items-center justify-center rounded-full bg-blue text-white shadow-md">
+                      <svg
+                        aria-hidden="true"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 18 18"
+                        fill="none"
+                        className="ml-0.5"
+                      >
+                        <path d="M5.5 3.8v10.4l8.2-5.2-8.2-5.2Z" fill="currentColor" />
+                      </svg>
+                    </span>
+                  </button>
+                )}
               </div>
             </div>
 

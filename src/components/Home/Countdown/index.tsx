@@ -19,26 +19,27 @@ const CounDown = ({ banners = [] }: { banners?: BannerApi[] }) => {
         <div
           className={
             hasApiBanner
-              ? `relative overflow-hidden bg-white ${
-                  banner?.tamanho_tela === "mobile" ? "h-[520px]" : "h-[650px]"
-                }`
+              ? "relative w-full overflow-hidden bg-white"
               : "relative h-[360px] overflow-hidden bg-[#0b2f2b] sm:h-[460px] lg:h-[560px] xl:h-[650px]"
           }
         >
-          <Image
-            src={image}
-            alt={banner?.titulo || "Banner de campanha Pepperone"}
-            fill={!hasApiBanner}
-            width={1920}
-            height={650}
-            priority={Boolean(banner)}
-            sizes="100vw"
-            className={
-              hasApiBanner
-                ? "absolute left-0 top-1/2 h-auto w-full -translate-y-1/2"
-                : "object-cover opacity-70"
-            }
-          />
+          {hasApiBanner ? (
+            <img
+              src={image}
+              alt={banner?.titulo || "Banner de campanha Pepperone"}
+              loading="eager"
+              className="block h-auto w-full"
+            />
+          ) : (
+            <Image
+              src={image}
+              alt={banner?.titulo || "Banner de campanha Pepperone"}
+              fill
+              priority={Boolean(banner)}
+              sizes="100vw"
+              className="object-cover opacity-70"
+            />
+          )}
           {hasApiBanner && banner?.url && (
             <Link
               href={banner.url}
