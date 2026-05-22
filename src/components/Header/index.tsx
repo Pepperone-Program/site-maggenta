@@ -87,8 +87,8 @@ const defaultMenuGroups: HeaderMenuGroup[] = [
 
 const topbarItems = [
   "(11) 2971-5252 / (11) 2950-3923",
-  "Seja Bem-Vindo Ã  Pepperone Brindes Corporativos!",
-  "Faturamento mÃ­nimo R$1.000,00",
+  "Seja Bem-Vindo à Pepperone Brindes Corporativos!",
+  "Faturamento mínimo R$1.000,00",
 ];
 
 const menuColumns = <T,>(items: T[], rowsPerColumn = 12) =>
