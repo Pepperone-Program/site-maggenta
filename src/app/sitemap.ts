@@ -8,6 +8,7 @@ const routes = [
   "",
   "/brindes-personalizados",
   "/brindes-para-empresas",
+  "/lancamentos",
   "/orcamentos",
   "/fale-conosco",
   "/empresa-de-brindes",

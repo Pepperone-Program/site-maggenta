@@ -12,7 +12,12 @@ import { Product } from "@/types/product";
 import { showAddedToCartMessage } from "@/lib/cart-feedback";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
 
-const SingleGridItem = ({ item }: { item: Product }) => {
+type SingleGridItemProps = {
+  item: Product;
+  badgeLabel?: string;
+};
+
+const SingleGridItem = ({ item, badgeLabel }: SingleGridItemProps) => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const href = productPath(item);
@@ -35,6 +40,14 @@ const SingleGridItem = ({ item }: { item: Product }) => {
   return (
     <div className="group flex h-full flex-col">
       <div className="relative mb-4 flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg bg-white p-2 shadow-1">
+        {badgeLabel && (
+          <span
+            className="pointer-events-none absolute right-0 top-0 z-20 mt-2 mr-2 rounded-full px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.14em] text-white shadow-[0_8px_22px_rgba(250,70,22,0.38)] ring-1 ring-white/75"
+            style={{ backgroundColor: "rgb(231, 77, 15)" }}
+          >
+            {badgeLabel}
+          </span>
+        )}
         <Link
           href={href}
           aria-label={`Ver detalhes de ${item.title}`}

@@ -2,19 +2,17 @@ import React from "react";
 import { Metadata } from "next";
 import { permanentRedirect } from "next/navigation";
 import ShopWithoutSidebar from "@/components/ShopWithoutSidebar";
-import {
-  friendlyPersonalizedParam,
-  getCatalogoTipoProduto,
-} from "@/lib/api";
-import { buildSeoOther, contextualKeywords, siteUrl } from "@/lib/seo";
+import { friendlyPersonalizedParam, getProdutosSite } from "@/lib/api";
+import { buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
 
 export const revalidate = 120;
 
 export const metadata: Metadata = {
-  title: "Brindes para empresas",
+  title: "Brindes para empresas | Catálogo completo",
   description:
-    "Brindes para Empresas, Querendo comprar produtos promocionais personalizados? É aqui na Pepperone Brindes",
+    "Catálogo completo de brindes para empresas da Pepperone, com paginação no navegador para facilitar a navegação por todos os produtos do site.",
   keywords: contextualKeywords("brindes para empresas", [
+    "catálogo completo de brindes",
     "produtos promocionais para empresas",
     "brindes corporativos com logomarca",
     "orçamento de brindes para empresas",
@@ -23,11 +21,11 @@ export const metadata: Metadata = {
     canonical: "/brindes-para-empresas",
   },
   other: buildSeoOther({
-    title: "Brindes para empresas",
+    title: "Brindes para empresas | Catálogo completo",
     description:
-      "Brindes para Empresas, Querendo comprar produtos promocionais personalizados? É aqui na Pepperone Brindes",
+      "Catálogo completo de brindes para empresas da Pepperone, com paginação no navegador para facilitar a navegação por todos os produtos do site.",
     canonical: `${siteUrl}/brindes-para-empresas`,
-    subject: "brindes para empresas e produtos promocionais",
+    subject: "catálogo completo de brindes para empresas",
   }),
 };
 
@@ -46,14 +44,14 @@ const toNumber = (value: string | string[] | undefined) => {
 const BrindesParaEmpresasPage = async ({ searchParams }: PageProps) => {
   const params = (await searchParams) || {};
   const tipoId = toNumber(params.tipo) || 12;
-  const catalogo = await getCatalogoTipoProduto(tipoId);
+  const produtos = await getProdutosSite(10000);
 
   if (firstParam(params.tipo)) {
     permanentRedirect(
       `/brindes-para-empresas/${encodeURIComponent(
         friendlyPersonalizedParam(
           tipoId,
-          catalogo.tipo_produto?.tipo_produto || "brindes"
+          "brindes"
         )
       )}`
     );
@@ -62,9 +60,10 @@ const BrindesParaEmpresasPage = async ({ searchParams }: PageProps) => {
   return (
     <main>
       <ShopWithoutSidebar
-        products={catalogo.items}
+        products={produtos}
         title="Brindes para empresas"
-        description={catalogo.tipo_produto?.descricao || ""}
+        description="Confira o catálogo completo da Pepperone com todos os produtos do site, organizado com paginação no navegador para facilitar a navegação."
+        breadcrumbPages={["Brindes para empresas"]}
       />
     </main>
   );
