@@ -12,6 +12,10 @@ import { Product } from "@/types/product";
 import { showAddedToCartMessage } from "@/lib/cart-feedback";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
 
+const launchBadgeStyle = {
+  backgroundColor: "rgb(250, 70, 22)",
+};
+
 type SingleListItemProps = {
   item: Product;
   badgeLabel?: string;
@@ -43,8 +47,8 @@ const SingleListItem = ({ item, badgeLabel }: SingleListItemProps) => {
         <div className="shadow-list relative flex aspect-square w-full max-w-full items-center justify-center overflow-hidden p-4 sm:max-w-[270px]">
           {badgeLabel && (
             <span
-              className="pointer-events-none absolute right-3 top-3 z-20 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white shadow-[0_8px_22px_rgba(250,70,22,0.38)] ring-1 ring-white/75"
-              style={{ backgroundColor: "rgb(250, 70, 22)" }}
+              className="pointer-events-none absolute right-3 top-3 z-20 rounded-full bg-[rgb(250,70,22)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white shadow-[0_8px_22px_rgba(250,70,22,0.38)] ring-1 ring-white/75"
+              style={launchBadgeStyle}
             >
               {badgeLabel}
             </span>
