@@ -2,6 +2,7 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useCallback, useRef } from "react";
 import Image from "next/image";
+import ImageWithFallback from "@/components/Common/ImageWithFallback";
 
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { useAppSelector } from "@/redux/store";
@@ -96,7 +97,7 @@ const PreviewSliderModal = () => {
         {data.imgs.previews.map((image, index) => (
           <SwiperSlide key={image}>
           <div className="relative flex justify-center items-center">
-            <Image
+            <ImageWithFallback
               src={image}
               alt={`${data.title} - imagem ${index + 1}`}
               width={650}

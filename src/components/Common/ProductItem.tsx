@@ -1,6 +1,6 @@
 "use client";
 import React, { useCallback } from "react";
-import Image from "next/image";
+import ImageWithFallback from "@/components/Common/ImageWithFallback";
 import { Product } from "@/types/product";
 import { addItemToCart } from "@/redux/features/cart-slice";
 import { useDispatch } from "react-redux";
@@ -31,7 +31,7 @@ const ProductItem = ({ item }: { item: Product }) => {
           aria-label={`Ver detalhes de ${item.title}`}
           className="relative block h-full w-full"
         >
-          <Image
+          <ImageWithFallback
             src={item.imgs.previews[0]}
             alt={item.title}
             fill
@@ -41,7 +41,7 @@ const ProductItem = ({ item }: { item: Product }) => {
             className="object-contain transition-opacity duration-500 group-hover:opacity-0"
             loading="lazy"
           />
-          <Image
+          <ImageWithFallback
             src={item.imgs.previews[1] || item.imgs.previews[0]}
             alt={`${item.title} - segunda imagem`}
             fill

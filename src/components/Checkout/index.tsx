@@ -1,7 +1,7 @@
 "use client";
 
 import React, { FormEvent, FocusEvent, useEffect, useState } from "react";
-import Image from "next/image";
+import ImageWithFallback from "@/components/Common/ImageWithFallback";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
 import { useAppSelector } from "@/redux/store";
@@ -223,7 +223,7 @@ const Checkout = () => {
                         >
                           <div className="flex min-w-0 gap-4">
                             <div className="relative h-18 w-18 shrink-0 overflow-hidden rounded-md border border-gray-3 bg-gray-1">
-                              <Image
+                              <ImageWithFallback
                                 src={item.imgs.previews[0]}
                                 alt={item.title}
                                 fill

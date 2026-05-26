@@ -10,6 +10,7 @@ import { AppDispatch } from "@/redux/store";
 import { productPath } from "@/lib/products";
 import { Product } from "@/types/product";
 import { showAddedToCartMessage } from "@/lib/cart-feedback";
+import ImageWithFallback from "@/components/Common/ImageWithFallback";
 
 const SingleListItem = ({ item }: { item: Product }) => {
   const router = useRouter();
@@ -44,14 +45,14 @@ const SingleListItem = ({ item }: { item: Product }) => {
             onFocus={prefetchProduct}
             onTouchStart={prefetchProduct}
           >
-            <Image
+            <ImageWithFallback
               src={item.imgs.previews[0]}
               alt={item.title}
               fill
               sizes="270px"
               className="object-contain transition-opacity duration-500 group-hover:opacity-0"
             />
-            <Image
+            <ImageWithFallback
               src={item.imgs.previews[1] || item.imgs.previews[0]}
               alt={`${item.title} - segunda imagem`}
               fill

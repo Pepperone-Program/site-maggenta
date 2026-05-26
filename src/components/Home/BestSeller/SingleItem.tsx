@@ -9,6 +9,7 @@ import Link from "next/link";
 import { addItemToWishlist } from "@/redux/features/wishlist-slice";
 import { formatPrice, productPath } from "@/lib/products";
 import { showAddedToCartMessage } from "@/lib/cart-feedback";
+import ImageWithFallback from "@/components/Common/ImageWithFallback";
 
 const SingleItem = ({ item }: { item: Product }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -91,14 +92,14 @@ const SingleItem = ({ item }: { item: Product }) => {
             aria-label={`Ver detalhes de ${item.title}`}
             className="relative block aspect-square w-full max-w-[1000px]"
           >
-            <Image
+            <ImageWithFallback
               src={item.imgs.previews[0]}
               alt={item.title}
               fill
               sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
               className="object-contain transition-opacity duration-500 group-hover:opacity-0"
             />
-            <Image
+            <ImageWithFallback
               src={item.imgs.previews[1] || item.imgs.previews[0]}
               alt={`${item.title} - segunda imagem`}
               fill

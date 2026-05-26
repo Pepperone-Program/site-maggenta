@@ -103,6 +103,11 @@ const nextConfig = {
         hostname: "**.supabase.co",
         pathname: "/storage/v1/object/public/**",
       },
+      {
+        protocol: "https",
+        hostname: "bucket.pepperone.com.br",
+        pathname: "/storage/v1/object/public/**",
+      },
     ],
   },
   turbopack: {
