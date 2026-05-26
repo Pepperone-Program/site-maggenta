@@ -13,10 +13,14 @@ const ShopWithoutSidebar = ({
   products = shopData,
   title = "Brindes para empresas",
   description = "",
+  breadcrumbPages = ["brindes personalizados"],
+  productBadgeLabel,
 }: {
   products?: Product[];
   title?: string;
   description?: string;
+  breadcrumbPages?: string[];
+  productBadgeLabel?: string;
 }) => {
   const [productStyle, setProductStyle] = useState("grid");
   const [currentPage, setCurrentPage] = useState(1);
@@ -45,7 +49,7 @@ const ShopWithoutSidebar = ({
     <>
       <Breadcrumb
         title={title}
-        pages={["brindes para empresas"]}
+        pages={breadcrumbPages}
       />
       <section className="overflow-hidden relative pb-20 pt-5 lg:pt-20 xl:pt-28 bg-[#f3f4f6]">
         <div className="max-w-[1800px] w-full mx-auto px-2 sm:px-3">
@@ -156,9 +160,9 @@ const ShopWithoutSidebar = ({
               >
                 {visibleProducts.map((item) =>
                   productStyle === "grid" ? (
-                    <SingleGridItem item={item} key={item.id} />
+                    <SingleGridItem item={item} key={item.id} badgeLabel={productBadgeLabel} />
                   ) : (
-                    <SingleListItem item={item} key={item.id} />
+                    <SingleListItem item={item} key={item.id} badgeLabel={productBadgeLabel} />
                   )
                 )}
               </div>

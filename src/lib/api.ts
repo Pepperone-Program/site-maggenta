@@ -1279,7 +1279,7 @@ export async function getProdutosSite(limit = 12): Promise<Product[]> {
   const maxPages = Math.max(1, Math.ceil(limit / pageSize));
   const produtos =
     (await apiFetchAllPages<ProdutoApi>(
-      "/produtos?empresaId=1",
+      "/produtos/site?empresaId=1",
       pageSize,
       maxPages
     )) || [];
@@ -1747,7 +1747,13 @@ export async function getMenuGroups(): Promise<ApiMenuGroup[]> {
     {
       id: "brindes",
       title: "Brindes",
+      path: "/brindes-para-empresas",
       items: toMenuItems(tipos || mockTiposProdutos, "id_tipo_produto", "tipo_produto", "tipo"),
+    },
+    {
+      id: "lancamentos",
+      title: "Lançamentos",
+      path: "/lancamentos",
     },
     {
       id: "publicos",

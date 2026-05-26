@@ -12,6 +12,7 @@ export function GET() {
 - Home: ${siteUrl}/
 - Catalogo de brindes personalizados: ${siteUrl}/brindes-personalizados
 - Brindes para empresas: ${siteUrl}/brindes-para-empresas
+- Lancamentos: ${siteUrl}/lancamentos
 - Publicos-alvo: ${siteUrl}/publicos-alvos
 - Datas promocionais: ${siteUrl}/datas-promocionais
 - Fale conosco: ${siteUrl}/fale-conosco

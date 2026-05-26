@@ -13,6 +13,7 @@ import { formatDisplayPrice } from "@/lib/products";
 import { personalizedSuffix } from "@/lib/slugs";
 import { useAppSelector } from "@/redux/store";
 import { toast } from "sonner";
+// @ts-ignore -- Side-effect CSS import resolved by Next.js bundler.
 import "swiper/css";
 
 type HeaderMenuGroup = {
@@ -71,7 +72,13 @@ const defaultMenuGroups: HeaderMenuGroup[] = [
   {
     id: "brindes",
     title: "Brindes",
+    path: "/brindes-para-empresas",
     items: [{ id: "1", title: "Corporativos", path: "/brindes-personalizados" }],
+  },
+  {
+    id: "lancamentos",
+    title: "Lançamentos",
+    path: "/lancamentos",
   },
   {
     id: "publicos",
@@ -372,9 +379,16 @@ const Header = () => {
                           touchMenuHandled.current = true;
                           toggleMenu(menuItem.id);
                         }}
-                        onClick={() => {
+                        onClick={(event) => {
                           if (touchMenuHandled.current) {
                             touchMenuHandled.current = false;
+                            return;
+                          }
+
+                          if (event.detail >= 2 && menuItem.path) {
+                            setNavigationOpen(false);
+                            setActiveMenuId(null);
+                            router.push(menuItem.path);
                             return;
                           }
 

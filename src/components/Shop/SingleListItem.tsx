@@ -12,7 +12,12 @@ import { Product } from "@/types/product";
 import { showAddedToCartMessage } from "@/lib/cart-feedback";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
 
-const SingleListItem = ({ item }: { item: Product }) => {
+type SingleListItemProps = {
+  item: Product;
+  badgeLabel?: string;
+};
+
+const SingleListItem = ({ item, badgeLabel }: SingleListItemProps) => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const href = productPath(item);
@@ -36,6 +41,14 @@ const SingleListItem = ({ item }: { item: Product }) => {
     <div className="group rounded-lg bg-white shadow-1">
       <div className="flex flex-col sm:flex-row">
         <div className="shadow-list relative flex aspect-square w-full max-w-full items-center justify-center overflow-hidden p-4 sm:max-w-[270px]">
+          {badgeLabel && (
+            <span
+              className="pointer-events-none absolute right-3 top-3 z-20 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white shadow-[0_8px_22px_rgba(250,70,22,0.38)] ring-1 ring-white/75"
+              style={{ backgroundColor: "rgb(250, 70, 22)" }}
+            >
+              {badgeLabel}
+            </span>
+          )}
           <Link
             href={href}
             aria-label={`Ver detalhes de ${item.title}`}
