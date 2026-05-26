@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import ImageWithFallback from "@/components/Common/ImageWithFallback";
 
 const LatestProducts = ({ products }) => {
   return (
@@ -15,7 +16,7 @@ const LatestProducts = ({ products }) => {
           {products.slice(0, 3).map((product, key) => (
             <div className="flex items-center gap-6" key={key}>
               <div className="flex items-center justify-center rounded-[10px] bg-gray-3 max-w-[90px] w-full h-22.5">
-                <Image src={product.imgs?.thumbnails?.[0]} alt="product" width={74} height={74} />
+                <ImageWithFallback src={product.imgs?.thumbnails?.[0]} alt="product" width={74} height={74} />
               </div>
 
               <div>

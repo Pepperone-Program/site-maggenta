@@ -5,7 +5,7 @@ import { useDispatch } from "react-redux";
 import { removeItemFromWishlist } from "@/redux/features/wishlist-slice";
 import { addItemToCart } from "@/redux/features/cart-slice";
 
-import Image from "next/image";
+import ImageWithFallback from "@/components/Common/ImageWithFallback";
 import Link from "next/link";
 import { formatPrice, productPath } from "@/lib/products";
 import { showAddedToCartMessage } from "@/lib/cart-feedback";
@@ -62,7 +62,7 @@ const SingleItem = ({ item }) => {
         <div className="flex items-center justify-between gap-5">
           <div className="w-full flex items-center gap-5.5">
             <div className="flex items-center justify-center rounded-[5px] bg-gray-2 max-w-[80px] w-full h-17.5">
-              <Image src={item.imgs?.thumbnails[0]} alt="product" width={200} height={200} />
+              <ImageWithFallback src={item.imgs?.thumbnails[0]} alt="product" width={200} height={200} />
             </div>
 
             <div>

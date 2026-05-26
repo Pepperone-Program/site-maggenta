@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import ImageWithFallback from "@/components/Common/ImageWithFallback";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
 import { addItemToCart } from "@/redux/features/cart-slice";
@@ -195,7 +195,7 @@ const ShopDetails = ({
                   />
                 ) : (
                   <>
-                    <Image
+                    <ImageWithFallback
                       src={product.imgs.previews[previewImg]}
                       alt={`${product.title} - imagem ${previewImg + 1}`}
                       width={520}
@@ -203,7 +203,7 @@ const ShopDetails = ({
                       priority
                       className="relative z-10 h-auto max-h-[460px] w-full object-contain"
                     />
-                    <Image
+                    <ImageWithFallback
                       src="/images/logo/logo-vertical.svg"
                       alt="Marca d'agua Pepperone"
                       width={260}
@@ -230,7 +230,7 @@ const ShopDetails = ({
                     }`}
                     aria-label={`Ver imagem ${key + 1} de ${product.title}`}
                   >
-                    <Image
+                    <ImageWithFallback
                       width={1000}
                       height={1000}
                       src={item}

@@ -5,7 +5,7 @@ import { useModalContext } from "@/app/context/QuickViewModalContext";
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import { addItemToCart } from "@/redux/features/cart-slice";
 import { useDispatch } from "react-redux";
-import Image from "next/image";
+import ImageWithFallback from "@/components/Common/ImageWithFallback";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { resetQuickView } from "@/redux/features/quickView-slice";
 import { updateproductDetails } from "@/redux/features/product-details";
@@ -112,7 +112,7 @@ const QuickViewModal = () => {
                       className={`flex items-center justify-center w-20 h-20 overflow-hidden rounded-lg bg-gray-1 ease-out duration-200 hover:border-2 hover:border-blue ${activePreview === key && "border-2 border-blue"
                         }`}
                     >
-                      <Image
+                      <ImageWithFallback
                         src={img || ""}
                         alt="thumbnail"
                         width={61}
@@ -148,7 +148,7 @@ const QuickViewModal = () => {
                     </button>
 
                     {product?.imgs?.previews?.[activePreview] && (
-                      <Image
+                      <ImageWithFallback
                         src={product.imgs.previews[activePreview]}
                         alt="products-details"
                         width={400}

@@ -6,7 +6,7 @@ import {
   updateCartItemQuantity,
 } from "@/redux/features/cart-slice";
 
-import Image from "next/image";
+import ImageWithFallback from "@/components/Common/ImageWithFallback";
 import { formatPrice, productPath } from "@/lib/products";
 import Link from "next/link";
 
@@ -39,7 +39,7 @@ const SingleItem = ({ item }) => {
         <div className="flex items-center justify-between gap-5">
           <div className="w-full flex items-center gap-5.5">
             <div className="flex items-center justify-center rounded-[5px] bg-gray-2 max-w-[80px] w-full h-17.5">
-              <Image width={200} height={200} src={item.imgs?.thumbnails[0]} alt="product" />
+              <ImageWithFallback width={200} height={200} src={item.imgs?.thumbnails[0]} alt="product" />
             </div>
 
             <div>
