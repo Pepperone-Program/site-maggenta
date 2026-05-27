@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Autoplay } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useSelector } from "react-redux";
@@ -124,6 +124,7 @@ const searchPathFromQuery = (query: string) => {
 
 const Header = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchSuggestions, setSearchSuggestions] = useState<SearchSuggestion[]>([]);
@@ -160,6 +161,17 @@ const Header = () => {
       setActiveMenuId(null);
     }, 160);
   };
+
+  const closeSearchUi = useCallback(() => {
+    setNavigationOpen(false);
+    setActiveMenuId(null);
+    setSearchFocused(false);
+    setSearchSuggestions([]);
+  }, []);
+
+  useEffect(() => {
+    closeSearchUi();
+  }, [pathname, closeSearchUi]);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -239,6 +251,7 @@ const Header = () => {
       const query = searchQuery.trim();
 
       if (!query) {
+        closeSearchUi();
         window.location.assign("/");
         return;
       }
@@ -247,6 +260,7 @@ const Header = () => {
         return;
       }
 
+      closeSearchUi();
       setSearching(true);
 
       try {
@@ -259,15 +273,11 @@ const Header = () => {
 
         if (destinationPath) {
           router.push(destinationPath);
-          setSearchFocused(false);
-          setSearchSuggestions([]);
           return;
         }
 
         if (items.length > 0) {
           router.push(searchPathFromQuery(query));
-          setSearchFocused(false);
-          setSearchSuggestions([]);
           return;
         }
 
@@ -278,7 +288,7 @@ const Header = () => {
         setSearching(false);
       }
     },
-    [searchQuery, router, searching]
+    [searchQuery, router, searching, closeSearchUi]
   );
 
   useEffect(() => {
@@ -469,6 +479,7 @@ const Header = () => {
               />
               <button
                 type="submit"
+                onClick={closeSearchUi}
                 aria-label="Buscar"
                 disabled={searching}
                 aria-busy={searching}
@@ -485,7 +496,7 @@ const Header = () => {
                       onMouseDown={(event) => event.preventDefault()}
                       onClick={() => {
                         setSearchQuery("");
-                        setSearchFocused(false);
+                        closeSearchUi();
                       }}
                       className="block px-4 py-2 text-left text-sm font-medium text-dark hover:bg-gray-1 hover:text-blue"
                     >
@@ -533,7 +544,7 @@ const Header = () => {
                       onMouseDown={(event) => event.preventDefault()}
                       onClick={() => {
                         setSearchQuery("");
-                        setSearchFocused(false);
+                        closeSearchUi();
                       }}
                       className="block px-4 py-2 text-left text-sm font-medium text-dark hover:bg-gray-1 hover:text-blue"
                     >
