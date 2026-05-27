@@ -395,7 +395,7 @@ const Header = () => {
                             return;
                           }
 
-                          if (event.detail >= 2 && menuItem.path) {
+                          if (menuItem.path) {
                             setNavigationOpen(false);
                             setActiveMenuId(null);
                             router.push(menuItem.path);

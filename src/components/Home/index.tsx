@@ -27,12 +27,13 @@ const Home = async () => {
     getActiveBanners("home_mega"),
     getActiveBanners("banner_medio"),
   ]);
+  const visibleSections = productSections.filter((section) => section.id !== "promocao");
 
   return (
     <main>
       <Hero banners={megaBanners} />
       <Categories categories={categories} />
-      {productSections.slice(0, 2).map((section) => (
+      {visibleSections.slice(0, 2).map((section) => (
         <NewArrival
           key={section.id}
           eyebrow={section.eyebrow}
@@ -42,7 +43,7 @@ const Home = async () => {
       ))}
       <PromoBanner banners={homeMegaBanners} />
       <PartnersCarousel />
-      {productSections.slice(2).map((section) => (
+      {visibleSections.slice(2).map((section) => (
         <NewArrival
           key={section.id}
           eyebrow={section.eyebrow}
