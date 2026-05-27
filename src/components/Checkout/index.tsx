@@ -15,6 +15,9 @@ import {
   trackEvent,
 } from "@/lib/tracking";
 
+const ROUTE_STORAGE_KEY = "pepperone:last-internal-route";
+const DEFAULT_RETURN_ROUTE = "/brindes-para-empresas";
+
 const fields = [
   { name: "fantasia", label: "Empresa ou nome", placeholder: "Ex.: Pepperone Brindes", required: true },
   { name: "contato", label: "Contato", placeholder: "Nome do responsável", required: true },
@@ -38,6 +41,7 @@ const Checkout = () => {
   const [message, setMessage] = useState("");
   const [cepLoading, setCepLoading] = useState(false);
   const [attribution, setAttribution] = useState<AttributionParams>({});
+  const [returnRoute, setReturnRoute] = useState(DEFAULT_RETURN_ROUTE);
 
   const total = cartItems.reduce(
     (sum, item) => sum + item.discountedPrice * item.quantity,
@@ -52,6 +56,11 @@ const Checkout = () => {
       ...storedAttribution,
       ...queryAttribution,
     });
+
+    const storedReturnRoute = sessionStorage.getItem(ROUTE_STORAGE_KEY);
+    if (storedReturnRoute) {
+      setReturnRoute(storedReturnRoute);
+    }
   }, []);
 
   const handleCepBlur = async (event: FocusEvent<HTMLInputElement>) => {
@@ -254,6 +263,25 @@ const Checkout = () => {
                       </p>
                     </div>
 
+                    <button
+                      type="submit"
+                      disabled={status === "loading" || cartItems.length === 0}
+                      className="mt-7.5 flex w-full justify-center rounded-md bg-blue px-6 py-3 font-medium text-white duration-200 hover:bg-blue-dark disabled:cursor-not-allowed disabled:bg-dark-4"
+                    >
+                      {status === "loading"
+                        ? "Enviando..."
+                        : "Enviar solicitação de orçamento"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => router.push(returnRoute || DEFAULT_RETURN_ROUTE)}
+                      className="mt-3 flex w-full justify-center rounded-md px-6 py-3 font-medium text-white duration-200 hover:opacity-95"
+                      style={{ backgroundColor: "rgb(250, 70, 2)" }}
+                    >
+                      Escolher mais produtos
+                    </button>
+
                     {message && (
                       <p
                         className={`mt-5 rounded-md px-4 py-3 text-sm ${
@@ -266,15 +294,6 @@ const Checkout = () => {
                       </p>
                     )}
 
-                    <button
-                      type="submit"
-                      disabled={status === "loading" || cartItems.length === 0}
-                      className="mt-7.5 flex w-full justify-center rounded-md bg-blue px-6 py-3 font-medium text-white duration-200 hover:bg-blue-dark disabled:cursor-not-allowed disabled:bg-dark-4"
-                    >
-                      {status === "loading"
-                        ? "Enviando..."
-                        : "Enviar solicitação de orçamento"}
-                    </button>
                   </div>
 
                   <div className="pb-6 px-4 sm:px-8.5">

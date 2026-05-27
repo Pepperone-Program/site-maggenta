@@ -1,7 +1,8 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, Suspense, useEffect } from "react";
 import Script from "next/script";
+import { usePathname, useSearchParams } from "next/navigation";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import { CartModalProvider } from "../context/CartSidebarModalContext";
@@ -14,6 +15,28 @@ import ClarityInit from "@/components/Common/ClarityInit";
 import MarketingPixels from "@/components/Common/MarketingPixels";
 import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "sonner";
+
+const ROUTE_STORAGE_KEY = "pepperone:last-internal-route";
+const ROUTE_CURRENT_KEY = "pepperone:current-internal-route";
+
+const RouteHistoryTracker = () => {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const query = searchParams.toString();
+    const currentRoute = query ? `${pathname}?${query}` : pathname;
+    const previousRoute = sessionStorage.getItem(ROUTE_CURRENT_KEY);
+
+    if (previousRoute && previousRoute !== currentRoute) {
+      sessionStorage.setItem(ROUTE_STORAGE_KEY, previousRoute);
+    }
+
+    sessionStorage.setItem(ROUTE_CURRENT_KEY, currentRoute);
+  }, [pathname, searchParams]);
+
+  return null;
+};
 
 const ClientShell = ({ children }: { children: ReactNode }) => {
   return (
@@ -29,6 +52,9 @@ const ClientShell = ({ children }: { children: ReactNode }) => {
       <ReduxProvider>
         <CartModalProvider>
           <PreviewSliderProvider>
+            <Suspense fallback={null}>
+              <RouteHistoryTracker />
+            </Suspense>
             <Header />
             {children}
             <CartSidebarModal />
