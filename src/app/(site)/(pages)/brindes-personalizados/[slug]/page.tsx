@@ -1,6 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import ShopDetails from "@/components/ShopDetails";
 import { productPath } from "@/lib/products";
 import {
@@ -125,7 +125,7 @@ const ProductPage = async ({ params }: ProductPageProps) => {
   const product = await getProdutoBySlug(slug);
 
   if (!product) {
-    notFound();
+    redirect("/");
   }
 
   if (slug !== product.slug) {
