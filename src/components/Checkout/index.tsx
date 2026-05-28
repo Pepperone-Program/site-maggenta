@@ -19,17 +19,17 @@ const ROUTE_STORAGE_KEY = "pepperone:last-internal-route";
 const DEFAULT_RETURN_ROUTE = "/brindes-para-empresas";
 
 const fields = [
-  { name: "fantasia", label: "Empresa ou nome", placeholder: "Ex.: Pepperone Brindes", required: true },
+  { name: "fantasia", label: "Empresa ou nome", placeholder: "Ex.: Pepperone Brindes", required: false },
   { name: "contato", label: "Contato", placeholder: "Nome do responsável", required: true },
   { name: "email", label: "E-mail", type: "email", placeholder: "vendas@empresa.com.br", required: true },
-  { name: "tel", label: "Telefone", placeholder: "(11) 99999-9999", required: true },
+  { name: "tel", label: "Telefone", placeholder: "(11) 99999-9999", required: false },
   { name: "endereco", label: "Endereço", placeholder: "Rua, avenida ou travessa", required: true },
   { name: "endereco_n", label: "Número", placeholder: "43" },
   { name: "endereco_compl", label: "Complemento", placeholder: "Sala, bloco ou referência" },
-  { name: "bairro", label: "Bairro", placeholder: "Casa Verde" },
-  { name: "cep", label: "CEP", placeholder: "02515-010" },
-  { name: "cidade", label: "Cidade", placeholder: "Sao Paulo", required: true },
-  { name: "uf", label: "UF", placeholder: "SP", maxLength: 2, required: true },
+  { name: "bairro", label: "Bairro", placeholder: "Casa Verde", required: false},
+  { name: "cep", label: "CEP", placeholder: "02515-010", required: false },
+  { name: "cidade", label: "Cidade", placeholder: "Sao Paulo", required: false },
+  { name: "uf", label: "UF", placeholder: "SP", maxLength: 2, required: false },
 ];
 
 const Checkout = () => {

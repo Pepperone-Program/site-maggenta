@@ -365,13 +365,13 @@ const ShopDetails = ({
                   </button>
                 </div>
 
-                <button
-                  type="button"
+                <Link
+                  href="/orcamentos"
                   onClick={handleAddToCart}
-                  className="h-12 flex-1 rounded-md bg-blue px-8 text-sm font-semibold text-white duration-200 hover:bg-blue-dark"
+                  className="flex h-12 flex-1 items-center justify-center rounded-md bg-blue px-8 text-center text-sm font-semibold text-white duration-200 hover:bg-blue-dark"
                 >
                   Adicionar ao orçamento
-                </button>
+                </Link>
                 <button
                   type="button"
                   onClick={() => setShowTags((value) => !value)}
