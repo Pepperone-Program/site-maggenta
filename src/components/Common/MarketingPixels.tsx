@@ -1,40 +1,21 @@
 "use client";
 
 import Script from "next/script";
+import { ga4Id, googleAdsId } from "@/lib/google-tags";
 
-const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
-const ga4Id = process.env.NEXT_PUBLIC_GA4_ID;
-const googleAdsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID;
 const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
 const MarketingPixels = () => {
-  const hasGoogleTags = Boolean(gtmId || ga4Id || googleAdsId);
+  const hasGoogleTags = Boolean(ga4Id || googleAdsId);
 
   return (
     <>
-      {gtmId && (
-        <>
-          <Script
-            id="gtm-script"
-            strategy="afterInteractive"
-            src={`https://www.googletagmanager.com/gtm.js?id=${gtmId}`}
-          />
-          <Script
-            id="gtm-init"
-            strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `window.dataLayer = window.dataLayer || []; window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });`,
-            }}
-          />
-        </>
-      )}
-
       {hasGoogleTags && (
         <>
           <Script
             id="gtag-src"
             strategy="afterInteractive"
-            src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id || googleAdsId || gtmId}`}
+            src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id || googleAdsId}`}
           />
           <Script
             id="gtag-init"
