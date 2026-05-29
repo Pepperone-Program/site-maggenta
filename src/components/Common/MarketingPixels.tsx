@@ -1,12 +1,12 @@
 "use client";
 
 import Script from "next/script";
-import { ga4Id, googleAdsId } from "@/lib/google-tags";
+import { googleAdsId } from "@/lib/google-tags";
 
 const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
 const MarketingPixels = () => {
-  const hasGoogleTags = Boolean(ga4Id || googleAdsId);
+  const hasGoogleTags = Boolean(googleAdsId);
 
   return (
     <>
@@ -15,7 +15,7 @@ const MarketingPixels = () => {
           <Script
             id="gtag-src"
             strategy="afterInteractive"
-            src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id || googleAdsId}`}
+            src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsId}`}
           />
           <Script
             id="gtag-init"
@@ -26,7 +26,6 @@ const MarketingPixels = () => {
                 function gtag(){dataLayer.push(arguments);} 
                 window.gtag = gtag;
                 gtag('js', new Date());
-                ${ga4Id ? `gtag('config', '${ga4Id}');` : ""}
                 ${googleAdsId ? `gtag('config', '${googleAdsId}');` : ""}
               `,
             }}

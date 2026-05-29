@@ -4,7 +4,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import ClientShell from "./ClientShell";
 import { buildSeoOther, marketKeywords, ogImageUrl, siteName, siteUrl } from "@/lib/seo";
-import { googleTagManagerId } from "@/lib/google-tags";
+import { googleAnalyticsId, googleTagManagerId } from "@/lib/google-tags";
 
 const defaultTitle = "Brindes Personalizados | Pepperone Brindes ";
 const defaultDescription =
@@ -126,6 +126,22 @@ export default function RootLayout({
           id="google-tag-manager"
           async
           src={`https://www.googletagmanager.com/gtm.js?id=${googleTagManagerId}`}
+        />
+        <script
+          id="google-analytics"
+          async
+          src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`}
+        />
+        <script
+          id="google-analytics-init"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${googleAnalyticsId}');
+            `,
+          }}
         />
         <script
           type="application/ld+json"
