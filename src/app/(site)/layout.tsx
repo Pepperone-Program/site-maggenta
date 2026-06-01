@@ -4,7 +4,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import ClientShell from "./ClientShell";
 import { buildSeoOther, marketKeywords, ogImageUrl, siteName, siteUrl } from "@/lib/seo";
-import { googleAnalyticsId, googleTagManagerId } from "@/lib/google-tags";
+import { googleAdsId, googleAnalyticsId, googleTagManagerId } from "@/lib/google-tags";
 
 const defaultTitle = "Brindes Personalizados | Pepperone Brindes ";
 const defaultDescription =
@@ -140,6 +140,7 @@ export default function RootLayout({
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
               gtag('config', '${googleAnalyticsId}');
+              gtag('config', '${googleAdsId}');
             `,
           }}
         />

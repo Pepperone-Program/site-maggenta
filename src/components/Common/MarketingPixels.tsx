@@ -1,38 +1,12 @@
 "use client";
 
 import Script from "next/script";
-import { googleAdsId } from "@/lib/google-tags";
 
 const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
 const MarketingPixels = () => {
-  const hasGoogleTags = Boolean(googleAdsId);
-
   return (
     <>
-      {hasGoogleTags && (
-        <>
-          <Script
-            id="gtag-src"
-            strategy="afterInteractive"
-            src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsId}`}
-          />
-          <Script
-            id="gtag-init"
-            strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);} 
-                window.gtag = gtag;
-                gtag('js', new Date());
-                ${googleAdsId ? `gtag('config', '${googleAdsId}');` : ""}
-              `,
-            }}
-          />
-        </>
-      )}
-
       {metaPixelId && (
         <>
           <Script

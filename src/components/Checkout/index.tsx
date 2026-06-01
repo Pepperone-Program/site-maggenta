@@ -5,6 +5,7 @@ import ImageWithFallback from "@/components/Common/ImageWithFallback";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
 import { useAppSelector } from "@/redux/store";
+import { quoteConversionStorageKey } from "@/lib/google-tags";
 import { formatDisplayPrice } from "@/lib/products";
 import {
   type AttributionParams,
@@ -134,6 +135,13 @@ const Checkout = () => {
         items: cartItems.length,
         value: Number(total.toFixed(2)),
       });
+      sessionStorage.setItem(
+        quoteConversionStorageKey,
+        JSON.stringify({
+          email: String(customer.email || ""),
+          phone_number: String(customer.tel || ""),
+        })
+      );
       router.push("/orcamentos-obrigado");
     } catch (error) {
       setStatus("error");

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Metadata } from "next";
+import QuoteConversion from "@/components/Tracking/QuoteConversion";
 import { buildSeoOther, siteUrl } from "@/lib/seo";
 
 const title = "Orçamento enviado com sucesso";
@@ -27,6 +28,7 @@ export const metadata: Metadata = {
 const OrcamentosObrigadoPage = () => {
   return (
     <main className="min-h-screen bg-gray-2 pt-[150px] sm:pt-[138px]">
+      <QuoteConversion />
       <section className="mx-auto flex min-h-[calc(100vh-180px)] w-full max-w-[900px] items-center justify-center px-4 py-16">
         <div className="w-full rounded-md bg-white px-6 py-12 text-center shadow-1 sm:px-10 sm:py-16">
           <div className="mx-auto mb-7 flex h-24 w-24 items-center justify-center rounded-full bg-green/10 text-green">

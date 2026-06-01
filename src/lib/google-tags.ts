@@ -3,4 +3,9 @@ export const googleTagManagerId =
 
 export const googleAnalyticsId =
   process.env.NEXT_PUBLIC_GA4_ID || "G-KPTW37WV4S";
-export const googleAdsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID;
+export const googleAdsId =
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || "AW-817589373";
+export const googleAdsConversionLabel =
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL ||
+  "SEU_ROTULO_DE_CONVERSAO";
+export const quoteConversionStorageKey = "pepperone:quote-conversion";
