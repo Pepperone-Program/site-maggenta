@@ -2,6 +2,7 @@ import shopData from "@/components/Shop/shopData";
 import categoryData from "@/components/Home/Categories/categoryData";
 import { Product } from "@/types/product";
 import { Category } from "@/types/category";
+import { fetchWithTimeout } from "@/lib/timed-fetch";
 import { isValidImageSrc, safeImageSrc } from "@/lib/images";
 import {
   friendlyParam,
@@ -369,7 +370,7 @@ const apiRequest = async (path: string, init: RequestInit = {}) => {
   try {
     const method = (init.method || "GET").toUpperCase();
     const isGet = method === "GET";
-    const response = await fetch(url, {
+    const response = await fetchWithTimeout(url, {
       ...init,
       cache: isGet ? undefined : "no-store",
       next: isGet ? { revalidate: 300 } : undefined,

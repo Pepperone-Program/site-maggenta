@@ -2,6 +2,7 @@
 
 import React, { FormEvent, useState } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
+import { fetchWithTimeout, isRequestTimeoutError } from "@/lib/timed-fetch";
 import { trackEvent } from "@/lib/tracking";
 
 const hours = [
@@ -30,7 +31,7 @@ const Contact = () => {
     const payload = Object.fromEntries(formData.entries());
 
     try {
-      const response = await fetch("/api/contato", {
+      const response = await fetchWithTimeout("/api/contato", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -49,7 +50,9 @@ const Contact = () => {
     } catch (error) {
       setStatus("error");
       setMessage(
-        error instanceof Error ? error.message : "Nao foi possivel enviar sua mensagem."
+        isRequestTimeoutError(error)
+          ? "A API demorou para responder. Tente novamente em alguns instantes."
+          : error instanceof Error ? error.message : "Nao foi possivel enviar sua mensagem."
       );
     }
   };

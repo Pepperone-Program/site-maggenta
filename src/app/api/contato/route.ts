@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { buildApiUrl } from "@/lib/api";
+import { fetchWithTimeout, isRequestTimeoutError } from "@/lib/timed-fetch";
 
 const requiredFields = ["nome", "email", "assunto", "mensagem"];
 
@@ -31,23 +32,35 @@ export async function POST(request: Request) {
     );
   }
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      nome: String(body.nome || ""),
-      empresa: String(body.empresa || ""),
-      email: String(body.email || ""),
-      telefone: String(body.telefone || ""),
-      assunto: String(body.assunto || ""),
-      mensagem: String(body.mensagem || ""),
-    }),
-  });
-  const payload = await response.json().catch(() => null);
+  try {
+    const response = await fetchWithTimeout(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nome: String(body.nome || ""),
+        empresa: String(body.empresa || ""),
+        email: String(body.email || ""),
+        telefone: String(body.telefone || ""),
+        assunto: String(body.assunto || ""),
+        mensagem: String(body.mensagem || ""),
+      }),
+    });
+    const payload = await response.json().catch(() => null);
 
-  return NextResponse.json(payload || { success: response.ok }, {
-    status: response.ok ? 200 : response.status,
-  });
+    return NextResponse.json(payload || { success: response.ok }, {
+      status: response.ok ? 200 : response.status,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: isRequestTimeoutError(error)
+          ? "A API demorou para responder. Tente novamente em alguns instantes."
+          : "Nao foi possivel enviar sua mensagem.",
+      },
+      { status: 504 }
+    );
+  }
 }
