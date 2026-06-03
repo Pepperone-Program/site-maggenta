@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildApiUrl } from "@/lib/api";
+import { fetchWithTimeout } from "@/lib/timed-fetch";
 
 export async function GET(request: NextRequest) {
   const id = request.nextUrl.searchParams.get("id");
@@ -20,9 +21,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const response = await fetch(url, {
+    const response = await fetchWithTimeout(url, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
-      signal: AbortSignal.timeout(8000),
     });
 
     if (!response.ok) {

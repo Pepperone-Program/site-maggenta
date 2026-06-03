@@ -10,6 +10,7 @@ import { useSelector } from "react-redux";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import { selectTotalPrice } from "@/redux/features/cart-slice";
 import { formatDisplayPrice } from "@/lib/products";
+import { fetchWithTimeout } from "@/lib/timed-fetch";
 import { personalizedSuffix } from "@/lib/slugs";
 import { useAppSelector } from "@/redux/store";
 import { toast } from "sonner";
@@ -215,7 +216,7 @@ const Header = () => {
     setSearchSuggestions([]);
     const controller = new AbortController();
     const timer = setTimeout(() => {
-      fetch(`/api/produtos/busca?q=${encodeURIComponent(query)}&limit=10`, {
+      fetchWithTimeout(`/api/produtos/busca?q=${encodeURIComponent(query)}&limit=10`, {
         signal: controller.signal,
       })
         .then((response) => {
@@ -264,7 +265,7 @@ const Header = () => {
       setSearching(true);
 
       try {
-        const response = await fetch(
+        const response = await fetchWithTimeout(
           `/api/produtos/busca?q=${encodeURIComponent(query)}&limit=1`
         );
         const payload: SearchSubmitPayload | null = response.ok ? await response.json() : null;
@@ -295,7 +296,7 @@ const Header = () => {
     let active = true;
     const controller = new AbortController();
 
-    fetch("/api/menu", { signal: controller.signal })
+    fetchWithTimeout("/api/menu", { signal: controller.signal })
       .then((response) => (response.ok ? response.json() : null))
       .then((payload) => {
         if (active && Array.isArray(payload?.data)) {

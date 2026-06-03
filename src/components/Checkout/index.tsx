@@ -5,6 +5,7 @@ import ImageWithFallback from "@/components/Common/ImageWithFallback";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
 import { useAppSelector } from "@/redux/store";
+import { fetchWithTimeout, isRequestTimeoutError } from "@/lib/timed-fetch";
 import { quoteConversionStorageKey } from "@/lib/google-tags";
 import { formatDisplayPrice } from "@/lib/products";
 import {
@@ -75,7 +76,7 @@ const Checkout = () => {
     setCepLoading(true);
 
     try {
-      const response = await fetch(`https://brasilapi.com.br/api/cep/v1/${cep}`);
+      const response = await fetchWithTimeout(`https://brasilapi.com.br/api/cep/v1/${cep}`);
 
       if (!response.ok || !form) {
         return;
@@ -109,7 +110,7 @@ const Checkout = () => {
     const customer = Object.fromEntries(formData.entries());
 
     try {
-      const response = await fetch("/api/orcamento", {
+      const response = await fetchWithTimeout("/api/orcamento", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -146,7 +147,9 @@ const Checkout = () => {
     } catch (error) {
       setStatus("error");
       setMessage(
-        error instanceof Error ? error.message : "Nao foi possivel enviar o orcamento."
+        isRequestTimeoutError(error)
+          ? "A API demorou para responder. Tente novamente em alguns instantes."
+          : error instanceof Error ? error.message : "Nao foi possivel enviar o orcamento."
       );
     }
   };

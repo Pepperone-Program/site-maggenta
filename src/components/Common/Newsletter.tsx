@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { fetchWithTimeout, isRequestTimeoutError } from "@/lib/timed-fetch";
 
 const Newsletter = () => {
   const [email, setEmail] = useState("");
@@ -13,7 +14,7 @@ const Newsletter = () => {
     setMessage("");
 
     try {
-      const response = await fetch("/api/newsletter", {
+      const response = await fetchWithTimeout("/api/newsletter", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -31,7 +32,11 @@ const Newsletter = () => {
       setEmail("");
     } catch (error) {
       setStatus("error");
-      setMessage(error instanceof Error ? error.message : "Nao foi possivel cadastrar seu email.");
+      setMessage(
+        isRequestTimeoutError(error)
+          ? "A API demorou para responder. Tente novamente em alguns instantes."
+          : error instanceof Error ? error.message : "Nao foi possivel cadastrar seu email."
+      );
     }
   };
 

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import SingleOrder from "./SingleOrder";
 import ordersData from "./ordersData";
+import { fetchWithTimeout } from "@/lib/timed-fetch";
 
 const Orders = () => {
   const [orders, setOrders] = useState<any>([]);
 
   useEffect(() => {
-    fetch(`/api/order`)
+    fetchWithTimeout(`/api/order`)
       .then((res) => res.json())
       .then((data) => {
         setOrders(data.orders);
