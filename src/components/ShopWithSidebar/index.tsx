@@ -10,7 +10,7 @@ import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
 import shopData from "../Shop/shopData";
 import type { CatalogoOption, CatalogoProdutos } from "@/lib/api";
-import { friendlyParam } from "@/lib/slugs";
+import { friendlyPersonalizedParam } from "@/lib/slugs";
 import type { Product } from "@/types/product";
 
 type ActiveFilters = {
@@ -414,7 +414,7 @@ const ShopWithSidebar = ({
   const selectSubcategory = (id: number) => {
     const selectedSubcategory = subcategoryOptions.find((option) => option.id === id);
     const subcategoryParam = selectedSubcategory
-      ? friendlyParam(id, selectedSubcategory.label, "personalizado")
+      ? friendlyPersonalizedParam(id, selectedSubcategory.label)
       : String(id);
 
     router.push(`/subcategorias/${encodeURIComponent(subcategoryParam)}`);
@@ -423,7 +423,7 @@ const ShopWithSidebar = ({
   const selectCategory = (id: number) => {
     const selectedCategory = categories.find((category) => category.id === id);
     const categoryParam = selectedCategory
-      ? friendlyParam(id, selectedCategory.title, "personalizados")
+      ? friendlyPersonalizedParam(id, selectedCategory.title)
       : String(id);
 
     router.push(`/categorias/${encodeURIComponent(categoryParam)}`);

@@ -3,7 +3,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { isValidImageSrc } from "@/lib/images";
-import { friendlyParam } from "@/lib/slugs";
+import { friendlyPersonalizedParam } from "@/lib/slugs";
 
 const SingleItem = ({ item, priority = false }: { item: Category; priority?: boolean }) => {
   const hasImage = isValidImageSrc(item.img);
@@ -11,7 +11,7 @@ const SingleItem = ({ item, priority = false }: { item: Category; priority?: boo
   return (
     <Link
       href={`/categorias/${encodeURIComponent(
-        friendlyParam(item.id, item.title, "personalizados")
+        friendlyPersonalizedParam(item.id, item.title)
       )}`}
       className="group flex flex-col items-center"
     >

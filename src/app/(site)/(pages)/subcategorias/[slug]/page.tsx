@@ -1,5 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
+import { permanentRedirect } from "next/navigation";
 import ShopWithSidebar from "@/components/ShopWithSidebar";
 import {
   getCatalogoCategorias,
@@ -7,13 +8,17 @@ import {
   getDatasPromocionais,
   getPublicosAlvos,
 } from "@/lib/api";
-import { buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
+import { buildSeoOther, contextualKeywords, siteName, siteUrl, subcategoryPath } from "@/lib/seo";
 
 export const revalidate = 120;
 
 type PageProps = {
   params?: Promise<{ slug?: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+const firstParam = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] : value;
 
 const toNumber = (value: string | undefined) => {
   const parsed = parseInt(String(value || ""), 10);
@@ -36,7 +41,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const subcategoriaName = titleFromSlug(slug) || "Subcategoria";
   const title = `${subcategoriaName} Personalizado Brindes Personalizados`;
   const description = `${subcategoriaName} Personalizado, Querendo comprar Brindes Personalizados? É aqui na Pepperone Brindes`;
-  const canonical = new URL(`/subcategorias/${slug}`, siteUrl).toString();
+  const canonical = new URL(
+    subcategoryPath(subcategoriaId || 0, subcategoriaName),
+    siteUrl
+  ).toString();
 
   return {
     title,
@@ -70,8 +78,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-const SubcategoriaPage = async ({ params }: PageProps) => {
+const SubcategoriaPage = async ({ params, searchParams }: PageProps) => {
   const routeParams = (await params) || {};
+  const query = (await searchParams) || {};
   const slug = routeParams.slug || "";
   const subcategoriaId = toNumber(slug) || 0;
   const subcategoriaName = titleFromSlug(slug) || "Subcategoria";
@@ -81,6 +90,12 @@ const SubcategoriaPage = async ({ params }: PageProps) => {
     getPublicosAlvos(),
     getDatasPromocionais(),
   ]);
+  const canonicalPath = subcategoryPath(subcategoriaId || 0, subcategoriaName);
+  const currentPath = `/subcategorias/${slug}`;
+
+  if (currentPath !== canonicalPath || firstParam(query.page)) {
+    permanentRedirect(canonicalPath);
+  }
 
   return (
     <main>
@@ -95,7 +110,7 @@ const SubcategoriaPage = async ({ params }: PageProps) => {
         publicOptions={publicosAlvos}
         dateOptions={datasPromocionais}
         pageTitle={`${subcategoriaName} personalizado`}
-        basePath={`/subcategorias/${slug}`}
+        basePath={canonicalPath}
       />
     </main>
   );

@@ -3,14 +3,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
 import Link from "next/link";
-import { useDispatch } from "react-redux";
-import { addItemToCart } from "@/redux/features/cart-slice";
-import { AppDispatch } from "@/redux/store";
 import ProductItem from "@/components/Common/ProductItem";
 import Newsletter from "@/components/Common/Newsletter";
 import { Product } from "@/types/product";
-import { friendlyParam } from "@/lib/slugs";
-import { showAddedToCartMessage } from "@/lib/cart-feedback";
+import { friendlyPersonalizedParam } from "@/lib/slugs";
+import { useAddProductToCart } from "@/lib/hooks/useAddProductToCart";
 
 const getYoutubeVideoId = (value?: string | null) => {
   const video = value?.trim();
@@ -55,7 +52,7 @@ const ShopDetails = ({
   product: Product;
   relatedProducts: Product[];
 }) => {
-  const dispatch = useDispatch<AppDispatch>();
+  const addProductToCart = useAddProductToCart();
   const minimumQuantity = Math.max(1, Number(product.quantidadeMinima || 1));
   const [previewImg, setPreviewImg] = useState(0);
   const [activeMedia, setActiveMedia] = useState<"image" | "video">("image");
@@ -67,7 +64,7 @@ const ShopDetails = ({
   const wheelLockRef = useRef(0);
   const categoryPath = product.categoryId
     ? `/categorias/${encodeURIComponent(
-        friendlyParam(product.categoryId, product.category, "personalizados")
+        friendlyPersonalizedParam(product.categoryId, product.category)
       )}`
     : "/brindes-personalizados";
   const youtubeVideoId = getYoutubeVideoId(product.video);
@@ -143,13 +140,7 @@ const ShopDetails = ({
 
     setQuantity(safeQuantity);
     setQuantityInput(String(safeQuantity));
-    dispatch(
-      addItemToCart({
-        ...product,
-        quantity: safeQuantity,
-      })
-    );
-    showAddedToCartMessage(product.title, safeQuantity);
+    addProductToCart(product, safeQuantity);
   };
 
   const updateQuantity = (value: string) => {
@@ -222,7 +213,7 @@ const ShopDetails = ({
                       setActiveMedia("image");
                       setPreviewImg(key);
                     }}
-                    key={item}
+                    key={`${product.id}-thumbnail-${key}-${item}`}
                     className={`flex h-20 w-20 items-center justify-center rounded-md border bg-white p-2 shadow-1 duration-200 hover:border-blue sm:h-24 sm:w-24 ${
                       activeMedia === "image" && key === previewImg
                         ? "border-blue"

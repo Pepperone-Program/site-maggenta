@@ -1,9 +1,11 @@
 import React from "react";
 import { Metadata } from "next";
+import { permanentRedirect } from "next/navigation";
 import ShopWithoutSidebar from "@/components/ShopWithoutSidebar";
 import {
   getCatalogoSubcategoria,
   getCatalogoTipoProduto,
+  friendlyPersonalizedParam,
   personalizedTitle,
   searchProdutosSiteAll,
   searchProdutosSiteWithDestination,
@@ -25,7 +27,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const displayName = personalizedTitle(tipoName);
   const title = `${displayName} para Empresas e Eventos`;
   const description = `${displayName}, Querendo comprar Brindes Personalizados? E aqui na Pepperone Brindes`;
-  const canonical = new URL(`/categorias/${slug}`, siteUrl).toString();
+  const tipoId = catalogo.tipo_produto?.id_tipo_produto || toNumber(slug) || 0;
+  const canonical = new URL(
+    `/brindes-para-empresas/${encodeURIComponent(friendlyPersonalizedParam(tipoId, tipoName))}`,
+    siteUrl
+  ).toString();
 
   return {
     title,
@@ -126,6 +132,14 @@ const BrindesParaEmpresasTipoPage = async ({ params }: PageProps) => {
   const routeParams = (await params) || {};
   const catalogo = await resolveCatalogo(routeParams.slug || "");
   const title = catalogo.tipo_produto?.tipo_produto || "Brindes para empresas";
+  const tipoId = catalogo.tipo_produto?.id_tipo_produto || toNumber(routeParams.slug) || 0;
+  const canonicalPath = `/brindes-para-empresas/${encodeURIComponent(
+    friendlyPersonalizedParam(tipoId, title)
+  )}`;
+
+  if (`/brindes-para-empresas/${routeParams.slug || ""}` !== canonicalPath) {
+    permanentRedirect(canonicalPath);
+  }
 
   return (
     <main>

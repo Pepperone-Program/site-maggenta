@@ -3,13 +3,12 @@ import { Metadata } from "next";
 import { permanentRedirect } from "next/navigation";
 import ShopWithSidebar from "@/components/ShopWithSidebar";
 import {
-  friendlyParam,
   getCatalogoCategoria,
   getCatalogoCategorias,
   getDatasPromocionais,
   getPublicosAlvos,
 } from "@/lib/api";
-import { buildSeoOther, contextualKeywords, siteUrl } from "@/lib/seo";
+import { buildSeoOther, categoryPath, contextualKeywords, siteUrl } from "@/lib/seo";
 
 export const revalidate = 120;
 
@@ -80,11 +79,7 @@ const BrindesPersonalizadosPage = async ({ searchParams }: CatalogPageProps) => 
       categorias.find((category) => category.id === categoriaId)?.title ||
       "brindes";
     const query = redirectParams.toString();
-    permanentRedirect(
-      `/categorias/${encodeURIComponent(
-        friendlyParam(categoriaId, categoryTitle, "personalizados")
-      )}${query ? `?${query}` : ""}`
-    );
+    permanentRedirect(`${categoryPath(categoriaId, categoryTitle)}${query ? `?${query}` : ""}`);
   }
 
   return (

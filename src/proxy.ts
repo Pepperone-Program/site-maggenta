@@ -26,6 +26,15 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(homeUrl, 308);
   }
 
+  if (
+    pathname === "/categorias/[slug]" ||
+    pathname === "/subcategorias/[slug]" ||
+    pathname === "/brindes-personalizados/[slug]" ||
+    pathname === "/brindes-para-empresas/[slug]"
+  ) {
+    return NextResponse.redirect(homeUrl, 308);
+  }
+
   if (pathname.startsWith("/index.php/brindes-personalizados/")) {
     url.pathname = pathname.replace(
       "/index.php/brindes-personalizados/",

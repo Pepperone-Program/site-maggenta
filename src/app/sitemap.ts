@@ -20,6 +20,8 @@ const staticLastModified = new Date(
   process.env.SITEMAP_STATIC_LASTMOD || "2026-05-19T00:00:00.000Z"
 );
 
+const sitemapPath = (path: string) => path.split(/[?#]/)[0];
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = routes.map((route) => ({
     url: `${siteUrl}${route}`,
@@ -42,10 +44,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const menuRoutes = menuGroups
     .flatMap((group) => group.items || [])
     .filter(
-      (item) => item.path && !["/", "/cart", "/wishlist", "/llms.txt"].includes(item.path)
+      (item) =>
+        item.path &&
+        !item.path.includes("[") &&
+        !["/", "/cart", "/wishlist", "/llms.txt"].includes(sitemapPath(item.path))
     )
     .map((item) => ({
-      url: `${siteUrl}${item.path}`,
+      url: `${siteUrl}${sitemapPath(item.path)}`,
       lastModified: staticLastModified,
       changeFrequency: "weekly" as const,
       priority: 0.85,

@@ -1,5 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
+import { permanentRedirect } from "next/navigation";
 import ShopWithSidebar from "@/components/ShopWithSidebar";
 import {
   getCatalogoCategoria,
@@ -7,7 +8,7 @@ import {
   getDatasPromocionais,
   getPublicosAlvos,
 } from "@/lib/api";
-import { buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
+import { buildSeoOther, categoryPath, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
 
 export const revalidate = 120;
 
@@ -142,7 +143,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const categoryName = catalogo.categoria?.categoria || titleFromSlug(slug) || "Categoria";
   const title = categorySeoTitle(categoryName);
   const description = categorySeoDescription(categoryName);
-  const canonical = new URL(`/categorias/${slug}`, siteUrl).toString();
+  const canonical = new URL(categoryPath(categoriaId, categoryName), siteUrl).toString();
 
   return {
     title,
@@ -198,6 +199,15 @@ const CategoriasPage = async ({ params, searchParams }: PageProps) => {
     getPublicosAlvos(),
     getDatasPromocionais(),
   ]);
+  const canonicalPath = categoryPath(
+    catalogo.categoria?.id_categoria || categoriaId,
+    catalogo.categoria?.categoria || titleFromSlug(routeParams.slug || "") || "Categoria"
+  );
+  const currentPath = `/categorias/${routeParams.slug || categoriaId}`;
+
+  if (currentPath !== canonicalPath || firstParam(query.page)) {
+    permanentRedirect(canonicalPath);
+  }
 
   return (
     <main>
@@ -215,7 +225,7 @@ const CategoriasPage = async ({ params, searchParams }: PageProps) => {
         categoryOptions={categorias}
         publicOptions={publicosAlvos}
         dateOptions={datasPromocionais}
-        basePath={`/categorias/${routeParams.slug || categoriaId}`}
+        basePath={canonicalPath}
       />
     </main>
   );

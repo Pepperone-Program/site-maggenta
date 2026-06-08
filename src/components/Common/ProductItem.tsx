@@ -1,33 +1,30 @@
 "use client";
+
 import React, { useCallback } from "react";
+import Link from "next/link";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
 import { Product } from "@/types/product";
-import { addItemToCart } from "@/redux/features/cart-slice";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/redux/store";
-import Link from "next/link";
 import { formatDisplayPrice, productPath } from "@/lib/products";
-import { showAddedToCartMessage } from "@/lib/cart-feedback";
+import { minimumCartQuantity, useAddProductToCart } from "@/lib/hooks/useAddProductToCart";
 
 const ProductItem = ({ item }: { item: Product }) => {
-  const dispatch = useDispatch<AppDispatch>();
+  const addProductToCart = useAddProductToCart();
+  const href = productPath(item);
 
-  const handleAddToCart = useCallback(() => {
-    const quantity = Math.max(1, Number(item.quantidadeMinima || 1));
-    dispatch(
-      addItemToCart({
-        ...item,
-        quantity,
-      })
-    );
-    showAddedToCartMessage(item.title, quantity);
-  }, [dispatch, item]);
+  const handleAddToCart = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      addProductToCart(item, minimumCartQuantity(item));
+    },
+    [addProductToCart, item]
+  );
 
   return (
     <div className="group flex h-full min-h-[430px] flex-col text-center">
       <div className="relative mb-4 flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg bg-[#F6F7FB] p-2">
         <Link
-          href={productPath(item)}
+          href={href}
           aria-label={`Ver detalhes de ${item.title}`}
           className="relative block h-full w-full"
         >
@@ -57,17 +54,19 @@ const ProductItem = ({ item }: { item: Product }) => {
       <p className="mb-1 text-custom-sm font-medium text-blue">{item.category}</p>
 
       <p
-        className="mb-1 min-h-[48px] overflow-hidden font-medium leading-6 text-dark ease-out duration-200 hover:text-blue"
+        className="mb-1 min-h-[48px] overflow-hidden font-medium leading-6 text-dark duration-200 hover:text-blue"
         style={{
           display: "-webkit-box",
           WebkitBoxOrient: "vertical",
           WebkitLineClamp: 2,
         }}
       >
-        <Link href={productPath(item)}> {item.title} </Link>
+        <Link href={href}>{item.title}</Link>
       </p>
 
-      <p className="mb-5 text-normal text-dark-4 hover:text-dark transition-all cursor-pointer">Código: {item.codigo}</p>
+      <p className="mb-5 text-normal text-dark-4 transition-all hover:text-dark">
+        <Link href={href}>Código: {item.codigo}</Link>
+      </p>
 
       {item.discountedPrice > 0 ? (
         <span className="mt-auto flex items-center justify-center gap-2 font-medium text-lg">
@@ -81,6 +80,7 @@ const ProductItem = ({ item }: { item: Product }) => {
       ) : (
         <div className="mt-auto flex justify-center">
           <button
+            type="button"
             onClick={handleAddToCart}
             className="inline-flex w-full justify-center rounded-[5px] bg-blue px-6 py-2 text-custom-sm font-medium text-white duration-200 hover:bg-blue-dark"
           >

@@ -1703,7 +1703,7 @@ const toMenuItems = <T extends Record<string, unknown>>(
       path:
         filterKey === "categoria"
           ? `/categorias/${encodeURIComponent(
-              friendlyParam(String(item[idKey]), String(item[titleKey]), "personalizados")
+              friendlyPersonalizedParam(String(item[idKey]), String(item[titleKey]))
             )}`
         : filterKey === "publico"
             ? `/publicos-alvos/${encodeURIComponent(
@@ -1741,7 +1741,7 @@ export async function getMenuGroups(): Promise<ApiMenuGroup[]> {
         id: String(category.id),
         title: category.title,
         path: `/categorias/${encodeURIComponent(
-          friendlyParam(category.id, category.title, "personalizados")
+          friendlyPersonalizedParam(category.id, category.title)
         )}`,
       })),
     },

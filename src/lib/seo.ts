@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { friendlyPersonalizedParam } from "@/lib/slugs";
 
 export const siteUrl = "https://www.pepperone.com.br";
 export const siteName = "Pepperone Brindes";
@@ -31,7 +32,19 @@ export const uniqueSeoKeywords = (...groups: Array<Array<string | undefined | nu
     });
 };
 
+export const prioritySeoKeywords = [
+  "brindes personalizados para empresas",
+  "empresas de brindes corporativos",
+  "loja brindes personalizados",
+  "empresa de brindes",
+  "brindes premium personalizados",
+  "loja de brindes personalizados",
+  "peperone brindes",
+  "pepperoni brindes",
+];
+
 export const marketKeywords = uniqueSeoKeywords([
+  ...prioritySeoKeywords,
   "brindes personalizados para empresas",
   "brindes corporativos personalizados",
   "produtos promocionais personalizados",
@@ -81,6 +94,12 @@ export const ogImageUrl = ({
 
   return `${siteUrl}/api/og?${params.toString()}`;
 };
+
+export const categoryPath = (id: number | string, title: string) =>
+  `/categorias/${encodeURIComponent(friendlyPersonalizedParam(id, title))}`;
+
+export const subcategoryPath = (id: number | string, title: string) =>
+  `/subcategorias/${encodeURIComponent(friendlyPersonalizedParam(id, title))}`;
 
 export const buildSeoOther = ({
   title,
