@@ -95,7 +95,7 @@ const PreviewSliderModal = () => {
 
       <Swiper ref={sliderRef} slidesPerView={1} spaceBetween={20}>
         {data.imgs.previews.map((image, index) => (
-          <SwiperSlide key={image}>
+          <SwiperSlide key={`${data.id}-preview-${index}-${image}`}>
           <div className="relative flex justify-center items-center">
             <ImageWithFallback
               src={image}

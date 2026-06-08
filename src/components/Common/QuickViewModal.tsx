@@ -3,17 +3,17 @@ import React, { useEffect, useState } from "react";
 
 import { useModalContext } from "@/app/context/QuickViewModalContext";
 import { AppDispatch, useAppSelector } from "@/redux/store";
-import { addItemToCart } from "@/redux/features/cart-slice";
 import { useDispatch } from "react-redux";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { resetQuickView } from "@/redux/features/quickView-slice";
 import { updateproductDetails } from "@/redux/features/product-details";
-import { showAddedToCartMessage } from "@/lib/cart-feedback";
+import { useAddProductToCart } from "@/lib/hooks/useAddProductToCart";
 
 const QuickViewModal = () => {
   const { isModalOpen, closeModal } = useModalContext();
   const { openPreviewModal } = usePreviewSlider();
+  const addProductToCart = useAddProductToCart();
   const [quantity, setQuantity] = useState(1);
 
   const dispatch = useDispatch<AppDispatch>();
@@ -42,14 +42,7 @@ const QuickViewModal = () => {
 
   // add to cart
   const handleAddToCart = () => {
-    dispatch(
-      addItemToCart({
-        ...product,
-        quantity,
-      })
-    );
-    showAddedToCartMessage(product.title, quantity);
-
+    addProductToCart(product, quantity);
     closeModal();
   };
 

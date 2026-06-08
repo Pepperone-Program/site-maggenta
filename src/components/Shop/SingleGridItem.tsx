@@ -4,13 +4,10 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
-import { addItemToCart } from "@/redux/features/cart-slice";
-import { AppDispatch } from "@/redux/store";
 import { productPath } from "@/lib/products";
 import { Product } from "@/types/product";
-import { showAddedToCartMessage } from "@/lib/cart-feedback";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
+import { minimumCartQuantity, useAddProductToCart } from "@/lib/hooks/useAddProductToCart";
 
 const launchBadgeStyle = {
   backgroundColor: "rgb(250, 70, 22)",
@@ -23,22 +20,17 @@ type SingleGridItemProps = {
 
 const SingleGridItem = ({ item, badgeLabel }: SingleGridItemProps) => {
   const router = useRouter();
-  const dispatch = useDispatch<AppDispatch>();
+  const addProductToCart = useAddProductToCart();
   const href = productPath(item);
 
   const prefetchProduct = () => {
     router.prefetch(href);
   };
 
-  const handleAddToCart = () => {
-    const quantity = Math.max(1, Number(item.quantidadeMinima || 1));
-    dispatch(
-      addItemToCart({
-        ...item,
-        quantity,
-      })
-    );
-    showAddedToCartMessage(item.title, quantity);
+  const handleAddToCart = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    addProductToCart(item, minimumCartQuantity(item));
   };
 
   return (
@@ -113,9 +105,16 @@ const SingleGridItem = ({ item, badgeLabel }: SingleGridItemProps) => {
         </Link>
       </p>
 
-      <p className="mb-3 text-center text-custom-sm font-medium text-dark-4">
+      <Link
+        href={href}
+        prefetch
+        onMouseEnter={prefetchProduct}
+        onFocus={prefetchProduct}
+        onTouchStart={prefetchProduct}
+        className="mb-3 text-center text-custom-sm font-medium text-dark-4 duration-200 hover:text-dark"
+      >
         Código: {item.codigo}
-      </p>
+      </Link>
 
       <button
         type="button"

@@ -5,9 +5,7 @@ import {
   friendlyPersonalizedParam,
   searchProdutosSiteWithDestination,
 } from "@/lib/api";
-
-const suffixIfNeeded = (title: string, suffix: string) =>
-  /personalizad/i.test(title) ? "" : suffix;
+import { categoryPath, subcategoryPath } from "@/lib/seo";
 
 const destinationPath = (
   destino: Awaited<ReturnType<typeof searchProdutosSiteWithDestination>>["destinoBusca"]
@@ -18,9 +16,7 @@ const destinationPath = (
 
   if (destino.tipo === "categoria" && destino.id_categoria) {
     const title = destino.categoria || "categoria";
-    return `/categorias/${encodeURIComponent(
-      friendlyParam(destino.id_categoria, title, suffixIfNeeded(title, "personalizados"))
-    )}`;
+    return categoryPath(destino.id_categoria, title);
   }
 
   if (destino.tipo === "tipo_produto" && destino.id_tipo_produto) {
@@ -34,9 +30,7 @@ const destinationPath = (
 
   if (destino.tipo === "subcategoria" && destino.id_subcategoria) {
     const title = destino.subcategoria || "brindes";
-    return `/subcategorias/${encodeURIComponent(
-      friendlyParam(destino.id_subcategoria, title, suffixIfNeeded(title, "personalizado"))
-    )}`;
+    return subcategoryPath(destino.id_subcategoria, title);
   }
 
   return destino.url_sugerida || null;

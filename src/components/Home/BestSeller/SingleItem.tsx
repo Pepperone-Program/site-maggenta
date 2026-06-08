@@ -3,26 +3,21 @@ import React from "react";
 import { Product } from "@/types/product";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
-import { addItemToCart } from "@/redux/features/cart-slice";
 import Image from "next/image";
 import Link from "next/link";
 import { addItemToWishlist } from "@/redux/features/wishlist-slice";
 import { formatPrice, productPath } from "@/lib/products";
-import { showAddedToCartMessage } from "@/lib/cart-feedback";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
+import { minimumCartQuantity, useAddProductToCart } from "@/lib/hooks/useAddProductToCart";
 
 const SingleItem = ({ item }: { item: Product }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const addProductToCart = useAddProductToCart();
 
-  const handleAddToCart = () => {
-    const quantity = Math.max(1, Number(item.quantidadeMinima || 1));
-    dispatch(
-      addItemToCart({
-        ...item,
-        quantity,
-      })
-    );
-    showAddedToCartMessage(item.title, quantity);
+  const handleAddToCart = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    addProductToCart(item, minimumCartQuantity(item));
   };
 
   const handleItemToWishList = () => {
@@ -139,7 +134,7 @@ const SingleItem = ({ item }: { item: Product }) => {
           </Link>
 
           <button
-            onClick={() => handleAddToCart()}
+            onClick={handleAddToCart}
             aria-label="button for add to cart"
             id="addCartOne"
             className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-white hover:bg-blue"
