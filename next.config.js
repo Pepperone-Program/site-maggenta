@@ -108,6 +108,11 @@ const nextConfig = {
         hostname: "bucket.pepperone.com.br",
         pathname: "/storage/v1/object/public/**",
       },
+      {
+        protocol: "https",
+        hostname: "cdn.xbzbrindes.com.br",
+        pathname: "/**",
+      },
     ],
   },
   turbopack: {

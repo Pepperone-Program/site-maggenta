@@ -8,6 +8,7 @@ import { productPath } from "@/lib/products";
 import { Product } from "@/types/product";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
 import { minimumCartQuantity, useAddProductToCart } from "@/lib/hooks/useAddProductToCart";
+import { formatReviewCount, productReviewCount } from "@/lib/reviews";
 
 const launchBadgeStyle = {
   backgroundColor: "rgb(250, 70, 22)",
@@ -22,6 +23,7 @@ const SingleGridItem = ({ item, badgeLabel }: SingleGridItemProps) => {
   const router = useRouter();
   const addProductToCart = useAddProductToCart();
   const href = productPath(item);
+  const reviewCount = formatReviewCount(productReviewCount(item));
 
   const prefetchProduct = () => {
     router.prefetch(href);
@@ -83,7 +85,7 @@ const SingleGridItem = ({ item, badgeLabel }: SingleGridItemProps) => {
           ))}
         </div>
 
-        <p className="text-custom-sm">({item.reviews} avaliações)</p>
+        <p className="text-custom-sm">({reviewCount} avaliações)</p>
       </div>
 
       <p
