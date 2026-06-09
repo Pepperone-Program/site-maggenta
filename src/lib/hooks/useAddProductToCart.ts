@@ -12,6 +12,10 @@ type CartProduct = Product & {
   quantidadeMinima?: number;
 };
 
+type AddProductToCartOptions = {
+  openCartPreview?: boolean;
+};
+
 export const minimumCartQuantity = (product: Pick<CartProduct, "quantidadeMinima">) =>
   Math.max(1, Number(product.quantidadeMinima || 1));
 
@@ -20,7 +24,11 @@ export const useAddProductToCart = () => {
   const { openCartModal } = useCartModalContext();
 
   return useCallback(
-    (product: CartProduct, quantity?: number) => {
+    (
+      product: CartProduct,
+      quantity?: number,
+      options: AddProductToCartOptions = {}
+    ) => {
       const safeQuantity = Math.max(
         minimumCartQuantity(product),
         Math.floor(Number(quantity || minimumCartQuantity(product)))
@@ -33,7 +41,10 @@ export const useAddProductToCart = () => {
         })
       );
       showAddedToCartMessage(product.title, safeQuantity);
-      openCartModal();
+
+      if (options.openCartPreview !== false) {
+        openCartModal();
+      }
 
       return safeQuantity;
     },
