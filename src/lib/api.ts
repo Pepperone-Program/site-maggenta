@@ -637,7 +637,7 @@ export const mapApiProdutoToProduct = (
   const badge = isYes(product.promocao)
     ? "Promoção"
     : isYes(product.lancamento)
-      ? "Lancamento"
+      ? "Lançamento"
       : isYes(product.premium)
         ? "Premium"
         : undefined;

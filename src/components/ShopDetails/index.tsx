@@ -60,6 +60,8 @@ const ShopDetails = ({
   const [quantity, setQuantity] = useState(minimumQuantity);
   const [quantityInput, setQuantityInput] = useState(String(minimumQuantity));
   const [showTags, setShowTags] = useState(false);
+  const [isMainImageZoomed, setIsMainImageZoomed] = useState(false);
+  const [imageZoomOrigin, setImageZoomOrigin] = useState("50% 50%");
   const mainImageRef = useRef<HTMLDivElement>(null);
   const wheelLockRef = useRef(0);
   const categoryPath = product.categoryId
@@ -140,7 +142,7 @@ const ShopDetails = ({
 
     setQuantity(safeQuantity);
     setQuantityInput(String(safeQuantity));
-    addProductToCart(product, safeQuantity);
+    addProductToCart(product, safeQuantity, { openCartPreview: false });
   };
 
   const updateQuantity = (value: string) => {
@@ -157,6 +159,23 @@ const ShopDetails = ({
     updateQuantity(quantityInput);
   };
 
+  const handleMainImagePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (activeMedia === "video") {
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+    setImageZoomOrigin(`${x}% ${y}%`);
+  };
+
+  const resetMainImageZoom = () => {
+    setIsMainImageZoomed(false);
+    setImageZoomOrigin("50% 50%");
+  };
+
   return (
     <>
       <main className="bg-white pt-[108px] sm:pt-[112px]">
@@ -165,7 +184,10 @@ const ShopDetails = ({
             <div>
               <div
                 ref={mainImageRef}
-                className="relative flex min-h-[360px] items-center justify-center overflow-hidden rounded-lg bg-white p-6 shadow-1 sm:min-h-[520px]"
+                onPointerEnter={() => setIsMainImageZoomed(activeMedia === "image")}
+                onPointerMove={handleMainImagePointerMove}
+                onPointerLeave={resetMainImageZoom}
+                className="relative flex min-h-[360px] cursor-zoom-in items-center justify-center overflow-hidden rounded-lg bg-white p-6 shadow-1 sm:min-h-[520px]"
               >
                 {product.badge && (
                   <span className="absolute left-5 top-5 z-20 rounded-full bg-blue px-4 py-1.5 text-sm font-semibold text-white">
@@ -192,7 +214,11 @@ const ShopDetails = ({
                       width={520}
                       height={520}
                       priority
-                      className="relative z-10 h-auto max-h-[460px] w-full object-contain"
+                      className="relative z-10 h-auto max-h-[460px] w-full object-contain transition-transform duration-200 ease-out"
+                      style={{
+                        transform: isMainImageZoomed ? "scale(1.85)" : "scale(1)",
+                        transformOrigin: imageZoomOrigin,
+                      }}
                     />
                     <ImageWithFallback
                       src="/images/logo/logo-vertical.svg"

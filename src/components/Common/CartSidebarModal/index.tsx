@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import { removeItemFromCart } from "@/redux/features/cart-slice";
 import { useAppSelector } from "@/redux/store";
@@ -11,6 +12,13 @@ import SingleItem from "./SingleItem";
 const CartSidebarModal = () => {
   const { isCartModalOpen, closeCartModal } = useCartModalContext();
   const cartItems = useAppSelector((state) => state.cartReducer.items);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (pathname === "/orcamentos" && isCartModalOpen) {
+      closeCartModal();
+    }
+  }, [pathname, isCartModalOpen, closeCartModal]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
