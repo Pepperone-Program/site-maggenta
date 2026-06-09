@@ -14,6 +14,7 @@ import { fetchWithTimeout } from "@/lib/timed-fetch";
 import { personalizedSuffix } from "@/lib/slugs";
 import { useAppSelector } from "@/redux/store";
 import { toast } from "sonner";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 // @ts-ignore -- Side-effect CSS import resolved by Next.js bundler.
 import "swiper/css";
 
@@ -42,6 +43,28 @@ type SearchSubmitPayload = {
     tipo?: string | null;
     path?: string | null;
   } | null;
+};
+
+type SearchPayload = SearchSubmitPayload;
+
+const SEARCH_CACHE_TIME = 60 * 60 * 1000;
+const SEARCH_CACHE_KEY = "product-search-v2";
+
+const searchProducts = async (
+  query: string,
+  limit: number,
+  signal?: AbortSignal
+): Promise<SearchPayload | null> => {
+  const response = await fetchWithTimeout(
+    `/api/produtos/busca?q=${encodeURIComponent(query)}&limit=${limit}`,
+    { signal }
+  );
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  return response.ok ? response.json() : null;
 };
 
 const showSearchNotFoundMessage = () => {
@@ -125,10 +148,11 @@ const searchPathFromQuery = (query: string) => {
 
 const Header = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const pathname = usePathname();
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchSuggestions, setSearchSuggestions] = useState<SearchSuggestion[]>([]);
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
   const [menuGroups, setMenuGroups] = useState(defaultMenuGroups);
@@ -136,10 +160,24 @@ const Header = () => {
   const [searching, setSearching] = useState(false);
   const menuCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchMenuHandled = useRef(false);
-  const latestSearchQuery = useRef("");
   const { openCartModal } = useCartModalContext();
   const cartItems = useAppSelector((state) => state.cartReducer.items);
   const totalPrice = useSelector(selectTotalPrice);
+  const trimmedSearchQuery = searchQuery.trim();
+  const suggestionsQuery = useQuery({
+    queryKey: [SEARCH_CACHE_KEY, debouncedSearchQuery, 10],
+    queryFn: ({ signal }) => searchProducts(debouncedSearchQuery, 10, signal),
+    enabled: debouncedSearchQuery.length >= 2,
+    staleTime: SEARCH_CACHE_TIME,
+    gcTime: SEARCH_CACHE_TIME,
+    retry: false,
+  });
+  const searchSuggestions =
+    debouncedSearchQuery === trimmedSearchQuery && searchFocused
+      ? Array.isArray(suggestionsQuery.data?.data?.items)
+        ? suggestionsQuery.data.data.items
+        : []
+      : [];
 
   const openMenu = (menuId: string) => {
     if (menuCloseTimer.current) {
@@ -167,12 +205,16 @@ const Header = () => {
     setNavigationOpen(false);
     setActiveMenuId(null);
     setSearchFocused(false);
-    setSearchSuggestions([]);
   }, []);
 
   useEffect(() => {
     closeSearchUi();
   }, [pathname, closeSearchUi]);
+
+  useEffect(() => {
+    queryClient.removeQueries({ queryKey: ["product-search"] });
+    queryClient.invalidateQueries({ queryKey: [SEARCH_CACHE_KEY] });
+  }, [queryClient]);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -205,46 +247,14 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
-    const query = searchQuery.trim();
-    latestSearchQuery.current = query;
-
-    if (query.length < 2) {
-      setSearchSuggestions([]);
-      return;
-    }
-
-    setSearchSuggestions([]);
-    const controller = new AbortController();
     const timer = setTimeout(() => {
-      fetchWithTimeout(`/api/produtos/busca?q=${encodeURIComponent(query)}&limit=10`, {
-        signal: controller.signal,
-      })
-        .then((response) => {
-          if (response.status === 404) {
-            return null;
-          }
-
-          return response.ok ? response.json() : null;
-        })
-        .then((payload) => {
-          if (latestSearchQuery.current !== query) {
-            return;
-          }
-
-          const items = Array.isArray(payload?.data?.items) ? payload.data.items : [];
-
-          if (items.length > 0) {
-            setSearchSuggestions(items);
-          }
-        })
-        .catch(() => undefined);
+      setDebouncedSearchQuery(trimmedSearchQuery);
     }, 220);
 
     return () => {
-      controller.abort();
       clearTimeout(timer);
     };
-  }, [searchQuery]);
+  }, [trimmedSearchQuery]);
 
   const handleSearchSubmit = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
@@ -265,10 +275,20 @@ const Header = () => {
       setSearching(true);
 
       try {
-        const response = await fetchWithTimeout(
-          `/api/produtos/busca?q=${encodeURIComponent(query)}&limit=1`
-        );
-        const payload: SearchSubmitPayload | null = response.ok ? await response.json() : null;
+        const cachedSuggestions = queryClient.getQueryData<SearchPayload | null>([
+          SEARCH_CACHE_KEY,
+          query,
+          10,
+        ]);
+        const payload =
+          cachedSuggestions !== undefined
+            ? cachedSuggestions
+            : await queryClient.fetchQuery({
+                queryKey: [SEARCH_CACHE_KEY, query, 1],
+                queryFn: ({ signal }) => searchProducts(query, 1, signal),
+                staleTime: SEARCH_CACHE_TIME,
+                gcTime: SEARCH_CACHE_TIME,
+              });
         const destinationPath = payload?.destino_busca?.path;
         const items = Array.isArray(payload?.data?.items) ? payload.data.items : [];
 
@@ -289,7 +309,7 @@ const Header = () => {
         setSearching(false);
       }
     },
-    [searchQuery, router, searching, closeSearchUi]
+    [searchQuery, router, searching, closeSearchUi, queryClient]
   );
 
   useEffect(() => {

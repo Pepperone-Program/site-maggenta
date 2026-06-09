@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, Suspense, useEffect } from "react";
+import { ReactNode, Suspense, useEffect, useState } from "react";
 import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
 import Header from "../../components/Header";
@@ -15,6 +15,7 @@ import ClarityInit from "@/components/Common/ClarityInit";
 import MarketingPixels from "@/components/Common/MarketingPixels";
 import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "sonner";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const ROUTE_STORAGE_KEY = "pepperone:last-internal-route";
 const ROUTE_CURRENT_KEY = "pepperone:current-internal-route";
@@ -39,6 +40,19 @@ const RouteHistoryTracker = () => {
 };
 
 const ClientShell = ({ children }: { children: ReactNode }) => {
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60 * 60 * 1000,
+            gcTime: 60 * 60 * 1000,
+            refetchOnWindowFocus: false,
+          },
+        },
+      })
+  );
+
   return (
     <>
       <MarketingPixels />
@@ -49,9 +63,10 @@ const ClientShell = ({ children }: { children: ReactNode }) => {
         strategy="afterInteractive"
       />
       <Analytics/>
-      <ReduxProvider>
-        <CartModalProvider>
-          <PreviewSliderProvider>
+      <QueryClientProvider client={queryClient}>
+        <ReduxProvider>
+          <CartModalProvider>
+            <PreviewSliderProvider>
             <Suspense fallback={null}>
               <RouteHistoryTracker />
             </Suspense>
@@ -69,9 +84,10 @@ const ClientShell = ({ children }: { children: ReactNode }) => {
                 },
               }}
             />
-          </PreviewSliderProvider>
-        </CartModalProvider>
-      </ReduxProvider>
+            </PreviewSliderProvider>
+          </CartModalProvider>
+        </ReduxProvider>
+      </QueryClientProvider>
       <ScrollToTop />
       <Footer />
     </>
