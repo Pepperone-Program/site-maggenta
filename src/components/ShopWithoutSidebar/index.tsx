@@ -51,7 +51,7 @@ const ShopWithoutSidebar = ({
         title={title}
         pages={breadcrumbPages}
       />
-      <section className="overflow-hidden relative pb-20 pt-5 lg:pt-20 xl:pt-28 bg-[#f3f4f6]">
+      <section className="relative min-h-[900px] overflow-hidden bg-[#f3f4f6] pb-20 pt-5 lg:pt-20 xl:pt-28">
         <div className="max-w-[1800px] w-full mx-auto px-2 sm:px-3">
           <div className="flex gap-7.5">
             {/* // <!-- Content Start --> */}
@@ -154,8 +154,8 @@ const ShopWithoutSidebar = ({
               <div
                 className={`${
                   productStyle === "grid"
-                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-7.5 gap-y-9"
-                    : "flex flex-col gap-7.5"
+                    ? "grid min-h-[720px] grid-cols-1 gap-x-7.5 gap-y-9 transition-opacity duration-200 sm:grid-cols-2 lg:grid-cols-4"
+                    : "flex min-h-[720px] flex-col gap-7.5 transition-opacity duration-200"
                 }`}
               >
                 {visibleProducts.map((item) =>

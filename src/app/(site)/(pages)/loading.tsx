@@ -1,14 +1,25 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+import Breadcrumb from "@/components/Common/Breadcrumb";
+import ProductListingSkeleton from "@/components/Shop/ProductListingSkeleton";
+
+const sidebarRoutes = [
+  "/brindes-personalizados",
+  "/categorias/",
+  "/subcategorias/",
+  "/publicos-alvos/",
+  "/datas-promocionais/",
+];
+
 const PagesLoading = () => {
+  const pathname = usePathname() || "";
+  const withSidebar = sidebarRoutes.some((route) => pathname.includes(route));
+
   return (
-    <main className="min-h-screen bg-[#f3f4f6] pt-[124px] sm:pt-[112px]">
-      <div className="mx-auto w-full max-w-[1800px] px-2 py-10 sm:px-3">
-        <div className="h-12 w-64 max-w-full animate-pulse rounded-md bg-white/80" />
-        <div className="mt-8 grid grid-cols-1 gap-7.5 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 8 }, (_, index) => (
-            <div key={index} className="min-h-[360px] animate-pulse rounded-lg bg-white shadow-1" />
-          ))}
-        </div>
-      </div>
+    <main className="min-h-screen bg-[#f3f4f6]" aria-busy="true">
+      <Breadcrumb title="Carregando produtos" pages={["brindes personalizados"]} />
+      <ProductListingSkeleton withSidebar={withSidebar} />
     </main>
   );
 };
