@@ -482,7 +482,7 @@ const ShopWithSidebar = ({
   return (
     <>
       <Breadcrumb title={pageTitle} pages={["brindes personalizados"]} />
-      <section className="relative overflow-hidden bg-[#f3f4f6] pb-20 pt-5 lg:pt-12 xl:pt-16">
+      <section className="relative min-h-[900px] overflow-hidden bg-[#f3f4f6] pb-20 pt-5 lg:pt-12 xl:pt-16">
         <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
           <div className="flex gap-6 xl:gap-8">
             <div
@@ -652,8 +652,8 @@ const ShopWithSidebar = ({
                 <div
                   className={`${
                     productStyle === "grid"
-                      ? "grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
-                      : "flex flex-col gap-7.5"
+                      ? "grid min-h-[720px] grid-cols-1 gap-x-6 gap-y-10 transition-opacity duration-200 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+                      : "flex min-h-[720px] flex-col gap-7.5 transition-opacity duration-200"
                   }`}
                 >
                   {items.map((item) =>
