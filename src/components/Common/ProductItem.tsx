@@ -3,6 +3,7 @@
 import React, { useCallback } from "react";
 import Link from "next/link";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
+import ProductCode from "@/components/Common/ProductCode";
 import { Product } from "@/types/product";
 import { formatDisplayPrice, productPath } from "@/lib/products";
 import { minimumCartQuantity, useAddProductToCart } from "@/lib/hooks/useAddProductToCart";
@@ -64,9 +65,10 @@ const ProductItem = ({ item }: { item: Product }) => {
         <Link href={href}>{item.title}</Link>
       </p>
 
-      <p className="mb-5 text-normal text-dark-4 transition-all hover:text-dark">
-        <Link href={href}>Código: {item.codigo}</Link>
-      </p>
+      <ProductCode
+        code={item.codigo}
+        className="mb-5 text-normal text-dark-4 transition-all hover:text-dark"
+      />
 
       {item.discountedPrice > 0 ? (
         <span className="mt-auto flex items-center justify-center gap-2 font-medium text-lg">

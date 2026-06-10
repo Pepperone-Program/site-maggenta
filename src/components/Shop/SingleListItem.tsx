@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { productPath } from "@/lib/products";
 import { Product } from "@/types/product";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
+import ProductCode from "@/components/Common/ProductCode";
 import { minimumCartQuantity, useAddProductToCart } from "@/lib/hooks/useAddProductToCart";
 
 const launchBadgeStyle = {
@@ -84,16 +85,10 @@ const SingleListItem = ({ item, badgeLabel }: SingleListItemProps) => {
             </Link>
           </p>
 
-          <Link
-            href={href}
-            prefetch
-            onMouseEnter={prefetchProduct}
-            onFocus={prefetchProduct}
-            onTouchStart={prefetchProduct}
+          <ProductCode
+            code={item.codigo}
             className="mb-4 text-custom-sm font-medium text-dark-4 duration-200 hover:text-dark"
-          >
-            Código: {item.codigo}
-          </Link>
+          />
 
           <button
             type="button"
