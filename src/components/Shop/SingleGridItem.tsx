@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { productPath } from "@/lib/products";
 import { Product } from "@/types/product";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
+import ProductCode from "@/components/Common/ProductCode";
 import { minimumCartQuantity, useAddProductToCart } from "@/lib/hooks/useAddProductToCart";
 import { formatReviewCount, productReviewCount } from "@/lib/reviews";
 
@@ -107,16 +108,10 @@ const SingleGridItem = ({ item, badgeLabel }: SingleGridItemProps) => {
         </Link>
       </p>
 
-      <Link
-        href={href}
-        prefetch
-        onMouseEnter={prefetchProduct}
-        onFocus={prefetchProduct}
-        onTouchStart={prefetchProduct}
+      <ProductCode
+        code={item.codigo}
         className="mb-3 text-center text-custom-sm font-medium text-dark-4 duration-200 hover:text-dark"
-      >
-        Código: {item.codigo}
-      </Link>
+      />
 
       <button
         type="button"
