@@ -39,12 +39,21 @@ const destinationPath = (
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("q") || "";
   const limit = Number(request.nextUrl.searchParams.get("limit") || 10);
-  const { products, destinoBusca, exactProduct } = await searchProdutosSiteWithDestination(
+  const { products, destinoBusca, exactProduct, exactProductId, exactProductCode } =
+    await searchProdutosSiteWithDestination(
     query,
     Number.isFinite(limit) ? limit : 10
   );
   const destinoPath = destinationPath(destinoBusca);
-  const exactProductPath = exactProduct ? productPath(exactProduct) : null;
+  const exactProductPath =
+    exactProduct || exactProductId
+      ? productPath(
+          exactProduct || {
+            id: exactProductId || undefined,
+            title: exactProductCode || "produto",
+          }
+        )
+      : null;
   const items = products.map((product) => ({
     id: product.id,
     title: product.title,
@@ -60,8 +69,8 @@ export async function GET(request: NextRequest) {
       destino_busca: exactProductPath
         ? {
             tipo: "produto",
-            id_produto: exactProduct?.id,
-            codigo: exactProduct?.codigo,
+            id_produto: exactProduct?.id || exactProductId,
+            codigo: exactProduct?.codigo || exactProductCode,
             path: exactProductPath,
           }
         : destinoBusca
