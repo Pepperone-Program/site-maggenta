@@ -241,6 +241,16 @@ export type SearchProdutosSiteResult = {
   products: Product[];
   destinoBusca: SearchDestinationApi | null;
   exactProduct?: Product | null;
+  exactProductId?: number | null;
+  exactProductCode?: string | null;
+};
+
+type SearchProdutosSiteApiData = {
+  items?: ProdutoApi[];
+  destino_busca?: SearchDestinationApi | null;
+  match_exato_codigo?: boolean;
+  id_produto?: number;
+  codigo?: string;
 };
 
 type DataPromocionalApi = {
@@ -1528,33 +1538,74 @@ export async function searchProdutosSiteWithDestination(
     return { products: [], destinoBusca: null };
   }
 
-  const payload = await apiRequest(
-    `/produtos/site/busca?q=${encodeURIComponent(
-      search
-    )}&empresaId=1&page=1&limit=${limit}`
-  );
-  const data =
+  const parseSearchData = (payload: unknown) =>
     payload && typeof payload === "object" && "data" in payload
-      ? (payload.data as {
-          items?: ProdutoApi[];
-          destino_busca?: SearchDestinationApi | null;
-          match_exato_codigo?: boolean;
-          id_produto?: number;
-          codigo?: string;
-        })
+      ? (payload.data as SearchProdutosSiteApiData)
       : null;
+  const resolveExactProduct = async (
+    data: SearchProdutosSiteApiData | null
+  ): Promise<SearchProdutosSiteResult | null> => {
+    if (!data?.match_exato_codigo || !data.id_produto) {
+      return null;
+    }
 
-  if (data?.match_exato_codigo && data.id_produto) {
+    const exactProductId = Number(data.id_produto);
     const exactProduct = await getProdutoById(Number(data.id_produto));
 
     return {
       products: exactProduct ? [exactProduct] : [],
       destinoBusca: null,
       exactProduct,
+      exactProductId: Number.isFinite(exactProductId) ? exactProductId : null,
+      exactProductCode: data.codigo || null,
     };
+  };
+  const codeSearchVariants = (term: string) => {
+    const normalized = term.toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+    if (normalized.length < 5 || !/\d/.test(normalized)) {
+      return [];
+    }
+
+    const collapsed = normalized.replace(/(.)\1+/g, "$1");
+    const candidates = [normalized, collapsed]
+      .filter(Boolean)
+      .flatMap((value) => (value.startsWith("PEP") ? [value] : [`PEP${value}`, value]));
+
+    return Array.from(new Set(candidates)).filter(
+      (value) => value.toLowerCase() !== search.toLowerCase()
+    );
+  };
+
+  const payload = await apiRequest(
+    `/produtos/site/busca?q=${encodeURIComponent(
+      search
+    )}&empresaId=1&page=1&limit=${limit}`
+  );
+  const data = parseSearchData(payload);
+  const exactResult = await resolveExactProduct(data);
+
+  if (exactResult) {
+    return exactResult;
   }
 
   const produtos = data?.items || [];
+
+  if (!produtos.length && !data?.destino_busca) {
+    for (const variant of codeSearchVariants(search)) {
+      const variantPayload = await apiRequest(
+        `/produtos/site/busca?q=${encodeURIComponent(
+          variant
+        )}&empresaId=1&page=1&limit=1`
+      );
+      const variantExactResult = await resolveExactProduct(parseSearchData(variantPayload));
+
+      if (variantExactResult) {
+        return variantExactResult;
+      }
+    }
+  }
+
   const normalizedSearch = slugify(search);
 
   const products = produtos
