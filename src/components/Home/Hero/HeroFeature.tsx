@@ -14,8 +14,8 @@ const featureData = [
   },
   {
     img: "/images/icons/icon-02.svg",
-    title: "Primeira troca",
-    description: "Sem custo",
+    title: "Vitrine Infinita",
+    description: "Conheça nosso vasto catálogo de produtos",
   },
   {
     img: "/images/icons/icon-03.svg",
@@ -25,7 +25,7 @@ const featureData = [
   {
     img: "/images/icons/icon-04.svg",
     title: "Entrega nacional",
-    description: "Para todo o Brasil",
+    description: "Mediante consulta prévia",
   },
 ];
 
