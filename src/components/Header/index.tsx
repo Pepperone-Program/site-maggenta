@@ -49,6 +49,8 @@ type SearchPayload = SearchSubmitPayload;
 
 const SEARCH_CACHE_TIME = 60 * 60 * 1000;
 const SEARCH_CACHE_KEY = "product-search-v2";
+const MENU_CACHE_TIME = 60 * 60 * 1000;
+const MENU_CACHE_KEY = "header-menu-v2";
 
 const searchProducts = async (
   query: string,
@@ -65,6 +67,20 @@ const searchProducts = async (
   }
 
   return response.ok ? response.json() : null;
+};
+
+const fetchMenuGroups = async (signal?: AbortSignal): Promise<HeaderMenuGroup[]> => {
+  const response = await fetchWithTimeout("/api/menu", {
+    cache: "no-store",
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new Error("Não foi possível atualizar o menu.");
+  }
+
+  const payload = await response.json();
+  return Array.isArray(payload?.data) ? payload.data : defaultMenuGroups;
 };
 
 const showSearchNotFoundMessage = () => {
@@ -155,7 +171,6 @@ const Header = () => {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
-  const [menuGroups, setMenuGroups] = useState(defaultMenuGroups);
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const [searching, setSearching] = useState(false);
   const menuCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -164,6 +179,17 @@ const Header = () => {
   const cartItems = useAppSelector((state) => state.cartReducer.items);
   const totalPrice = useSelector(selectTotalPrice);
   const trimmedSearchQuery = searchQuery.trim();
+  const menuQuery = useQuery<HeaderMenuGroup[]>({
+    queryKey: [MENU_CACHE_KEY],
+    queryFn: ({ signal }) => fetchMenuGroups(signal),
+    staleTime: MENU_CACHE_TIME,
+    gcTime: MENU_CACHE_TIME,
+    refetchInterval: MENU_CACHE_TIME,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: "always",
+    retry: 1,
+  });
+  const menuGroups: HeaderMenuGroup[] = menuQuery.data ?? defaultMenuGroups;
   const suggestionsQuery = useQuery({
     queryKey: [SEARCH_CACHE_KEY, debouncedSearchQuery, 10],
     queryFn: ({ signal }) => searchProducts(debouncedSearchQuery, 10, signal),
@@ -311,25 +337,6 @@ const Header = () => {
     },
     [searchQuery, router, searching, closeSearchUi, queryClient]
   );
-
-  useEffect(() => {
-    let active = true;
-    const controller = new AbortController();
-
-    fetchWithTimeout("/api/menu", { signal: controller.signal })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((payload) => {
-        if (active && Array.isArray(payload?.data)) {
-          setMenuGroups(payload.data);
-        }
-      })
-      .catch(() => undefined);
-
-    return () => {
-      active = false;
-      controller.abort();
-    };
-  }, []);
 
   useEffect(() => {
     return () => {

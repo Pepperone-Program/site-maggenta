@@ -380,10 +380,11 @@ const apiRequest = async (path: string, init: RequestInit = {}) => {
   try {
     const method = (init.method || "GET").toUpperCase();
     const isGet = method === "GET";
+    const cache = isGet ? init.cache : "no-store";
     const response = await fetchWithTimeout(url, {
       ...init,
-      cache: isGet ? undefined : "no-store",
-      next: isGet ? { revalidate: 300 } : undefined,
+      cache,
+      next: isGet && cache !== "no-store" ? { revalidate: 300 } : undefined,
       headers: {
         "Content-Type": "application/json",
         ...authHeaders(),
@@ -463,10 +464,14 @@ async function apiFetchItem<T>(path: string, init: RequestInit = {}): Promise<T 
 async function apiFetchAllPages<T>(
   path: string,
   pageSize = 100,
-  maxPages = 80
+  maxPages = 80,
+  init: RequestInit = {}
 ): Promise<T[] | null> {
   const separator = path.includes("?") ? "&" : "?";
-  const firstPayload = await apiRequest(`${path}${separator}page=1&limit=${pageSize}`);
+  const firstPayload = await apiRequest(
+    `${path}${separator}page=1&limit=${pageSize}`,
+    init
+  );
 
   if (!firstPayload) {
     return null;
@@ -488,7 +493,10 @@ async function apiFetchAllPages<T>(
   const pages = Array.from({ length: Math.max(totalPages - 1, 0) }, (_, index) => index + 2);
   const rest = await Promise.all(
     pages.map(async (page) => {
-      const payload = await apiRequest(`${path}${separator}page=${page}&limit=${pageSize}`);
+      const payload = await apiRequest(
+        `${path}${separator}page=${page}&limit=${pageSize}`,
+        init
+      );
       const data =
         payload && typeof payload === "object" && "data" in payload
           ? (payload.data as PaginatedApiData<T> | T[])
@@ -518,10 +526,11 @@ async function fetchFirstAvailable<T>(paths: string[]): Promise<T | null> {
 
 async function fetchAllFirstAvailable<T>(
   paths: string[],
-  pageSize = 100
+  pageSize = 100,
+  init: RequestInit = {}
 ): Promise<T[] | null> {
   for (const path of paths) {
-    const data = await apiFetchAllPages<T>(path, pageSize);
+    const data = await apiFetchAllPages<T>(path, pageSize, 80, init);
 
     if (data?.length) {
       return data;
@@ -1191,12 +1200,14 @@ export async function getCatalogoTipoProduto(
   };
 }
 
-export async function getCatalogoCategorias(): Promise<CatalogoOption[]> {
+export async function getCatalogoCategorias(
+  init: RequestInit = {}
+): Promise<CatalogoOption[]> {
   const categorias =
     (await fetchAllFirstAvailable<(typeof mockCategorias)[number]>([
       "/categorias",
       "/produtos/categorias",
-    ], 100)) || mockCategorias;
+    ], 100, init)) || mockCategorias;
 
   return categorias
     .filter((category) => isEnabled(category.habilitado))
@@ -1208,11 +1219,13 @@ export async function getCatalogoCategorias(): Promise<CatalogoOption[]> {
     .filter((category) => Number.isFinite(category.id) && category.title);
 }
 
-export async function getDatasPromocionais(): Promise<CatalogoOption[]> {
+export async function getDatasPromocionais(
+  init: RequestInit = {}
+): Promise<CatalogoOption[]> {
   const datas =
     (await fetchAllFirstAvailable<DataPromocionalApi>([
       "/datas-promocionais",
-    ], 10)) || mockDatasPromocionais;
+    ], 10, init)) || mockDatasPromocionais;
 
   return datas
     .filter((data) => isEnabled(data.habilitado))
@@ -1224,13 +1237,15 @@ export async function getDatasPromocionais(): Promise<CatalogoOption[]> {
     .filter((data) => Number.isFinite(data.id) && data.title);
 }
 
-export async function getPublicosAlvos(): Promise<CatalogoOption[]> {
+export async function getPublicosAlvos(
+  init: RequestInit = {}
+): Promise<CatalogoOption[]> {
   const publicos =
     (await fetchAllFirstAvailable<(typeof mockPublicosAlvos)[number]>([
       "/publicos-alvos",
       "/publicos_alvos",
       "/publicos-alvo",
-    ], 100)) || mockPublicosAlvos;
+    ], 100, init)) || mockPublicosAlvos;
 
   return publicos
     .filter((publico) => isEnabled(publico.habilitado))
@@ -1772,15 +1787,16 @@ const toMenuItems = <T extends Record<string, unknown>>(
     }));
 
 export async function getMenuGroups(): Promise<ApiMenuGroup[]> {
+  const menuRequestInit: RequestInit = { cache: "no-store" };
   const [categorias, tipos, publicos, datas] = await Promise.all([
-    getCatalogoCategorias(),
+    getCatalogoCategorias(menuRequestInit),
     fetchAllFirstAvailable<(typeof mockTiposProdutos)[number]>([
       "/tipos-produtos/habilitados",
       "/tipos_produtos/habilitados",
       "/tiposProdutos/habilitados",
-    ], 100),
-    getPublicosAlvos(),
-    getDatasPromocionais(),
+    ], 100, menuRequestInit),
+    getPublicosAlvos(menuRequestInit),
+    getDatasPromocionais(menuRequestInit),
   ]);
 
   return [
