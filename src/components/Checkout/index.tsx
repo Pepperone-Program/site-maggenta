@@ -1,6 +1,6 @@
 "use client";
 
-import React, { FormEvent, FocusEvent, useEffect, useState } from "react";
+import React, { FormEvent, FocusEvent, useEffect, useRef, useState } from "react";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
@@ -18,6 +18,7 @@ import {
 } from "@/lib/tracking";
 
 const ROUTE_STORAGE_KEY = "pepperone:last-internal-route";
+const QUOTE_CUSTOMER_STORAGE_KEY = "pepperone:quote-customer";
 const DEFAULT_RETURN_ROUTE = "/brindes-para-empresas";
 
 const fields = [
@@ -34,9 +35,46 @@ const fields = [
   { name: "uf", label: "UF", placeholder: "SP", maxLength: 2, required: false },
 ];
 
+const quoteCustomerFieldNames = fields.map((field) => field.name);
+
+const readStoredQuoteCustomer = () => {
+  try {
+    const storedCustomer = window.localStorage.getItem(QUOTE_CUSTOMER_STORAGE_KEY);
+
+    if (!storedCustomer) {
+      return null;
+    }
+
+    const parsedCustomer = JSON.parse(storedCustomer);
+
+    if (!parsedCustomer || typeof parsedCustomer !== "object" || Array.isArray(parsedCustomer)) {
+      return null;
+    }
+
+    return parsedCustomer as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+};
+
+const getQuoteCustomerFromFormData = (formData: FormData) =>
+  quoteCustomerFieldNames.reduce<Record<string, string>>((customer, fieldName) => {
+    customer[fieldName] = String(formData.get(fieldName) || "").trim();
+    return customer;
+  }, {});
+
+const persistQuoteCustomer = (customer: Record<string, unknown>) => {
+  try {
+    window.localStorage.setItem(QUOTE_CUSTOMER_STORAGE_KEY, JSON.stringify(customer));
+  } catch {
+    // Storage can be unavailable in private windows or restricted browsers.
+  }
+};
+
 const Checkout = () => {
   const router = useRouter();
   const cartItems = useAppSelector((state) => state.cartReducer.items);
+  const formRef = useRef<HTMLFormElement>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
     "idle"
   );
@@ -62,6 +100,20 @@ const Checkout = () => {
     const storedReturnRoute = sessionStorage.getItem(ROUTE_STORAGE_KEY);
     if (storedReturnRoute) {
       setReturnRoute(storedReturnRoute);
+    }
+
+    const storedCustomer = readStoredQuoteCustomer();
+    const form = formRef.current;
+
+    if (storedCustomer && form) {
+      quoteCustomerFieldNames.forEach((fieldName) => {
+        const field = form.elements.namedItem(fieldName);
+        const storedValue = storedCustomer[fieldName];
+
+        if (field instanceof HTMLInputElement && !field.value && typeof storedValue === "string") {
+          field.value = storedValue;
+        }
+      });
     }
   }, []);
 
@@ -108,6 +160,7 @@ const Checkout = () => {
 
     const formData = new FormData(event.currentTarget);
     const customer = Object.fromEntries(formData.entries());
+    const quoteCustomer = getQuoteCustomerFromFormData(formData);
 
     try {
       const response = await fetchWithTimeout("/api/orcamento", {
@@ -143,6 +196,7 @@ const Checkout = () => {
           phone_number: String(customer.tel || ""),
         })
       );
+      persistQuoteCustomer(quoteCustomer);
       router.push("/orcamentos-obrigado");
     } catch (error) {
       setStatus("error");
@@ -161,7 +215,7 @@ const Checkout = () => {
         
         <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
                     
-          <form onSubmit={handleSubmit}>
+          <form ref={formRef} onSubmit={handleSubmit}>
             <div className="grid gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(420px,0.85fr)]">
               <div className="w-full">
                 <div className="h-full rounded-md bg-white p-4 shadow-1 sm:p-8.5 xl:p-10">
