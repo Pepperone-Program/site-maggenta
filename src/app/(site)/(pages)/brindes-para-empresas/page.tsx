@@ -10,7 +10,7 @@ export const revalidate = 120;
 export const metadata: Metadata = {
   title: "Brindes para empresas | Catálogo completo",
   description:
-    "Catálogo completo de brindes para empresas da Pepperone, com paginação no navegador para facilitar a navegação por todos os produtos do site.",
+    "Catálogo completo de brindes para empresas da Maggenta, com paginação no navegador para facilitar a navegação por todos os produtos do site.",
   keywords: contextualKeywords("brindes para empresas", [
     "catálogo completo de brindes",
     "produtos promocionais para empresas",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   other: buildSeoOther({
     title: "Brindes para empresas | Catálogo completo",
     description:
-      "Catálogo completo de brindes para empresas da Pepperone, com paginação no navegador para facilitar a navegação por todos os produtos do site.",
+      "Catálogo completo de brindes para empresas da Maggenta, com paginação no navegador para facilitar a navegação por todos os produtos do site.",
     canonical: `${siteUrl}/brindes-para-empresas`,
     subject: "catálogo completo de brindes para empresas",
   }),
@@ -62,7 +62,7 @@ const BrindesParaEmpresasPage = async ({ searchParams }: PageProps) => {
       <ShopWithoutSidebar
         products={produtos}
         title="Brindes para empresas"
-        description="Confira o catálogo completo da Pepperone com todos os produtos do site, organizado com paginação no navegador para facilitar a navegação."
+        description="Confira o catálogo completo da Maggenta com todos os produtos do site, organizado com paginação no navegador para facilitar a navegação."
         breadcrumbPages={["Brindes para empresas"]}
       />
     </main>

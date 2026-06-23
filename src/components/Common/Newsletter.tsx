@@ -43,7 +43,7 @@ const Newsletter = () => {
   return (
     <section className="overflow-hidden">
       <div className="max-w-[1800px] mx-auto px-2 sm:px-3">
-        <div className="relative z-1 overflow-hidden rounded-xl bg-[#a3a3a3]">
+        <div className="relative z-1 overflow-hidden rounded-[32px] bg-[#241827] shadow-2">
           
           <div className="absolute -z-1 max-w-[523px] max-h-[243px] w-full h-full right-0 top-0 bg-gradient-1"></div>
 
@@ -69,12 +69,12 @@ const Newsletter = () => {
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                     required
-                    className="w-full bg-gray-1 border border-gray-3 outline-none rounded-md placeholder:text-dark-4 py-3 px-5"
+                    className="w-full rounded-full border border-white/20 bg-white px-5 py-3 text-dark outline-none placeholder:text-dark-4"
                   />
                   <button
                     type="submit"
                     disabled={status === "loading"}
-                    className="inline-flex justify-center py-3 px-7 text-white bg-blue  font-medium rounded-md ease-out duration-200 hover:bg-white hover:text-blue"
+                    className="inline-flex justify-center rounded-full bg-blue px-7 py-3 font-medium text-white duration-200 ease-out hover:bg-white hover:text-blue"
                   >
                     {status === "loading" ? "Enviando" : "Cadastrar"}
                   </button>

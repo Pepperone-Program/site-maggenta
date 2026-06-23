@@ -44,7 +44,7 @@ const PartnersCarousel = () => {
   };
 
   return (
-    <section className="bg-white py-4">
+    <section className="bg-[#fbf8fa] py-10">
       <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
         <div className="mb-7 text-center">
           <h2 className="text-2xl font-semibold text-dark">
@@ -76,7 +76,7 @@ const PartnersCarousel = () => {
         >
           {partners.map((partner, index) => (
             <SwiperSlide key={partner}>
-              <div className="flex h-24 items-center justify-center rounded-md bg-white px-5 shadow-1">
+              <div className="flex h-24 items-center justify-center rounded-[24px] bg-transparent px-5">
                 <Image
                   src={`/images/parceiros/${partner}`}
                   alt={`Logo ${partnerName(partner)}`}

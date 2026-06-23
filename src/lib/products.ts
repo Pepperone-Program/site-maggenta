@@ -9,7 +9,7 @@ export const formatPrice = (value: number) =>
   }).format(value);
 
 export const formatDisplayPrice = (value: number) =>
-  value > 0 ? formatPrice(value) : "Sob consulta";
+  value > 0 ? formatPrice(value) : "";
 
 export const productPath = (product: Partial<Pick<Product, "slug" | "id" | "title">>) => {
   if (product.slug) {

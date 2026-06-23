@@ -6,27 +6,27 @@ import ClientShell from "./ClientShell";
 import { buildSeoOther, marketKeywords, ogImageUrl, siteName, siteUrl } from "@/lib/seo";
 import { googleAdsId, googleAnalyticsId, googleTagManagerId } from "@/lib/google-tags";
 
-const defaultTitle = "Brindes Personalizados | Pepperone Brindes ";
+const defaultTitle = "Brindes Personalizados | Maggenta Brindes ";
 const defaultDescription =
   "Brindes corporativos personalizados, produtos promocionais e orcamentos para empresas em todo o Brasil.";
 const defaultOgImage = ogImageUrl({
-  title: "Pepperone Brindes",
+  title: "Maggenta Brindes",
   subtitle: "Brindes corporativos personalizados para empresas",
 });
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "Pepperone Brindes Corporativos",
+  name: "Maggenta Brindes Corporativos",
   url: siteUrl,
   logo: `${siteUrl}/images/logo/logo.svg`,
-  email: "vendas@pepperone.com.br",
+  email: "vendas@maggenta.com.br",
   telephone: "+55-11-2971-5252",
   sameAs: [
-    "https://www.instagram.com/pepperonebrindes/",
-    "https://www.facebook.com/pepperonepromocional",
-    "https://www.linkedin.com/company/pepperone/",
-    "https://x.com/pepperonebrinde",
-    "https://www.youtube.com/channel/UC_5I5Dl0two_DqBNsZdRlfA",
+    "https://www.instagram.com/brindesmaggenta",
+    "https://web.facebook.com/maggentapromocional?_rdc=1&_rdr#",
+    "https://www.linkedin.com/company/maggenta-brindes-promocionais/posts/?feedView=all",
+    "https://x.com/maggentabrindes",
+    "https://www.youtube.com/@maggentabrindes9883",
   ],
   address: {
     "@type": "PostalAddress",
@@ -40,7 +40,7 @@ const organizationSchema = {
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "Pepperone",
+  name: "Maggenta",
   url: siteUrl,
   potentialAction: {
     "@type": "SearchAction",
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
     default: defaultTitle,
-    template: "%s | Pepperone Brindes",
+    template: "%s | Maggenta Brindes",
   },
   description: defaultDescription,
   keywords: marketKeywords,
@@ -87,7 +87,7 @@ export const metadata: Metadata = {
     images: [
       {
         url: defaultOgImage,
-        alt: "Pepperone Brindes Corporativos",
+        alt: "Maggenta Brindes Corporativos",
         width: 1200,
         height: 630,
       },

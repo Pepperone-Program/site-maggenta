@@ -19,21 +19,21 @@ const CounDown = ({ banners = [] }: { banners?: BannerApi[] }) => {
         <div
           className={
             hasApiBanner
-              ? "relative w-full overflow-hidden bg-white"
-              : "relative h-[360px] overflow-hidden bg-[#0b2f2b] sm:h-[460px] lg:h-[560px] xl:h-[650px]"
+              ? "relative w-full overflow-hidden rounded-[28px] bg-white shadow-2 sm:rounded-[36px]"
+              : "relative h-[360px] overflow-hidden rounded-[28px] bg-[#241827] shadow-2 sm:h-[460px] sm:rounded-[36px] lg:h-[560px] xl:h-[650px]"
           }
         >
           {hasApiBanner ? (
             <img
               src={image}
-              alt={banner?.titulo || "Banner de campanha Pepperone"}
+              alt={banner?.titulo || "Banner de campanha Maggenta"}
               loading="eager"
               className="block h-auto w-full"
             />
           ) : (
             <Image
               src={image}
-              alt={banner?.titulo || "Banner de campanha Pepperone"}
+              alt={banner?.titulo || "Banner de campanha Maggenta"}
               fill
               priority={Boolean(banner)}
               sizes="100vw"
@@ -58,7 +58,7 @@ const CounDown = ({ banners = [] }: { banners?: BannerApi[] }) => {
           )}
           {!hasApiBanner && (
             <>
-              <div className="absolute inset-0 bg-gradient-to-r from-[#061f1c] via-[#061f1c]/70 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#241827] via-[#241827]/70 to-transparent" />
 
               <div className="relative z-10 flex h-full max-w-[720px] flex-col justify-center px-5 sm:px-10 lg:px-16">
                 <span className="mb-4 text-sm font-semibold uppercase tracking-wide text-white">
@@ -73,7 +73,7 @@ const CounDown = ({ banners = [] }: { banners?: BannerApi[] }) => {
                 </p>
                 <Link
                   href={href}
-                  className="mt-8 inline-flex w-fit rounded-md bg-blue px-9 py-3 text-sm font-semibold text-white duration-200 hover:bg-blue-dark"
+                  className="mt-8 inline-flex w-fit rounded-full bg-blue px-9 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(178,22,104,0.24)] duration-200 hover:bg-blue-dark"
                 >
                   Solicitar orcamento
                 </Link>
@@ -87,10 +87,12 @@ const CounDown = ({ banners = [] }: { banners?: BannerApi[] }) => {
 
   return (
     <section className="overflow-hidden py-14">
+      <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
       <div className={hasMobileBanner ? "hidden sm:block" : ""}>
         {renderBanner(desktopBanner)}
       </div>
       {hasMobileBanner && <div className="sm:hidden">{renderBanner(mobileBanner)}</div>}
+      </div>
     </section>
   );
 };

@@ -4,13 +4,13 @@ import { buildSeoOther, contextualKeywords, siteUrl } from "@/lib/seo";
 
 const title = "Solicitar orçamentos";
 const description =
-  "Solicite orçamentos de brindes personalizados para empresas com atendimento consultivo da Pepperone Brindes.";
+  "Solicite orçamentos de brindes personalizados para empresas com atendimento consultivo da Maggenta Brindes.";
 
 export const metadata: Metadata = {
   title,
   description,
   keywords: contextualKeywords("orçamentos de brindes personalizados", [
-    "solicitar orçamento Pepperone",
+    "solicitar orçamento Maggenta",
     "cotação de brindes corporativos",
     "brindes personalizados sob consulta",
   ]),

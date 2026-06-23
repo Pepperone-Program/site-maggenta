@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { productPath } from "@/lib/products";
 import { getMenuGroups, getProdutosForSitemap } from "@/lib/api";
 
-const siteUrl = "https://www.pepperone.com.br";
+const siteUrl = "https://www.maggenta.com.br";
 
 const routes = [
   "",

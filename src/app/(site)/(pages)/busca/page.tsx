@@ -22,7 +22,7 @@ export async function generateMetadata({
   const params = (await searchParams) || {};
   const term = searchTerm(params) || "Busca";
   const title = `${term} Brindes Personalizados`;
-  const description = `${term}, veja produtos encontrados pelo nome e solicite orçamento de brindes personalizados na Pepperone Brindes.`;
+  const description = `${term}, veja produtos encontrados pelo nome e solicite orçamento de brindes personalizados na Maggenta Brindes.`;
   const canonical = new URL(`/busca?q=${encodeURIComponent(term)}`, siteUrl).toString();
 
   return {

@@ -15,7 +15,7 @@ const PersonalizedGiftsSeo = () => {
             Brindes corporativos para campanhas e eventos
           </h4>
           <p className="mt-8 space-y-6 text-justify text-base leading-8">
-            A Pepperone atende empresas que precisam de brindes personalizados para
+            A Maggenta atende empresas que precisam de brindes personalizados para
             feiras, congressos, datas promocionais, ações internas, programas de
             relacionamento e lançamentos de produtos. O catálogo reúne opções como
             canetas, blocos de anotações, copos, garrafas, mochilas, bolsas,

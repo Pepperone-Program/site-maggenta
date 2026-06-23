@@ -5,7 +5,7 @@ import { buildSeoOther, siteUrl } from "@/lib/seo";
 
 const title = "Orçamento enviado com sucesso";
 const description =
-  "Seu pedido de orçamento foi enviado com sucesso. A Pepperone entrará em contato em até 24 horas.";
+  "Seu pedido de orçamento foi enviado com sucesso. A Maggenta entrará em contato em até 24 horas.";
 
 export const metadata: Metadata = {
   title,

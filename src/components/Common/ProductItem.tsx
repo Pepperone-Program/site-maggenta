@@ -23,7 +23,7 @@ const ProductItem = ({ item }: { item: Product }) => {
 
   return (
     <div className="group flex h-full min-h-[430px] flex-col text-center">
-      <div className="relative mb-4 flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg bg-[#F6F7FB] p-2">
+      <div className="relative mb-4 flex aspect-square w-full items-center justify-center overflow-hidden rounded-[28px] border border-white bg-white p-4 shadow-2 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-3">
         <Link
           href={href}
           aria-label={`Ver detalhes de ${item.title}`}
@@ -84,7 +84,7 @@ const ProductItem = ({ item }: { item: Product }) => {
           <button
             type="button"
             onClick={handleAddToCart}
-            className="inline-flex w-full justify-center rounded-[5px] bg-blue px-6 py-2 text-custom-sm font-medium text-white duration-200 hover:bg-blue-dark"
+            className="inline-flex w-full justify-center rounded-full bg-blue px-6 py-2.5 text-custom-sm font-medium text-white shadow-[0_14px_30px_rgba(178,22,104,0.24)] duration-200 hover:bg-blue-dark"
           >
             Orçar
           </button>

@@ -10,7 +10,7 @@ const size = {
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
-  const title = searchParams.get("title") || "Pepperone Brindes";
+  const title = searchParams.get("title") || "Maggenta Brindes";
   const subtitle =
     searchParams.get("subtitle") || "Brindes personalizados para empresas";
   const image = searchParams.get("image");
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
               color: "#1f8f2f",
             }}
           >
-            Pepperone Brindes
+            Maggenta Brindes
           </div>
           <div
             style={{

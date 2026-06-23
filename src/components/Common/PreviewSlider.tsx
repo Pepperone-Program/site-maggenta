@@ -106,7 +106,7 @@ const PreviewSliderModal = () => {
             />
             <Image
               src="/images/logo/logo-vertical.svg"
-              alt="Marca d'agua Pepperone"
+              alt="Marca d'agua Maggenta"
               width={280}
               height={280}
               className="pointer-events-none absolute left-1/2 top-1/2 w-[36%] max-w-[280px] -translate-x-1/2 -translate-y-1/2 opacity-[0.15]"

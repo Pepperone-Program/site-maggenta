@@ -31,10 +31,10 @@ const PromoBanner = ({ banners = [] }: PromoBannerProps) => {
       >
         {items.map((banner, index) => (
           <SwiperSlide key={`${mobile ? "mobile" : "desktop"}-${banner.id_banner}`}>
-            <div className="relative w-full overflow-hidden bg-white">
+            <div className="relative w-full overflow-hidden rounded-[28px] bg-white shadow-2 sm:rounded-[36px]">
               <img
                 src={banner.url_banner || ""}
-                alt={banner.titulo || "Banner Pepperone"}
+                alt={banner.titulo || "Banner Maggenta"}
                 loading={index === 0 ? "eager" : "lazy"}
                 className="block h-auto w-full"
               />
@@ -53,7 +53,7 @@ const PromoBanner = ({ banners = [] }: PromoBannerProps) => {
 
     return (
       <section className="overflow-hidden py-20">
-        <div className="w-full">
+        <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
           <div className={hasMobileBanners ? "hidden sm:block" : ""}>
             {renderBanners(visibleDesktopBanners)}
           </div>
@@ -69,8 +69,8 @@ const PromoBanner = ({ banners = [] }: PromoBannerProps) => {
 
   return (
     <section className="overflow-hidden py-20">
-      <div className="w-full">
-        <div className="relative z-1 overflow-hidden bg-[#eef2ea] px-4 py-12.5 sm:px-7.5 lg:px-14 lg:py-17.5 xl:px-19 xl:py-22.5">
+      <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
+        <div className="relative z-1 overflow-hidden rounded-[32px] bg-[#f4eef3] px-4 py-12.5 shadow-2 sm:px-7.5 lg:px-14 lg:py-17.5 xl:px-19 xl:py-22.5">
           <div className="max-w-[560px]">
             <span className="mb-3 block text-lg font-medium text-dark">
               Kit pronto para montanha
@@ -87,7 +87,7 @@ const PromoBanner = ({ banners = [] }: PromoBannerProps) => {
 
             <Link
               href="/brindes-personalizados"
-              className="mt-7.5 inline-flex rounded-md bg-blue px-9.5 py-[11px] text-custom-sm font-medium text-white duration-200 hover:bg-blue-dark"
+              className="mt-7.5 inline-flex rounded-full bg-blue px-9.5 py-[11px] text-custom-sm font-medium text-white shadow-[0_14px_30px_rgba(178,22,104,0.24)] duration-200 hover:bg-blue-dark"
             >
               Solicitar orçamento
             </Link>

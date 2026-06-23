@@ -21,11 +21,11 @@ const NewArrival = ({
 }: ProductSectionProps) => {
   return (
     <section className="overflow-hidden pt-15">
-      <div className="max-w-[1800px] w-full mx-auto px-2 sm:px-3">
+      <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
         {/* <!-- section title --> */}
         <div className="relative mb-7 flex flex-col items-center text-center">
           <div>
-            <span className="flex items-center justify-center gap-2.5 font-medium text-black mb-1.5">
+            <span className="mb-2 flex items-center justify-center gap-2.5 font-medium text-blue">
               <svg
                 width="20"
                 height="20"
@@ -47,14 +47,14 @@ const NewArrival = ({
               </svg>
               {eyebrow}
             </span>
-            <h2 className="font-semibold text-xl xl:text-heading-5 text-black">
+            <h2 className="text-xl font-semibold text-dark xl:text-heading-5">
               {title}
             </h2>
           </div>
 
           <Link
             href="/brindes-personalizados"
-            className="mt-4 inline-flex font-medium text-custom-sm py-2.5 px-7 rounded-md border-gray-3 border bg-gray-1 text-dark ease-out duration-200 hover:bg-blue hover:text-white hover:border-transparent sm:absolute sm:right-0 sm:top-1/2 sm:mt-0 sm:-translate-y-1/2"
+            className="mt-4 inline-flex rounded-full border border-gray-3 bg-white px-7 py-2.5 text-custom-sm font-medium text-dark shadow-1 duration-200 ease-out hover:border-transparent hover:bg-blue hover:text-white sm:absolute sm:right-0 sm:top-1/2 sm:mt-0 sm:-translate-y-1/2"
           >
             Ver todos
           </Link>

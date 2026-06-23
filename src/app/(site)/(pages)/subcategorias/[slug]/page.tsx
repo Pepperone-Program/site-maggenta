@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const subcategoriaId = toNumber(slug) || 0;
   const subcategoriaName = titleFromSlug(slug) || "Subcategoria";
   const title = `${subcategoriaName} Personalizado Brindes Personalizados`;
-  const description = `${subcategoriaName} Personalizado, Querendo comprar Brindes Personalizados? É aqui na Pepperone Brindes`;
+  const description = `${subcategoriaName} Personalizado, Querendo comprar Brindes Personalizados? É aqui na Maggenta Brindes`;
   const canonical = new URL(
     subcategoryPath(subcategoriaId || 0, subcategoriaName),
     siteUrl

@@ -11,10 +11,10 @@ const Breadcrumb = ({ title, pages, titleAs = "h1" }: BreadcrumbProps) => {
   const TitleTag = titleAs;
 
   return (
-    <div className="overflow-hidden shadow-breadcrumb pt-[124px] sm:pt-[112px]">
+    <div className="overflow-hidden bg-[#fbf8fa] pt-[132px] sm:pt-[124px]">
       <div className="border-t border-gray-3">
         <div className="max-w-[1800px] w-full mx-auto px-2 sm:px-3 py-5 xl:py-10">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex flex-col justify-between gap-3 rounded-[28px] bg-white px-5 py-5 shadow-2 sm:flex-row sm:items-center xl:px-8">
             <TitleTag className="font-semibold text-dark text-xl sm:text-2xl xl:text-custom-2">
               {title}
             </TitleTag>

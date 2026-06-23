@@ -4,7 +4,7 @@ import Image from "next/image";
 
 const SingleItem = ({ testimonial }: { testimonial: Testimonial }) => {
   return (
-    <div className="m-1 flex h-full min-h-[310px] flex-col rounded-[10px] bg-white px-4 py-7.5 shadow-testimonial sm:px-8.5">
+    <div className="m-1 flex h-full min-h-[310px] flex-col rounded-[28px] bg-white px-4 py-7.5 shadow-[0_18px_44px_rgba(75,37,66,0.10)] sm:px-8.5">
       <div className="flex items-center gap-1 mb-5">
         <Image
           src="/images/icons/icon-star.svg"

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/cart",
   },
-  description: "Revise os produtos do seu orçamento Pepperone.",
+  description: "Revise os produtos do seu orçamento Maggenta.",
   robots: {
     index: false,
     follow: false,

@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const catalogo = await getCatalogoPublicoAlvo(publicoAlvoId, { page: 1, limit: 1 });
   const publicoName = catalogo.categoria?.categoria || "Público Alvo";
   const title = `Brindes para ${publicoName} Personalizados e Corporativos`;
-  const description = `Brindes para ${publicoName}, Querendo comprar Brindes Personalizados? É aqui na Pepperone Brindes`;
+  const description = `Brindes para ${publicoName}, Querendo comprar Brindes Personalizados? É aqui na Maggenta Brindes`;
   const canonical = new URL(`/publicos-alvos/${slug}`, siteUrl).toString();
 
   return {

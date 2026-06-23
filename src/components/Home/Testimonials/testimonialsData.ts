@@ -14,19 +14,19 @@ const testimonialsData: Testimonial[] = [
     authorRole: "Cliente",
   },
   {
-    review: `Me chamo Tainá Bernardes e falo em nome da empresa Artvac Embalagens. Há mais ou menos 4 anos temos uma excelente parceria de fornecimento de brindes com a Pepperone. Nesses anos sempre fomos extremamente bem atendidos pela Caroline, excelente vendedora, sempre atenciosa, com carinho e cuidado em cada detalhe! Nossos brindes são sempre um sucesso com nossos clientes e sempre nos perguntam de onde são, indicamos de olhos fechados a empresa e a Caroline! Gratidão pela parceria de sempre!`,
+    review: `Me chamo Tainá Bernardes e falo em nome da empresa Artvac Embalagens. Há mais ou menos 4 anos temos uma excelente parceria de fornecimento de brindes com a Maggenta. Nesses anos sempre fomos extremamente bem atendidos pela Caroline, excelente vendedora, sempre atenciosa, com carinho e cuidado em cada detalhe! Nossos brindes são sempre um sucesso com nossos clientes e sempre nos perguntam de onde são, indicamos de olhos fechados a empresa e a Caroline! Gratidão pela parceria de sempre!`,
     authorName: "Artvac Embalagens",
     authorImg: "/images/users/artvac.png",
     authorRole: "Cliente",
   },
   {
-    review: `Os produtos da Pepperone são excelentes, mas o que realmente faz a diferença é o atendimento. A Carol, em especial, é impecável: sempre atenciosa, tira todas as minhas dúvidas, dá ótimas dicas e acompanha de perto cada pedido. É um atendimento que faz a gente se sentir cuidado de verdade. Recomendo de olhos fechados!`,
+    review: `Os produtos da Maggenta são excelentes, mas o que realmente faz a diferença é o atendimento. A Carol, em especial, é impecável: sempre atenciosa, tira todas as minhas dúvidas, dá ótimas dicas e acompanha de perto cada pedido. É um atendimento que faz a gente se sentir cuidado de verdade. Recomendo de olhos fechados!`,
     authorName: "Alice Buzanelo",
     authorImg: "/images/users/aliceBuzanelo.png",
     authorRole: "Cliente",
   },
   {
-    review: `Super recomendo a Pepperone para brindes e produtos promocionais. Trabalho com a empresa há tempos e sempre atenderam super bem. Eles têm um catálogo muito bom, com variedade de modelos e custos. A personalização é de muita qualidade. Destaco especialmente o atendimento da Caroline, sempre muito cordial e proativa em sugerir ideias e soluções.`,
+    review: `Super recomendo a Maggenta para brindes e produtos promocionais. Trabalho com a empresa há tempos e sempre atenderam super bem. Eles têm um catálogo muito bom, com variedade de modelos e custos. A personalização é de muita qualidade. Destaco especialmente o atendimento da Caroline, sempre muito cordial e proativa em sugerir ideias e soluções.`,
     authorName: "Edu Zanardi",
     authorImg: "/images/users/eduZanardi.png",
     authorRole: "Cliente",

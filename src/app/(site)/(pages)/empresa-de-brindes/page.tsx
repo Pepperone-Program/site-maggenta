@@ -4,7 +4,7 @@ import InstitutionalPage from "@/components/InstitutionalPage";
 export const metadata: Metadata = {
   title: "Empresa de Brindes",
   description:
-    "Conheça a Pepperone Promocional, nossos serviços de gravação, políticas de frete e garantia.",
+    "Conheça a Maggenta Promocional, nossos serviços de gravação, políticas de frete e garantia.",
   alternates: {
     canonical: "/empresa-de-brindes",
   },
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 const sections = [
   {
-    title: "PEPPERONE PROMOCIONAL",
+    title: "Maggenta PROMOCIONAL",
     paragraphs: [
       "Obrigado por acessar nosso site. Estamos prontos para entender e atender suas necessidades promocionais.",
     ],
@@ -45,7 +45,7 @@ const sections = [
     paragraphs: [
       "O período de garantia é estabelecido de acordo com o produto solicitado, será informado diretamente por um de nossos consultores no ato da compra, bem como irão determinar se há alguma limitação de uso.",
       "Apenas os consumidores que tenham adquirido nossos produtos de maneira legal e autorizada poderão obter cobertura sob esta garantia.",
-      "Atenção: A Pepperone Promocional isenta-se da responsabilidade de atender às solicitações de troca ou devolução de produtos fora do prazo ou com ausência dos itens ou acessórios que o acompanham.",
+      "Atenção: A Maggenta Promocional isenta-se da responsabilidade de atender às solicitações de troca ou devolução de produtos fora do prazo ou com ausência dos itens ou acessórios que o acompanham.",
     ],
   },
 ];
@@ -54,7 +54,7 @@ export default function EmpresaDeBrindesPage() {
   return (
     <InstitutionalPage
       eyebrow="Empresa de brindes"
-      title="Pepperone Promocional"
+      title="Maggenta Promocional"
       intro="Produtos corporativos, gravação especializada e atendimento consultivo para marcas que precisam entregar qualidade."
       sections={sections}
     />

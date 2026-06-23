@@ -22,7 +22,7 @@ const QUOTE_CUSTOMER_STORAGE_KEY = "pepperone:quote-customer";
 const DEFAULT_RETURN_ROUTE = "/brindes-para-empresas";
 
 const fields = [
-  { name: "fantasia", label: "Empresa ou nome", placeholder: "Ex.: Pepperone Brindes", required: false },
+  { name: "fantasia", label: "Empresa ou nome", placeholder: "Ex.: Maggenta Brindes", required: false },
   { name: "contato", label: "Contato", placeholder: "Nome do responsável", required: true },
   { name: "email", label: "E-mail", type: "email", placeholder: "vendas@empresa.com.br", required: true },
   { name: "tel", label: "Telefone", placeholder: "(11) 99999-9999", required: false },

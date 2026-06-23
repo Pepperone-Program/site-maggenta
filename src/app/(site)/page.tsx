@@ -6,7 +6,7 @@ export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Pepperone Brindes Corporativos Personalizados para Empresas",
+    absolute: "Maggenta Brindes Corporativos Personalizados para Empresas",
   },
   description:
     "Solicite orcamento de brindes corporativos personalizados, produtos promocionais e itens para empresas em todo o Brasil.",

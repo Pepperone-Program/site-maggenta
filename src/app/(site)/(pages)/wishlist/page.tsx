@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/wishlist",
   },
-  description: "Veja seus produtos favoritos de brindes personalizados na Pepperone.",
+  description: "Veja seus produtos favoritos de brindes personalizados na Maggenta.",
   robots: {
     index: false,
     follow: false,

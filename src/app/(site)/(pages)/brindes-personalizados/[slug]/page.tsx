@@ -49,8 +49,8 @@ export async function generateMetadata({
   const description =
     product.description ||
     product.shortDescription ||
-    `Solicite orcamento para ${product.title} personalizado na Pepperone.`;
-  const title = `${product.title} - ${product.codigo || product.id} - ${product.title} | Pepperone Brindes`;
+    `Solicite orcamento para ${product.title} personalizado na Maggenta.`;
+  const title = `${product.title} - ${product.codigo || product.id} - ${product.title} | Maggenta Brindes`;
 
   return {
     title: {
@@ -149,7 +149,7 @@ const ProductPage = async ({ params }: ProductPageProps) => {
     mpn: product.codigo || String(product.id),
     brand: {
       "@type": "Brand",
-      name: "Pepperone",
+      name: "Maggenta",
     },
     category: product.category,
     offers: {
@@ -161,7 +161,7 @@ const ProductPage = async ({ params }: ProductPageProps) => {
       itemCondition: "https://schema.org/NewCondition",
       seller: {
         "@type": "Organization",
-        name: "Pepperone",
+        name: "Maggenta",
       },
     },
     aggregateRating: {

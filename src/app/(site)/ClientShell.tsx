@@ -59,7 +59,7 @@ const ClientShell = ({ children }: { children: ReactNode }) => {
       <ClarityInit />
       <Script
         async
-        src="https://integrazap.com.br/gadget-v.1/wapp-flutuante.js?x=396a64b52d20d34d1e7ba4a95a975231&y=349273426667&z=pepperone.com.br"
+        src="https://integrazap.com.br/gadget-v.1/wapp-flutuante.js?x=019d7ce4c9075179faf49505675e4494&y=349319781679&z=maggenta.com.br"
         strategy="afterInteractive"
       />
       <Analytics/>

@@ -1,7 +1,6 @@
 ﻿"use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Autoplay } from "swiper/modules";
@@ -134,7 +133,7 @@ const defaultMenuGroups: HeaderMenuGroup[] = [
 
 const topbarItems = [
   "(11) 2971-5252 / (11) 2950-3923",
-  "Seja Bem-Vindo à Pepperone Brindes Corporativos!",
+  "Seja Bem-Vindo à Maggenta Brindes Corporativos!",
   "Faturamento mínimo R$1.000,00",
 ];
 
@@ -348,11 +347,11 @@ const Header = () => {
 
   return (
     <header
-      className={`fixed left-0 top-0 z-9999 w-full bg-white transition-all duration-300 ${
-        stickyMenu ? "shadow" : ""
+      className={`fixed left-0 top-0 z-9999 w-full transition-all duration-300 ${
+        stickyMenu ? "bg-white/95 shadow-2 backdrop-blur-xl" : "bg-white/92 backdrop-blur-xl"
       }`}
     >
-      <div className="bg-[#249230] text-white">
+      <div className="bg-[#241827] text-white">
         <div className="mx-auto w-full max-w-[1800px] px-2 py-2 text-center text-sm font-semibold sm:hidden">
           <Swiper
             loop
@@ -378,19 +377,18 @@ const Header = () => {
             stickyMenu ? "py-3" : "py-4"
           }`}
         >
-          <Link className="flex-shrink-0 sm:flex-shrink-0 xl:flex-shrink-0" href="/" aria-label="Pepperone">
-            <Image
-              src="/images/logo/logo.svg"
-              alt="Pepperone"
+          <Link className="flex-shrink-0 sm:flex-shrink-0 xl:flex-shrink-0" href="/" aria-label="Maggenta">
+            <img
+              src="/images/logo/logo.svg?v=20260623"
+              alt="Maggenta"
               width={190}
               height={32}
-              priority
               className="h-auto w-[118px] sm:w-[170px] lg:w-[190px]"
             />
           </Link>
 
           <nav
-            className={`absolute left-0 right-0 top-full w-full flex-col rounded-none border-none border-gray-3 bg-white p-0 shadow-lg sm:static sm:block sm:w-auto sm:translate-x-0 sm:translate-y-0 sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none ${
+            className={`absolute left-0 right-0 top-full w-full flex-col rounded-b-[28px] border-none border-gray-3 bg-white p-0 shadow-2 sm:static sm:block sm:w-auto sm:translate-x-0 sm:translate-y-0 sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none ${
             
               navigationOpen ? "flex" : "hidden"
             }`}
@@ -448,7 +446,7 @@ const Header = () => {
                           activeMenuId === menuItem.id ? "block" : "hidden"
                         }`}
                       >
-                        <div className="mt-0 overflow-x-auto rounded-md border border-gray-3 bg-white p-2 pt-0 shadow-lg sm:rounded-none sm:border-x-0 sm:border-b sm:border-t-0 sm:px-8 sm:py-7 sm:pt-7">
+                        <div className="mt-0 overflow-x-auto rounded-2xl border border-gray-3 bg-white p-2 pt-0 shadow-2 sm:rounded-[24px] sm:px-8 sm:py-7 sm:pt-7">
                           <div className="flex flex-col gap-x-12 gap-y-1 sm:flex-row">
                             {menuColumns(menuItem.items, 16).map((column, columnIndex) => (
                               <ul
@@ -463,7 +461,7 @@ const Header = () => {
                                         setNavigationOpen(false);
                                         setActiveMenuId(null);
                                       }}
-                                      className="block min-h-11 rounded px-1 py-0.5 text-sm font-light uppercase text-dark hover:bg-gray-1 hover:text-blue sm:min-h-0 sm:py-0.3 sm:text-xs"
+                                      className="block min-h-11 rounded-full px-3 py-1 text-sm font-light uppercase text-dark hover:bg-gray-1 hover:text-blue sm:min-h-0 sm:text-xs"
                                     >
                                       {item.title}
                                     </Link>
@@ -503,7 +501,7 @@ const Header = () => {
                 name="search"
                 aria-label="Buscar produtos"
                 placeholder="Buscar produtos"
-                className="h-11 w-full rounded-md border border-gray-3 bg-gray-1 pl-4 pr-11 text-sm text-dark outline-none transition-all duration-300 placeholder:text-dark-4 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                className="h-11 w-full rounded-full border border-gray-3 bg-gray-1 pl-4 pr-11 text-sm text-dark outline-none transition-all duration-300 placeholder:text-dark-4 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
               />
               <button
                 type="submit"
@@ -511,12 +509,12 @@ const Header = () => {
                 aria-label="Buscar"
                 disabled={searching}
                 aria-busy={searching}
-                className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-md text-dark transition-colors duration-200 hover:bg-gray-2 hover:text-blue disabled:cursor-wait disabled:opacity-70"
+                className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-full text-dark transition-colors duration-200 hover:bg-gray-2 hover:text-blue disabled:cursor-wait disabled:opacity-70"
               >
                 <SearchButtonIcon loading={searching} />
               </button>
               {searchFocused && searchSuggestions.length > 0 && (
-                <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-md border border-gray-3 bg-white py-2 shadow-lg" onMouseDown={(e) => e.preventDefault()}>
+                <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-gray-3 bg-white py-2 shadow-2" onMouseDown={(e) => e.preventDefault()}>
                   {searchSuggestions.map((suggestion) => (
                     <Link
                       key={suggestion.id}
@@ -552,19 +550,19 @@ const Header = () => {
                 name="search"
                 aria-label="Buscar produtos"
                 placeholder="Buscar produtos"
-                className="h-11 w-full rounded-md border border-gray-3 bg-gray-1 pl-4 pr-11 text-sm text-dark outline-none transition-all duration-300 placeholder:text-dark-4 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                className="h-11 w-full rounded-full border border-gray-3 bg-gray-1 pl-4 pr-11 text-sm text-dark outline-none transition-all duration-300 placeholder:text-dark-4 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
               />
               <button
                 type="submit"
                 aria-label="Buscar"
                 disabled={searching}
                 aria-busy={searching}
-                className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-md text-dark transition-colors duration-200 hover:bg-gray-2 hover:text-blue disabled:cursor-wait disabled:opacity-70"
+                className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-full text-dark transition-colors duration-200 hover:bg-gray-2 hover:text-blue disabled:cursor-wait disabled:opacity-70"
               >
                 <SearchButtonIcon loading={searching} />
               </button>
               {searchFocused && searchSuggestions.length > 0 && (
-                <div className="absolute right-0 top-full z-50 mt-1 w-[min(420px,calc(100vw-24px))] overflow-hidden rounded-md border border-gray-3 bg-white py-2 shadow-lg" onMouseDown={(e) => e.preventDefault()}>
+                <div className="absolute right-0 top-full z-50 mt-2 w-[min(420px,calc(100vw-24px))] overflow-hidden rounded-2xl border border-gray-3 bg-white py-2 shadow-2" onMouseDown={(e) => e.preventDefault()}>
                   {searchSuggestions.map((suggestion) => (
                     <Link
                       key={suggestion.id}
@@ -586,7 +584,7 @@ const Header = () => {
             <button
               type="button"
               onClick={openCartModal}
-              className="flex h-11 items-center gap-2 rounded-md border border-gray-3 bg-white px-3 text-dark transition-colors duration-200 hover:border-blue hover:text-blue"
+              className="flex h-11 items-center gap-2 rounded-full border border-gray-3 bg-white px-3.5 text-dark shadow-1 transition-colors duration-200 hover:border-blue hover:text-blue"
               aria-label="Abrir orÃ§amento"
             >
               <span className="relative inline-flex">
@@ -616,7 +614,7 @@ const Header = () => {
 
             <button
               aria-label="Abrir menu"
-              className="flex h-11 w-11 items-center justify-center rounded-md border border-gray-3 sm:hidden"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-3 bg-white shadow-1 sm:hidden"
               onClick={() => setNavigationOpen((value) => !value)}
               type="button"
             >

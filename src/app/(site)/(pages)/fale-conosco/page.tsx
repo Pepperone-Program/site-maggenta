@@ -5,11 +5,11 @@ import { buildSeoOther, contextualKeywords, siteUrl } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "Fale conosco",
   description:
-    "Entre em contato com a Pepperone para orcamentos de brindes personalizados, atendimento comercial e suporte.",
-  keywords: contextualKeywords("contato Pepperone", [
+    "Entre em contato com a Maggenta para orcamentos de brindes personalizados, atendimento comercial e suporte.",
+  keywords: contextualKeywords("contato Maggenta", [
     "orçamento de brindes personalizados",
-    "atendimento Pepperone Brindes",
-    "vendas Pepperone",
+    "atendimento Maggenta Brindes",
+    "vendas Maggenta",
   ]),
   alternates: {
     canonical: "/fale-conosco",
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   other: buildSeoOther({
     title: "Fale conosco",
     description:
-      "Entre em contato com a Pepperone para orcamentos de brindes personalizados, atendimento comercial e suporte.",
+      "Entre em contato com a Maggenta para orcamentos de brindes personalizados, atendimento comercial e suporte.",
     canonical: `${siteUrl}/fale-conosco`,
     subject: "contato comercial para brindes personalizados",
   }),

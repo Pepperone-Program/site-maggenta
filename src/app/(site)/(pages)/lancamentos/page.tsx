@@ -7,10 +7,10 @@ import { getProdutosSite } from "@/lib/api";
 export const revalidate = 120;
 
 export const metadata: Metadata = {
-  title: "Lançamentos | Pepperone Brindes",
+  title: "Lançamentos | Maggenta Brindes",
   description:
-    "Veja os 24 primeiros lançamentos do catálogo Pepperone, com produtos novos e destaque para campanhas, eventos e ações promocionais.",
-  keywords: contextualKeywords("lançamentos Pepperone", [
+    "Veja os 24 primeiros lançamentos do catálogo Maggenta, com produtos novos e destaque para campanhas, eventos e ações promocionais.",
+  keywords: contextualKeywords("lançamentos Maggenta", [
     "produtos novos para empresas",
     "lançamentos de brindes",
     "catálogo de brindes lançamentos",
@@ -19,18 +19,18 @@ export const metadata: Metadata = {
     canonical: "/lancamentos",
   },
   openGraph: {
-    title: "Lançamentos | Pepperone Brindes",
+    title: "Lançamentos | Maggenta Brindes",
     description:
-      "Veja os 24 primeiros lançamentos do catálogo Pepperone, com produtos novos e destaque para campanhas, eventos e ações promocionais.",
+      "Veja os 24 primeiros lançamentos do catálogo Maggenta, com produtos novos e destaque para campanhas, eventos e ações promocionais.",
     type: "website",
     url: `${siteUrl}/lancamentos`,
     siteName,
     locale: "pt_BR",
   },
   other: buildSeoOther({
-    title: "Lançamentos | Pepperone Brindes",
+    title: "Lançamentos | Maggenta Brindes",
     description:
-      "Veja os 24 primeiros lançamentos do catálogo Pepperone, com produtos novos e destaque para campanhas, eventos e ações promocionais.",
+      "Veja os 24 primeiros lançamentos do catálogo Maggenta, com produtos novos e destaque para campanhas, eventos e ações promocionais.",
     canonical: `${siteUrl}/lancamentos`,
     subject: "lançamentos de brindes personalizados",
   }),
@@ -44,7 +44,7 @@ export default async function LancamentosPage() {
       <ShopWithoutSidebar
         products={products}
         title="Lançamentos Personalizados"
-        description="Os 24 primeiros produtos do catálogo Pepperone em destaque para lançamentos, campanhas e oportunidades de relacionamento com clientes."
+        description="Os 24 primeiros produtos do catálogo Maggenta em destaque para lançamentos, campanhas e oportunidades de relacionamento com clientes."
         breadcrumbPages={["Lançamentos Personalizados"]}
         productBadgeLabel="Lançamento"
       />

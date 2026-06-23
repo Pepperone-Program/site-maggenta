@@ -222,7 +222,7 @@ const ShopDetails = ({
                     />
                     <ImageWithFallback
                       src="/images/logo/logo-vertical.svg"
-                      alt="Marca d'agua Pepperone"
+                      alt="Marca d'agua Maggenta"
                       width={260}
                       height={260}
                       className="pointer-events-none absolute left-1/2 top-1/2 z-20 w-[38%] max-w-[260px] -translate-x-1/2 -translate-y-1/2 opacity-[0.08]"

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { friendlyPersonalizedParam } from "@/lib/slugs";
 
 export const siteUrl = "https://www.pepperone.com.br";
-export const siteName = "Pepperone Brindes";
-export const seoAuthor = "Pepperone Brindes Personalizados";
+export const siteName = "Maggenta Brindes";
+export const seoAuthor = "Maggenta Brindes Personalizados";
 
 const normalizeKeyword = (value: string) =>
   value

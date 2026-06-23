@@ -89,7 +89,7 @@ const FilterGroup = ({
   const [open, setOpen] = useState(true);
 
   return (
-    <div className="rounded-md border border-gray-3 bg-white shadow-1">
+    <div className="rounded-[24px] border border-white bg-white shadow-2">
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
@@ -131,7 +131,7 @@ const FilterGroup = ({
               >
                 <span className="flex min-w-0 items-center gap-2">
                   <span
-                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
                       selected ? "border-blue bg-blue" : "border-gray-3 bg-white"
                     }`}
                   >
@@ -156,7 +156,7 @@ const FilterGroup = ({
                 </span>
 
                 <span
-                  className={`inline-flex shrink-0 rounded-[30px] px-2 text-custom-xs duration-200 group-hover:bg-blue group-hover:text-white ${
+                  className={`inline-flex shrink-0 rounded-full px-2 text-custom-xs duration-200 group-hover:bg-blue group-hover:text-white ${
                     selected ? "bg-blue text-white" : "bg-gray-2"
                   }`}
                 >
@@ -482,7 +482,7 @@ const ShopWithSidebar = ({
   return (
     <>
       <Breadcrumb title={pageTitle} pages={["brindes personalizados"]} />
-      <section className="relative min-h-[900px] overflow-hidden bg-[#f3f4f6] pb-20 pt-5 lg:pt-12 xl:pt-16">
+      <section className="relative min-h-[900px] overflow-hidden bg-[#fbf8fa] pb-20 pt-5 lg:pt-12 xl:pt-16">
         <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
           <div className="flex gap-6 xl:gap-8">
             <div
@@ -524,7 +524,7 @@ const ShopWithSidebar = ({
 
               <form onSubmit={(event) => event.preventDefault()}>
                 <div className="flex flex-col gap-5">
-                  <div className="rounded-md border border-gray-3 bg-white px-5 py-4 shadow-1">
+                  <div className="rounded-[24px] border border-white bg-white px-5 py-4 shadow-2">
                     <div className="flex items-center justify-between gap-3">
                       <p className="font-medium text-dark">Filtros</p>
                       <button
@@ -539,7 +539,7 @@ const ShopWithSidebar = ({
                   </div>
 
                   {!isSubcategoryRoute && (
-                    <div className="rounded-md border border-gray-3 bg-white shadow-1">
+                    <div className="rounded-[24px] border border-white bg-white shadow-2">
                       <label
                         htmlFor="catalog-category"
                         className="block py-3 pl-6 pr-5.5 font-medium text-dark shadow-filter"
@@ -551,7 +551,7 @@ const ShopWithSidebar = ({
                           id="catalog-category"
                           value={activeCategoryId}
                           onChange={(event) => selectCategory(Number(event.target.value))}
-                          className="h-11 w-full rounded-md border border-gray-3 bg-white px-3 text-custom-sm text-dark outline-none duration-200 focus:border-blue"
+                          className="h-11 w-full rounded-full border border-gray-3 bg-white px-4 text-custom-sm text-dark outline-none duration-200 focus:border-blue"
                         >
                           {categories.map((category) => (
                             <option key={category.id} value={category.id}>
@@ -589,7 +589,7 @@ const ShopWithSidebar = ({
             </div>
 
             <div className="min-w-0 flex-1">
-              <div className="mb-6 rounded-md border border-gray-3 bg-white px-4 py-3 shadow-1 sm:px-5">
+              <div className="mb-6 rounded-[24px] border border-white bg-white px-4 py-3 shadow-2 sm:px-5">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex flex-wrap items-center gap-4">
                     <p>
@@ -610,7 +610,7 @@ const ShopWithSidebar = ({
                         productStyle === "grid"
                           ? "border-blue bg-blue text-white"
                           : "border-gray-3 bg-gray-1 text-dark"
-                      } flex h-9 w-10.5 items-center justify-center rounded-[5px] border duration-200 hover:border-blue hover:bg-blue hover:text-white`}
+                      } flex h-9 w-10.5 items-center justify-center rounded-full border duration-200 hover:border-blue hover:bg-blue hover:text-white`}
                     >
                       <svg
                         className="fill-current"
@@ -631,7 +631,7 @@ const ShopWithSidebar = ({
                         productStyle === "list"
                           ? "border-blue bg-blue text-white"
                           : "border-gray-3 bg-gray-1 text-dark"
-                      } flex h-9 w-10.5 items-center justify-center rounded-[5px] border duration-200 hover:border-blue hover:bg-blue hover:text-white`}
+                      } flex h-9 w-10.5 items-center justify-center rounded-full border duration-200 hover:border-blue hover:bg-blue hover:text-white`}
                     >
                       <svg
                         className="fill-current"
@@ -665,7 +665,7 @@ const ShopWithSidebar = ({
                   )}
                 </div>
               ) : (
-                <div className="rounded-md border border-gray-3 bg-white p-8 text-center shadow-1">
+                <div className="rounded-[28px] border border-white bg-white p-8 text-center shadow-2">
                   <h2 className="text-lg font-medium text-dark">Nenhum produto encontrado</h2>
                   <p className="mt-2 text-custom-sm text-dark-4">
                     Ajuste os filtros para ver mais opcoes desta categoria.
@@ -675,7 +675,7 @@ const ShopWithSidebar = ({
 
               {catalogo.totalPages > 1 && (
                 <div className="mt-15 flex justify-center">
-                  <div className="rounded-md bg-white p-2 shadow-1">
+                  <div className="rounded-full bg-white p-2 shadow-2">
                     <ul className="flex items-center">
                       <li>
                         <Link
@@ -685,7 +685,7 @@ const ShopWithSidebar = ({
                           })}
                           scroll={false}
                           onClick={scrollToTopSmooth}
-                          className={`flex h-9 w-8 items-center justify-center rounded-[3px] duration-200 ${
+                          className={`flex h-9 w-8 items-center justify-center rounded-full duration-200 ${
                             catalogo.page <= 1
                               ? "pointer-events-none text-gray-4"
                               : "hover:bg-blue hover:text-white"
@@ -701,7 +701,7 @@ const ShopWithSidebar = ({
                             href={buildCatalogHref({ page })}
                             scroll={false}
                             onClick={scrollToTopSmooth}
-                            className={`flex rounded-[3px] px-3.5 py-1.5 duration-200 hover:bg-blue hover:text-white ${
+                            className={`flex rounded-full px-3.5 py-1.5 duration-200 hover:bg-blue hover:text-white ${
                               page === catalogo.page ? "bg-blue text-white" : ""
                             }`}
                           >
@@ -721,7 +721,7 @@ const ShopWithSidebar = ({
                           })}
                           scroll={false}
                           onClick={scrollToTopSmooth}
-                          className={`flex h-9 w-8 items-center justify-center rounded-[3px] duration-200 ${
+                          className={`flex h-9 w-8 items-center justify-center rounded-full duration-200 ${
                             catalogo.page >= catalogo.totalPages
                               ? "pointer-events-none text-gray-4"
                               : "hover:bg-blue hover:text-white"
@@ -736,7 +736,7 @@ const ShopWithSidebar = ({
               )}
 
               {categoryDescription && (
-                <section className="mx-auto mt-16 max-w-[1500px] rounded-md border border-gray-3 bg-white px-5 py-8 text-center shadow-1 sm:px-8 lg:px-12">
+                <section className="mx-auto mt-16 max-w-[1500px] rounded-[28px] border border-white bg-white px-5 py-8 text-center shadow-2 sm:px-8 lg:px-12">
                   <h2 className="mb-8 text-center text-3xl font-semibold leading-tight text-dark sm:text-4xl">
                     {categoryName}
                   </h2>

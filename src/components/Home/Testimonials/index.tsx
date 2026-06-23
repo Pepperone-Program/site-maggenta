@@ -11,6 +11,40 @@ import SingleItem from "./SingleItem";
 
 const Testimonials = () => {
   const testimonials = [...testimonialsData, ...testimonialsData];
+  const renderCarousel = (reverseDirection = false) => (
+    <Swiper
+      loop
+      speed={6500}
+      autoplay={{
+        delay: 0,
+        disableOnInteraction: false,
+        pauseOnMouseEnter: false,
+        reverseDirection,
+      }}
+      modules={[Autoplay]}
+      slidesPerView={1}
+      spaceBetween={20}
+      allowTouchMove={false}
+      breakpoints={{
+        0: {
+          slidesPerView: 1,
+        },
+        1000: {
+          slidesPerView: 2,
+        },
+        1200: {
+          slidesPerView: 3,
+        },
+      }}
+      className="[&_.swiper-wrapper]:items-stretch [&_.swiper-wrapper]:ease-linear"
+    >
+      {testimonials.map((item, key) => (
+        <SwiperSlide key={`${reverseDirection ? "reverse" : "forward"}-${key}`} className="!h-auto">
+          <SingleItem testimonial={item} />
+        </SwiperSlide>
+      ))}
+    </Swiper>
+  );
 
   return (
     <section className="overflow-hidden pb-16.5">
@@ -36,39 +70,10 @@ const Testimonials = () => {
 
             </div>
 
-            <Swiper
-              loop
-              speed={6500}
-              autoplay={{
-                delay: 0,
-                disableOnInteraction: false,
-                pauseOnMouseEnter: false,
-              }}
-              modules={[Autoplay]}
-              slidesPerView={1}
-              spaceBetween={20}
-              allowTouchMove={false}
-              breakpoints={{
-                0: {
-                  slidesPerView: 1,
-                },
-                1000: {
-                  slidesPerView: 2,
-                  // spaceBetween: 4,
-                },
-                // when window width is >= 768px
-                1200: {
-                  slidesPerView: 3,
-                },
-              }}
-              className="[&_.swiper-wrapper]:items-stretch [&_.swiper-wrapper]:ease-linear"
-            >
-              {testimonials.map((item, key) => (
-                <SwiperSlide key={key} className="!h-auto">
-                  <SingleItem testimonial={item} />
-                </SwiperSlide>
-              ))}
-            </Swiper>
+            <div className="space-y-5">
+              {renderCarousel(false)}
+              {renderCarousel(true)}
+            </div>
           </div>
         </div>
       </div>

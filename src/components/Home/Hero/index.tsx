@@ -7,7 +7,6 @@ import { Autoplay, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
-import HeroFeature from "./HeroFeature";
 import type { BannerApi } from "@/lib/api";
 
 const slides = [
@@ -54,8 +53,8 @@ const Hero = ({ banners = [] }: HeroProps) => {
     items.length
       ? items.map((banner) => ({
         id: String(banner.id_banner),
-        eyebrow: "Pepperone",
-        title: banner.titulo || "Pepperone Brindes",
+        eyebrow: "Maggenta",
+        title: banner.titulo || "Maggenta Brindes",
         description: "",
         image: banner.url_banner || "",
         href: banner.url || "/brindes-personalizados",
@@ -82,8 +81,8 @@ const Hero = ({ banners = [] }: HeroProps) => {
           <div
             className={
               banners.length
-                ? "relative w-full overflow-hidden bg-white"
-                : "relative h-[420px] overflow-hidden bg-[#0b2f2b] sm:h-[520px] lg:h-[650px] 2xl:h-[750px]"
+                ? "relative w-full overflow-hidden rounded-[28px] bg-white shadow-2 sm:rounded-[36px]"
+                : "relative h-[420px] overflow-hidden rounded-[28px] bg-[#241827] shadow-2 sm:h-[520px] sm:rounded-[36px] lg:h-[650px] 2xl:h-[720px]"
             }
           >
             {banners.length ? (
@@ -102,13 +101,13 @@ const Hero = ({ banners = [] }: HeroProps) => {
                 sizes="100vw"
                 className={`object-cover ${
                   slide.image.includes("/products/")
-                    ? "object-[78%_50%] opacity-70"
-                    : "opacity-75"
+                    ? "object-[78%_50%] opacity-68"
+                    : "opacity-78"
                 }`}
               />
             )}
             {!banners.length && (
-              <div className="absolute inset-0 bg-gradient-to-r from-[#061f1c]/82 via-[#061f1c]/44 to-[#061f1c]/8" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#241827]/88 via-[#241827]/48 to-[#241827]/10" />
             )}
             {banners.length > 0 && (
               <Link
@@ -120,7 +119,7 @@ const Hero = ({ banners = [] }: HeroProps) => {
 
             <div className="relative z-20 flex h-full max-w-[860px] flex-col justify-center px-5 sm:px-10 lg:px-16">
               {!banners.length && (
-                <span className="mb-5 inline-flex w-fit rounded-full bg-blue px-5 py-2 text-sm font-semibold uppercase tracking-wide text-white">
+                <span className="mb-5 inline-flex w-fit rounded-full bg-white/14 px-5 py-2 text-sm font-semibold uppercase tracking-wide text-white ring-1 ring-white/25">
                   {slide.eyebrow}
                 </span>
               )}
@@ -130,7 +129,7 @@ const Hero = ({ banners = [] }: HeroProps) => {
                     index === 0 ? "h1" : "h2",
                     {
                       className:
-                        "text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl xl:text-[76px]",
+                        "text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl xl:text-[72px]",
                     },
                     slide.title
                   )}
@@ -141,7 +140,7 @@ const Hero = ({ banners = [] }: HeroProps) => {
               )}
               <Link
                 href={slide.href}
-                className={`inline-flex w-fit rounded-md bg-blue px-8 py-3.5 text-sm font-semibold text-white duration-200 hover:bg-blue-dark ${
+                className={`inline-flex w-fit rounded-full bg-blue px-8 py-3.5 text-sm font-semibold text-white shadow-[0_18px_36px_rgba(178,22,104,0.28)] duration-200 hover:bg-blue-dark ${
                   banners.length ? "sr-only" : "mt-8"
                 }`}
               >
@@ -155,11 +154,11 @@ const Hero = ({ banners = [] }: HeroProps) => {
   );
 
   return (
-    <section className="overflow-hidden bg-white pt-[124px] sm:pt-[112px]">
+    <section className="overflow-hidden bg-[#fbf8fa] pt-[132px] sm:pt-[124px]">
       {banners.length > 0 && (
-        <h1 className="sr-only">Pepperone Brindes Corporativos Personalizados para Empresas</h1>
+        <h1 className="sr-only">Maggenta Brindes Corporativos Personalizados para Empresas</h1>
       )}
-      <div className="w-full">
+      <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
         <div className={hasMobileBanners ? "hidden sm:block" : ""}>
           {renderCarousel(desktopSlides)}
         </div>
@@ -169,8 +168,6 @@ const Hero = ({ banners = [] }: HeroProps) => {
           </div>
         )}
       </div>
-
-      <HeroFeature />
     </section>
   );
 };

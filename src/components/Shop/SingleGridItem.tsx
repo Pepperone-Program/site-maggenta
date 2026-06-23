@@ -38,7 +38,7 @@ const SingleGridItem = ({ item, badgeLabel }: SingleGridItemProps) => {
 
   return (
     <div className="group flex h-full flex-col">
-      <div className="relative mb-4 flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg bg-white p-2 shadow-1">
+      <div className="relative mb-4 flex aspect-square w-full items-center justify-center overflow-hidden rounded-[28px] border border-white bg-white p-4 shadow-2 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-3">
         {badgeLabel && (
           <span
             className="pointer-events-none absolute right-0 top-0 mr-2 mt-2 z-20 rounded-full bg-[rgb(250,70,22)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white shadow-[0_8px_22px_rgba(250,70,22,0.38)] ring-1 ring-white/75"
@@ -116,7 +116,7 @@ const SingleGridItem = ({ item, badgeLabel }: SingleGridItemProps) => {
       <button
         type="button"
         onClick={handleAddToCart}
-        className="mx-auto mt-auto flex min-h-11 w-full max-w-[220px] items-center justify-center rounded-[5px] bg-blue px-5 py-2 text-custom-sm font-medium text-white duration-200 hover:bg-blue-dark"
+        className="mx-auto mt-auto flex min-h-11 w-full max-w-[220px] items-center justify-center rounded-full bg-blue px-5 py-2 text-custom-sm font-medium text-white shadow-[0_14px_30px_rgba(178,22,104,0.24)] duration-200 hover:bg-blue-dark"
       >
         Orçar
       </button>

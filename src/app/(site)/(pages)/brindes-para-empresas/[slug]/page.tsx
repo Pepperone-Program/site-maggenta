@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const tipoName = catalogo.tipo_produto?.tipo_produto || "Brindes para empresas";
   const displayName = personalizedTitle(tipoName);
   const title = `${displayName} para Empresas e Eventos`;
-  const description = `${displayName}, Querendo comprar Brindes Personalizados? E aqui na Pepperone Brindes`;
+  const description = `${displayName}, Querendo comprar Brindes Personalizados? E aqui na Maggenta Brindes`;
   const tipoId = catalogo.tipo_produto?.id_tipo_produto || toNumber(slug) || 0;
   const canonical = new URL(
     `/brindes-para-empresas/${encodeURIComponent(friendlyPersonalizedParam(tipoId, tipoName))}`,

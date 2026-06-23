@@ -132,7 +132,7 @@ const categorySeoDescription = (categoryName: string) => {
   const agreement = personalizedAgreement(categoryName);
   const nameWithAgreement = agreement ? `${categoryName} ${agreement}` : categoryName;
 
-  return `${nameWithAgreement}, Querendo comprar Brindes Personalizados? É aqui na Pepperone Brindes`;
+  return `${nameWithAgreement}, Querendo comprar Brindes Personalizados? É aqui na Maggenta Brindes`;
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

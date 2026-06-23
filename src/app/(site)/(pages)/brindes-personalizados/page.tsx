@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     canonical: "/brindes-personalizados",
   },
   description:
-    "Brindes Personalizados, Querendo comprar produtos promocionais para empresas? É aqui na Pepperone Brindes",
+    "Brindes Personalizados, Querendo comprar produtos promocionais para empresas? É aqui na Maggenta Brindes",
   keywords: contextualKeywords("brindes personalizados", [
     "catálogo de brindes personalizados",
     "brindes personalizados por categoria",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   other: buildSeoOther({
     title: "Brindes personalizados",
     description:
-      "Brindes Personalizados, Querendo comprar produtos promocionais para empresas? É aqui na Pepperone Brindes",
+      "Brindes Personalizados, Querendo comprar produtos promocionais para empresas? É aqui na Maggenta Brindes",
     canonical: `${siteUrl}/brindes-personalizados`,
     subject: "catálogo de brindes personalizados",
   }),

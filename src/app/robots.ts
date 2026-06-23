@@ -1,6 +1,6 @@
 import { MetadataRoute } from "next";
 
-const siteUrl = "https://www.pepperone.com.br";
+const siteUrl = "https://www.maggenta.com.br";
 
 export default function robots(): MetadataRoute.Robots {
   const defaultDisallow = ["/api/"];

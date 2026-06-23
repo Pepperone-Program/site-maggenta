@@ -70,7 +70,7 @@ const Contact = () => {
                   Detalhes
                 </span>
                 <h2 className="mt-2 text-2xl font-semibold text-dark">
-                  Atendimento Pepperone
+                  Atendimento Maggenta
                 </h2>
               </div>
 

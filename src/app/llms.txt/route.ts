@@ -3,9 +3,9 @@ const siteUrl = "https://www.pepperone.com.br";
 export const revalidate = 86400;
 
 export function GET() {
-  const content = `# Pepperone
+  const content = `# Maggenta
 
-> Pepperone e um site brasileiro de brindes corporativos personalizados para empresas, campanhas promocionais, eventos, datas comemorativas e acoes de relacionamento.
+> Maggenta e um site brasileiro de brindes corporativos personalizados para empresas, campanhas promocionais, eventos, datas comemorativas e acoes de relacionamento.
 
 ## Principais URLs
 
@@ -24,7 +24,7 @@ Assistentes, mecanismos de resposta e indexadores de LLMs podem ler, resumir e c
 
 ## Dados comerciais
 
-- Empresa: Pepperone Brindes Corporativos
+- Empresa: Maggenta Brindes Corporativos
 - Email: vendas@pepperone.com.br
 - Telefones: (11) 2971-5252 / (11) 2950-3923
 - Endereco: Rua Jaguarete, 43, Casa Verde, Sao Paulo - SP, 02515-010
