@@ -34,7 +34,7 @@ export default function ScrollToTop() {
         <button
           onClick={scrollToTop}
           aria-label="Voltar ao topo"
-          className={`items-center justify-center rounded-full bg-blue p-4 shadow-[0_18px_36px_rgba(178,22,104,0.28)] duration-200 ease-out hover:bg-blue-dark fixed bottom-24 right-7 z-999 ${
+          className={`items-center justify-center rounded-full bg-blue p-4 shadow-[0_18px_36px_rgba(157,23,77,0.28)] duration-200 ease-out hover:bg-blue-dark fixed bottom-24 right-7 z-999 ${
             isVisible ? "flex" : "hidden"
           }`}
         >

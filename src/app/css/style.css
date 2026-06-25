@@ -10,7 +10,7 @@
   }
 
   body {
-    @apply font-normal text-base text-dark-3 relative z-1 bg-[#fbf8fa];
+    @apply font-normal text-base text-dark-3 relative z-1 bg-[#f5f5f4];
     font-family: "Nunito Sans", sans-serif;
   }
 
@@ -27,8 +27,8 @@
   }
 
   .premium-panel {
-    @apply rounded-[28px] bg-white shadow-2;
-    border: 1px solid rgb(255 255 255 / 0.7);
+    @apply rounded-[28px] bg-white shadow-2 transition-all duration-300 hover:border-blue/45;
+    border: 1px solid rgb(231 229 228 / 0.9);
   }
 
   .premium-pill {

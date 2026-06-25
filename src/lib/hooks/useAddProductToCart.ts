@@ -14,6 +14,7 @@ type CartProduct = Product & {
 
 type AddProductToCartOptions = {
   openCartPreview?: boolean;
+  autoClosePreviewMs?: number;
 };
 
 export const minimumCartQuantity = (product: Pick<CartProduct, "quantidadeMinima">) =>
@@ -21,7 +22,7 @@ export const minimumCartQuantity = (product: Pick<CartProduct, "quantidadeMinima
 
 export const useAddProductToCart = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { openCartModal } = useCartModalContext();
+  const { openCartModal, closeCartModal } = useCartModalContext();
 
   return useCallback(
     (
@@ -44,10 +45,16 @@ export const useAddProductToCart = () => {
 
       if (options.openCartPreview !== false) {
         openCartModal();
+
+        if (options.autoClosePreviewMs && options.autoClosePreviewMs > 0) {
+          window.setTimeout(() => {
+            closeCartModal();
+          }, options.autoClosePreviewMs);
+        }
       }
 
       return safeQuantity;
     },
-    [dispatch, openCartModal]
+    [dispatch, openCartModal, closeCartModal]
   );
 };

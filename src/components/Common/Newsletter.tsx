@@ -43,7 +43,7 @@ const Newsletter = () => {
   return (
     <section className="overflow-hidden">
       <div className="max-w-[1800px] mx-auto px-2 sm:px-3">
-        <div className="relative z-1 overflow-hidden rounded-[32px] bg-[#241827] shadow-2">
+        <div className="relative z-1 overflow-hidden rounded-[32px] bg-[#1c1917] shadow-2">
           
           <div className="absolute -z-1 max-w-[523px] max-h-[243px] w-full h-full right-0 top-0 bg-gradient-1"></div>
 

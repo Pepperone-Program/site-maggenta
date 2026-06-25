@@ -1,4 +1,18 @@
 .partners-carousel .swiper-wrapper {
-  align-items: stretch;
-  transition-timing-function: linear !important;
+  align-items: center;
+}
+
+.partners-carousel .swiper-slide {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.partners-carousel .partner-logo-card {
+  opacity: 0.64;
+  transform: scale(0.9);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.partners-carousel .swiper-slide-active .partner-logo-card {
+  opacity: 1;
+  transform: scale(1.18);
 }

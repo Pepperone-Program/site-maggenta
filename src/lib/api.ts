@@ -1787,7 +1787,7 @@ const toMenuItems = <T extends Record<string, unknown>>(
     }));
 
 export async function getMenuGroups(): Promise<ApiMenuGroup[]> {
-  const menuRequestInit: RequestInit = { cache: "no-store" };
+  const menuRequestInit: RequestInit = {};
   const [categorias, tipos, publicos, datas] = await Promise.all([
     getCatalogoCategorias(menuRequestInit),
     fetchAllFirstAvailable<(typeof mockTiposProdutos)[number]>([

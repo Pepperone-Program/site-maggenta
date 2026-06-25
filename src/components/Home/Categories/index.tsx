@@ -17,7 +17,7 @@ const Categories = ({ categories = data }: { categories?: Category[] }) => {
       <div className="w-full">
           <Swiper
             loop={carouselCategories.length > 6}
-            speed={6500}
+            speed={13000}
             autoplay={{
               delay: 0,
               disableOnInteraction: false,
@@ -25,10 +25,10 @@ const Categories = ({ categories = data }: { categories?: Category[] }) => {
             }}
             modules={[Autoplay]}
             allowTouchMove={false}
-            spaceBetween={8}
+            spaceBetween={0}
             slidesPerView="auto"
             breakpoints={{
-              768: { spaceBetween: 18 },
+              768: { spaceBetween: 0 },
             }}
             className="[&_.swiper-wrapper]:items-center [&_.swiper-wrapper]:ease-linear"
           >

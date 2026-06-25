@@ -1,6 +1,6 @@
-import { NextResponse, type NextRequest } from "next/server";
+﻿import { NextResponse, type NextRequest } from "next/server";
 
-const canonicalHost = "www.pepperone.com.br";
+const canonicalHost = "www.maggenta.com.br";
 const legacyAssetPrefixes = [
   "/content/stream/",
   "/static/uploads/",
@@ -14,7 +14,7 @@ export function proxy(request: NextRequest) {
   const homeUrl = new URL("/", request.url);
 
   if (
-    request.nextUrl.hostname === "pepperone.com.br" ||
+    request.nextUrl.hostname === "maggenta.com.br" ||
     request.nextUrl.hostname === "site-peppeerone.vercel.app"
   ) {
     url.hostname = canonicalHost;

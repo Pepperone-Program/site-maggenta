@@ -3,6 +3,8 @@ import "../css/style.css";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import ClientShell from "./ClientShell";
+import Footer from "@/components/Footer";
+import { getMenuGroups } from "@/lib/api";
 import { buildSeoOther, marketKeywords, ogImageUrl, siteName, siteUrl } from "@/lib/seo";
 import { googleAdsId, googleAnalyticsId, googleTagManagerId } from "@/lib/google-tags";
 
@@ -20,7 +22,7 @@ const organizationSchema = {
   url: siteUrl,
   logo: `${siteUrl}/images/logo/logo.svg`,
   email: "vendas@maggenta.com.br",
-  telephone: "+55-11-2971-5252",
+  telephone: "+55-11-2287-6444",
   sameAs: [
     "https://www.instagram.com/brindesmaggenta",
     "https://web.facebook.com/maggentapromocional?_rdc=1&_rdr#",
@@ -107,11 +109,13 @@ export const metadata: Metadata = {
   }),
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: ReactNode;
 }) {
+  const initialMenuGroups = await getMenuGroups();
+
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
@@ -160,7 +164,8 @@ export default function RootLayout({
             style={{ display: "none", visibility: "hidden" }}
           />
         </noscript>
-        <ClientShell>{children}</ClientShell>
+        <ClientShell initialMenuGroups={initialMenuGroups}>{children}</ClientShell>
+        <Footer />
       </body>
     </html>
   );

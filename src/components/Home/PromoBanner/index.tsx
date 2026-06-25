@@ -87,7 +87,7 @@ const PromoBanner = ({ banners = [] }: PromoBannerProps) => {
 
             <Link
               href="/brindes-personalizados"
-              className="mt-7.5 inline-flex rounded-full bg-blue px-9.5 py-[11px] text-custom-sm font-medium text-white shadow-[0_14px_30px_rgba(178,22,104,0.24)] duration-200 hover:bg-blue-dark"
+              className="mt-7.5 inline-flex rounded-full bg-blue px-9.5 py-[11px] text-custom-sm font-medium text-white shadow-[0_14px_30px_rgba(157,23,77,0.24)] duration-200 hover:bg-blue-dark"
             >
               Solicitar orçamento
             </Link>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { FormEvent, useState } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
@@ -99,15 +99,15 @@ const Contact = () => {
                   <a
                     onClick={() => trackEvent("email_click", { source: "contact_page" })}
                     className="mt-2 inline-flex text-blue hover:text-blue-dark"
-                    href="mailto:vendas@pepperone.com.br"
+                    href="mailto:vendas@maggenta.com.br"
                   >
-                    vendas@pepperone.com.br
+                    vendas@maggenta.com.br
                   </a>
                 </div>
 
                 <div>
                   <p className="mb-2 text-sm font-semibold uppercase text-dark-4">
-                    Endereço
+                    EndereÃ§o
                   </p>
                   <address className="not-italic leading-7 text-dark">
                     R. Jaguarete, 43
@@ -116,13 +116,13 @@ const Contact = () => {
                     <br />
                     CEP 02515-010
                     <br />
-                    São Paulo - SP
+                    SÃ£o Paulo - SP
                   </address>
                 </div>
 
                 <div>
                   <p className="mb-3 text-sm font-semibold uppercase text-dark-4">
-                    Horário
+                    HorÃ¡rio
                   </p>
                   <ul className="space-y-2 text-dark">
                     {hours.map((item) => (
@@ -138,7 +138,7 @@ const Contact = () => {
             <div className="rounded-md bg-white p-5 shadow-1 sm:p-8.5 xl:p-10">
               <div className="mb-7 border-b border-gray-3 pb-6">
                 <span className="text-sm font-semibold uppercase tracking-wide text-blue">
-                  Formulário
+                  FormulÃ¡rio
                 </span>
                 <h2 className="mt-2 text-2xl font-semibold text-dark">
                   Envie sua mensagem

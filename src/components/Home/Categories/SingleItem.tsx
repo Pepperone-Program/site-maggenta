@@ -13,7 +13,7 @@ const SingleItem = ({ item, priority = false }: { item: Category; priority?: boo
       href={`/categorias/${encodeURIComponent(
         friendlyPersonalizedParam(item.id, item.title)
       )}`}
-      className="group flex h-20 min-w-max items-center gap-4 px-5"
+      className="group flex h-20 min-w-max items-center gap-2 px-3"
     >
       <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white">
         {hasImage ? (

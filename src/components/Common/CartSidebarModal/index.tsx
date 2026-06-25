@@ -40,11 +40,11 @@ const CartSidebarModal = () => {
 
   return (
     <div
-      className={`fixed left-0 top-0 z-99999 flex h-screen w-full items-start justify-end overflow-y-auto bg-dark/70 px-3 py-4 duration-300 sm:px-5 sm:py-6 ${
+      className={`fixed left-0 top-0 z-99999 flex h-screen w-full items-start justify-end overflow-y-auto bg-transparent px-3 py-4 duration-300 sm:px-5 sm:py-6 ${
         isCartModalOpen ? "translate-x-0" : "translate-x-full"
       }`}
     >
-      <div className="modal-content relative flex max-h-[calc(100vh-32px)] w-full max-w-[430px] flex-col rounded-lg bg-white px-4 shadow-1 sm:max-h-[calc(100vh-48px)] sm:px-6">
+      <div className="modal-content relative flex max-h-[calc(100vh-32px)] w-full max-w-[430px] flex-col rounded-[28px] bg-white px-4 shadow-3 sm:max-h-[calc(100vh-48px)] sm:px-6">
         <div className="flex items-start justify-between gap-4 border-b border-gray-3 bg-white pb-4 pt-4 sm:pt-6">
           <div>
             <h2 className="text-lg font-medium text-dark sm:text-xl">Orçamento</h2>

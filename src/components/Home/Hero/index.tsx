@@ -81,8 +81,8 @@ const Hero = ({ banners = [] }: HeroProps) => {
           <div
             className={
               banners.length
-                ? "relative w-full overflow-hidden rounded-[28px] bg-white shadow-2 sm:rounded-[36px]"
-                : "relative h-[420px] overflow-hidden rounded-[28px] bg-[#241827] shadow-2 sm:h-[520px] sm:rounded-[36px] lg:h-[650px] 2xl:h-[720px]"
+                ? "relative w-full overflow-hidden bg-white"
+                : "relative h-[420px] overflow-hidden rounded-[28px] bg-[#1c1917] shadow-2 sm:h-[520px] sm:rounded-[36px] lg:h-[650px] 2xl:h-[720px]"
             }
           >
             {banners.length ? (
@@ -107,7 +107,7 @@ const Hero = ({ banners = [] }: HeroProps) => {
               />
             )}
             {!banners.length && (
-              <div className="absolute inset-0 bg-gradient-to-r from-[#241827]/88 via-[#241827]/48 to-[#241827]/10" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#1c1917]/88 via-[#1c1917]/48 to-[#1c1917]/10" />
             )}
             {banners.length > 0 && (
               <Link
@@ -140,7 +140,7 @@ const Hero = ({ banners = [] }: HeroProps) => {
               )}
               <Link
                 href={slide.href}
-                className={`inline-flex w-fit rounded-full bg-blue px-8 py-3.5 text-sm font-semibold text-white shadow-[0_18px_36px_rgba(178,22,104,0.28)] duration-200 hover:bg-blue-dark ${
+                className={`inline-flex w-fit rounded-full bg-blue px-8 py-3.5 text-sm font-semibold text-white shadow-[0_18px_36px_rgba(157,23,77,0.28)] duration-200 hover:bg-blue-dark ${
                   banners.length ? "sr-only" : "mt-8"
                 }`}
               >
@@ -154,11 +154,11 @@ const Hero = ({ banners = [] }: HeroProps) => {
   );
 
   return (
-    <section className="overflow-hidden bg-[#fbf8fa] pt-[132px] sm:pt-[124px]">
+    <section className="overflow-hidden bg-[#f5f5f4] pt-[132px] sm:pt-[124px]">
       {banners.length > 0 && (
         <h1 className="sr-only">Maggenta Brindes Corporativos Personalizados para Empresas</h1>
       )}
-      <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
+      <div className="w-full">
         <div className={hasMobileBanners ? "hidden sm:block" : ""}>
           {renderCarousel(desktopSlides)}
         </div>

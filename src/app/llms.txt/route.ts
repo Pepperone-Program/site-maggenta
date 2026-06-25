@@ -1,4 +1,4 @@
-const siteUrl = "https://www.pepperone.com.br";
+﻿const siteUrl = "https://www.maggenta.com.br";
 
 export const revalidate = 86400;
 
@@ -25,7 +25,7 @@ Assistentes, mecanismos de resposta e indexadores de LLMs podem ler, resumir e c
 ## Dados comerciais
 
 - Empresa: Maggenta Brindes Corporativos
-- Email: vendas@pepperone.com.br
+- Email: vendas@maggenta.com.br
 - Telefones: (11) 2971-5252 / (11) 2950-3923
 - Endereco: Rua Jaguarete, 43, Casa Verde, Sao Paulo - SP, 02515-010
 `;

@@ -1,4 +1,4 @@
-/** @type {import('next').NextConfig} */
+﻿/** @type {import('next').NextConfig} */
 const path = require("path");
 
 const apiUrl = process.env.NEXT_API_URL;
@@ -26,7 +26,7 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   async redirects() {
-    const canonicalHost = "www.pepperone.com.br";
+    const canonicalHost = "www.maggenta.com.br";
 
     return [
       {
@@ -34,7 +34,7 @@ const nextConfig = {
         has: [
           {
             type: "host",
-            value: "pepperone.com.br",
+            value: "maggenta.com.br",
           },
         ],
         destination: `https://${canonicalHost}/:path*`,
@@ -74,11 +74,7 @@ const nextConfig = {
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-          {
-            key: "Expires",
-            value: "Thu, 31 Dec 2037 23:55:55 GMT",
+            value: "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
           },
         ],
       },
@@ -105,7 +101,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "bucket.pepperone.com.br",
+        hostname: "bucket.maggenta.com.br",
         pathname: "/storage/v1/object/public/**",
       },
       {

@@ -16,14 +16,14 @@ const ProductItem = ({ item }: { item: Product }) => {
     (event: React.MouseEvent<HTMLButtonElement>) => {
       event.preventDefault();
       event.stopPropagation();
-      addProductToCart(item, minimumCartQuantity(item));
+      addProductToCart(item, minimumCartQuantity(item), { autoClosePreviewMs: 3000 });
     },
     [addProductToCart, item]
   );
 
   return (
-    <div className="group flex h-full min-h-[430px] flex-col text-center">
-      <div className="relative mb-4 flex aspect-square w-full items-center justify-center overflow-hidden rounded-[28px] border border-white bg-white p-4 shadow-2 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-3">
+    <div className="group flex h-full min-h-[430px] flex-col rounded-[28px] border border-transparent bg-white p-4 text-center shadow-[0_14px_34px_rgba(157,23,77,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-blue/45 hover:shadow-[0_20px_42px_rgba(157,23,77,0.14)]">
+      <div className="relative mb-4 flex aspect-square w-full items-center justify-center overflow-hidden rounded-[24px] bg-gray-2 p-3">
         <Link
           href={href}
           aria-label={`Ver detalhes de ${item.title}`}
@@ -84,7 +84,7 @@ const ProductItem = ({ item }: { item: Product }) => {
           <button
             type="button"
             onClick={handleAddToCart}
-            className="inline-flex w-full justify-center rounded-full bg-blue px-6 py-2.5 text-custom-sm font-medium text-white shadow-[0_14px_30px_rgba(178,22,104,0.24)] duration-200 hover:bg-blue-dark"
+            className="inline-flex w-full justify-center rounded-full bg-blue px-6 py-2.5 text-custom-sm font-medium text-white shadow-[0_14px_30px_rgba(157,23,77,0.24)] duration-200 hover:bg-blue-dark"
           >
             Orçar
           </button>

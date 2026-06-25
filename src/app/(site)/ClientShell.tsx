@@ -3,8 +3,7 @@
 import { ReactNode, Suspense, useEffect, useState } from "react";
 import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
+import Header, { type HeaderMenuGroup } from "../../components/Header";
 import { CartModalProvider } from "../context/CartSidebarModalContext";
 import { ReduxProvider } from "@/redux/provider";
 import CartSidebarModal from "@/components/Common/CartSidebarModal";
@@ -39,7 +38,13 @@ const RouteHistoryTracker = () => {
   return null;
 };
 
-const ClientShell = ({ children }: { children: ReactNode }) => {
+const ClientShell = ({
+  children,
+  initialMenuGroups,
+}: {
+  children: ReactNode;
+  initialMenuGroups?: HeaderMenuGroup[];
+}) => {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -70,7 +75,7 @@ const ClientShell = ({ children }: { children: ReactNode }) => {
             <Suspense fallback={null}>
               <RouteHistoryTracker />
             </Suspense>
-            <Header />
+            <Header initialMenuGroups={initialMenuGroups} />
             {children}
             <CartSidebarModal />
             <PreviewSliderModal />
@@ -89,7 +94,6 @@ const ClientShell = ({ children }: { children: ReactNode }) => {
         </ReduxProvider>
       </QueryClientProvider>
       <ScrollToTop />
-      <Footer />
     </>
   );
 };

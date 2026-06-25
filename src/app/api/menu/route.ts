@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getMenuGroups } from "@/lib/api";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export async function GET() {
   const menu = await getMenuGroups();
@@ -9,7 +9,7 @@ export async function GET() {
     { success: true, data: menu },
     {
       headers: {
-        "Cache-Control": "no-store, max-age=0",
+        "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=1800",
       },
     }
   );

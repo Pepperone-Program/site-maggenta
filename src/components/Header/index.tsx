@@ -17,7 +17,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 // @ts-ignore -- Side-effect CSS import resolved by Next.js bundler.
 import "swiper/css";
 
-type HeaderMenuGroup = {
+export type HeaderMenuGroup = {
   id: string;
   title: string;
   path?: string;
@@ -132,7 +132,7 @@ const defaultMenuGroups: HeaderMenuGroup[] = [
 ];
 
 const topbarItems = [
-  "(11) 2971-5252 / (11) 2950-3923",
+  "(11) 2287-6444",
   "Seja Bem-Vindo à Maggenta Brindes Corporativos!",
   "Faturamento mínimo R$1.000,00",
 ];
@@ -161,7 +161,11 @@ const searchPathFromQuery = (query: string) => {
     : "/";
 };
 
-const Header = () => {
+const Header = ({
+  initialMenuGroups = defaultMenuGroups,
+}: {
+  initialMenuGroups?: HeaderMenuGroup[];
+}) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const pathname = usePathname();
@@ -181,6 +185,7 @@ const Header = () => {
   const menuQuery = useQuery<HeaderMenuGroup[]>({
     queryKey: [MENU_CACHE_KEY],
     queryFn: ({ signal }) => fetchMenuGroups(signal),
+    initialData: initialMenuGroups,
     staleTime: MENU_CACHE_TIME,
     gcTime: MENU_CACHE_TIME,
     refetchInterval: MENU_CACHE_TIME,
@@ -188,7 +193,7 @@ const Header = () => {
     refetchOnWindowFocus: "always",
     retry: 1,
   });
-  const menuGroups: HeaderMenuGroup[] = menuQuery.data ?? defaultMenuGroups;
+  const menuGroups: HeaderMenuGroup[] = menuQuery.data ?? initialMenuGroups;
   const suggestionsQuery = useQuery({
     queryKey: [SEARCH_CACHE_KEY, debouncedSearchQuery, 10],
     queryFn: ({ signal }) => searchProducts(debouncedSearchQuery, 10, signal),
@@ -351,23 +356,22 @@ const Header = () => {
         stickyMenu ? "bg-white/95 shadow-2 backdrop-blur-xl" : "bg-white/92 backdrop-blur-xl"
       }`}
     >
-      <div className="bg-[#241827] text-white">
-        <div className="mx-auto w-full max-w-[1800px] px-2 py-2 text-center text-sm font-semibold sm:hidden">
+      <div className="border-b border-blue bg-white text-blue">
+        <div className="mx-auto h-9 w-full max-w-[1800px] px-2 text-center text-sm font-semibold">
           <Swiper
             loop
+            direction="vertical"
             autoplay={{ delay: 2600, disableOnInteraction: false }}
             modules={[Autoplay]}
             slidesPerView={1}
+            className="h-9"
           >
             {topbarItems.map((item) => (
-              <SwiperSlide key={item}>{item}</SwiperSlide>
+              <SwiperSlide key={item} className="!flex items-center justify-center">
+                {item}
+              </SwiperSlide>
             ))}
           </Swiper>
-        </div>
-        <div className="mx-auto hidden w-full max-w-[1800px] items-center justify-between gap-1 px-2 py-2 text-center text-xs font-semibold sm:flex sm:px-3 sm:text-sm">
-          {topbarItems.map((item) => (
-            <span key={item}>{item}</span>
-          ))}
         </div>
       </div>
 
@@ -581,10 +585,19 @@ const Header = () => {
               )}
             </form>
 
+            <a
+              href="tel:+551122876444"
+              className="hidden min-w-max flex-col leading-tight text-blue lg:flex"
+              aria-label="Ligue para Maggenta Brindes"
+            >
+              <span className="text-xs font-medium text-blue/80">Ligue-nos agora</span>
+              <span className="text-sm font-semibold">(11) 2287-6444</span>
+            </a>
+
             <button
               type="button"
               onClick={openCartModal}
-              className="flex h-11 items-center gap-2 rounded-full border border-gray-3 bg-white px-3.5 text-dark shadow-1 transition-colors duration-200 hover:border-blue hover:text-blue"
+              className="flex h-11 items-center gap-2 rounded-full bg-white px-3.5 text-dark shadow-1 transition-colors duration-200 hover:text-blue"
               aria-label="Abrir orÃ§amento"
             >
               <span className="relative inline-flex">

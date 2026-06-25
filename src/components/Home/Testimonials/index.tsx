@@ -14,7 +14,7 @@ const Testimonials = () => {
   const renderCarousel = (reverseDirection = false) => (
     <Swiper
       loop
-      speed={6500}
+      speed={4160}
       autoplay={{
         delay: 0,
         disableOnInteraction: false,
@@ -36,10 +36,10 @@ const Testimonials = () => {
           slidesPerView: 3,
         },
       }}
-      className="[&_.swiper-wrapper]:items-stretch [&_.swiper-wrapper]:ease-linear"
+      className="bg-transparent [&_.swiper-slide]:bg-transparent [&_.swiper-wrapper]:items-stretch [&_.swiper-wrapper]:ease-linear"
     >
       {testimonials.map((item, key) => (
-        <SwiperSlide key={`${reverseDirection ? "reverse" : "forward"}-${key}`} className="!h-auto">
+        <SwiperSlide key={`${reverseDirection ? "reverse" : "forward"}-${key}`} className="!h-auto !bg-transparent">
           <SingleItem testimonial={item} />
         </SwiperSlide>
       ))}
@@ -47,10 +47,10 @@ const Testimonials = () => {
   );
 
   return (
-    <section className="overflow-hidden pb-16.5">
-      <div className="max-w-[1800px] w-full mx-auto px-2 sm:px-3">
-        <div className="">
-          <div className="swiper testimonial-carousel common-carousel p-5">
+    <section className="overflow-hidden bg-transparent pb-16.5 pt-16 sm:pt-20">
+      <div className="mx-auto w-full max-w-[1800px] bg-transparent px-2 sm:px-3">
+        <div className="bg-transparent">
+          <div className="swiper testimonial-carousel common-carousel bg-transparent p-5">
             {/* <!-- section title --> */}
             <div className="relative mb-10 flex items-center justify-center text-center">
               <div>
@@ -70,7 +70,7 @@ const Testimonials = () => {
 
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-5 bg-transparent">
               {renderCarousel(false)}
               {renderCarousel(true)}
             </div>
