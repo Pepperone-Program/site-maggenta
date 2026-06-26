@@ -16,13 +16,8 @@ type QuotePayload = {
 };
 
 const requiredFields = [
-  "fantasia",
   "contato",
   "email",
-  "tel",
-  "endereco",
-  "cidade",
-  "uf",
 ];
 
 const text = (value: unknown) => String(value || "").trim();

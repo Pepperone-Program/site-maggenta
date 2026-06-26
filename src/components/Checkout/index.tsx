@@ -1,10 +1,13 @@
-"use client";
+﻿"use client";
 
 import React, { FormEvent, FocusEvent, useEffect, useRef, useState } from "react";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
 import { useAppSelector } from "@/redux/store";
+import { useDispatch } from "react-redux";
+import { type AppDispatch } from "@/redux/store";
+import { removeAllItemsFromCart } from "@/redux/features/cart-slice";
 import { fetchWithTimeout, isRequestTimeoutError } from "@/lib/timed-fetch";
 import { quoteConversionStorageKey } from "@/lib/google-tags";
 import { formatDisplayPrice } from "@/lib/products";
@@ -23,12 +26,12 @@ const DEFAULT_RETURN_ROUTE = "/brindes-para-empresas";
 
 const fields = [
   { name: "fantasia", label: "Empresa ou nome", placeholder: "Ex.: Maggenta Brindes", required: false },
-  { name: "contato", label: "Contato", placeholder: "Nome do responsável", required: true },
+  { name: "contato", label: "Contato", placeholder: "Nome do responsÃ¡vel", required: true },
   { name: "email", label: "E-mail", type: "email", placeholder: "vendas@empresa.com.br", required: true },
   { name: "tel", label: "Telefone", placeholder: "(11) 99999-9999", required: false },
-  { name: "endereco", label: "Endereço", placeholder: "Rua, avenida ou travessa", required: true },
-  { name: "endereco_n", label: "Número", placeholder: "43" },
-  { name: "endereco_compl", label: "Complemento", placeholder: "Sala, bloco ou referência" },
+  { name: "endereco", label: "EndereÃ§o", placeholder: "Rua, avenida ou travessa", required: false },
+  { name: "endereco_n", label: "NÃºmero", placeholder: "43" },
+  { name: "endereco_compl", label: "Complemento", placeholder: "Sala, bloco ou referÃªncia" },
   { name: "bairro", label: "Bairro", placeholder: "Casa Verde", required: false},
   { name: "cep", label: "CEP", placeholder: "02515-010", required: false },
   { name: "cidade", label: "Cidade", placeholder: "Sao Paulo", required: false },
@@ -73,6 +76,7 @@ const persistQuoteCustomer = (customer: Record<string, unknown>) => {
 
 const Checkout = () => {
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
   const cartItems = useAppSelector((state) => state.cartReducer.items);
   const formRef = useRef<HTMLFormElement>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
@@ -197,6 +201,7 @@ const Checkout = () => {
         })
       );
       persistQuoteCustomer(quoteCustomer);
+      dispatch(removeAllItemsFromCart());
       router.push("/orcamentos-obrigado");
     } catch (error) {
       setStatus("error");
@@ -210,7 +215,7 @@ const Checkout = () => {
 
   return (
     <>
-      <Breadcrumb title="Solicitar orçamentos" pages={["orcamentos"]} />
+      <Breadcrumb title="Solicitar orÃ§amentos" pages={["orcamentos"]} />
       <section className="min-h-[calc(100vh-220px)] overflow-hidden bg-gray-2 py-5 lg:py-8">
         
         <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
@@ -225,12 +230,12 @@ const Checkout = () => {
                         Solicitacao comercial
                       </span>
                       <h2 className="mt-2 text-2xl font-semibold text-dark">
-                        Dados para orçamento
+                        Dados para orÃ§amento
                       </h2>
                     </div>
                     <p className="max-w-[420px] text-sm leading-6 text-dark-4">
                       Preencha seus dados para que nossa equipe retorne com prazos,
-                      gravação e disponibilidade.
+                      gravaÃ§Ã£o e disponibilidade.
                     </p>
                   </div>
 
@@ -262,11 +267,11 @@ const Checkout = () => {
                   </div>
 
                   <label className="mt-5 block">
-                    <span className="mb-2.5 block text-dark">Observações</span>
+                    <span className="mb-2.5 block text-dark">ObservaÃ§Ãµes</span>
                     <textarea
                       name="obs"
                       rows={6}
-                      placeholder="Quantidade desejada, personalização, prazo, entrega ou qualquer detalhe importante."
+                      placeholder="Quantidade desejada, personalizaÃ§Ã£o, prazo, entrega ou qualquer detalhe importante."
                       className="w-full rounded-md border border-gray-3 bg-gray-1 p-5 outline-none duration-200 placeholder:text-dark-5 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </label>
@@ -280,14 +285,14 @@ const Checkout = () => {
                       Resumo
                     </span>
                     <h3 className="mt-2 text-2xl font-semibold text-dark">
-                      Seu orçamento
+                      Seu orÃ§amento
                     </h3>
                   </div>
 
                   <div className="max-h-[52vh] overflow-auto px-4 pb-6 pt-2.5 sm:px-8.5">
                     {cartItems.length === 0 ? (
                       <p className="py-6 text-dark-4">
-                        Adicione produtos para solicitar um orçamento.
+                        Adicione produtos para solicitar um orÃ§amento.
                       </p>
                     ) : (
                       cartItems.map((item) => (
@@ -335,7 +340,7 @@ const Checkout = () => {
                     >
                       {status === "loading"
                         ? "Enviando..."
-                        : "Enviar solicitação de orçamento"}
+                        : "Enviar solicitaÃ§Ã£o de orÃ§amento"}
                     </button>
 
                     <button
@@ -366,9 +371,9 @@ const Checkout = () => {
                       role="alert"
                       className="rounded-md border-2 border-red bg-red-light-6 px-4 py-3 text-sm text-red"
                     >
-                      <strong className="block font-medium">Atenção</strong>
+                      <strong className="block font-medium">AtenÃ§Ã£o</strong>
                       <span className="block">
-                        Não pagamos para testes de produtos, fique atento a golpes.
+                        NÃ£o pagamos para testes de produtos, fique atento a golpes.
                       </span>
                     </div>
                   </div>

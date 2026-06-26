@@ -49,7 +49,7 @@ const Home = async () => {
         />
       ))}
       <PromoBanner banners={homeMegaBanners} />
-      <PartnersCarousel />
+      {/* <PartnersCarousel /> */}
       {curatedSections.slice(2).map((section) => (
         <NewArrival
           key={section.id}

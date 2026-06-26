@@ -1750,7 +1750,11 @@ export async function getActiveBanners(tipo?: BannerTipo): Promise<BannerApi[]> 
   const banners = (await apiFetchAllPages<BannerApi>(`/banners/ativos${query}`, 100)) || [];
 
   return banners
-    .filter((banner) => banner.habilitado === "S" && isValidImageSrc(banner.url_banner))
+    .filter(
+      (banner) =>
+        banner.habilitado === "S" &&
+        (tipo === "home_mega" || isValidImageSrc(banner.url_banner))
+    )
     .filter((banner) => (tipo ? banner.tipo === tipo : true))
     .sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
 }

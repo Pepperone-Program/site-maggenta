@@ -5,7 +5,7 @@ type InitialState = {
   items: CartItem[];
 };
 
-type CartItem = {
+export type CartItem = {
   id: number;
   title: string;
   slug?: string;
@@ -72,6 +72,22 @@ export const cart = createSlice({
     removeAllItemsFromCart: (state) => {
       state.items = [];
     },
+    hydrateCartFromStorage: (state, action: PayloadAction<CartItem[]>) => {
+      state.items = action.payload
+        .filter((item) => item && Number.isFinite(Number(item.id)))
+        .map((item) => {
+          const minimumQuantity = Math.max(1, Number(item.quantidadeMinima || 1));
+
+          return {
+            ...item,
+            id: Number(item.id),
+            price: Number(item.price || 0),
+            discountedPrice: Number(item.discountedPrice || 0),
+            quantidadeMinima: minimumQuantity,
+            quantity: Math.max(minimumQuantity, Number(item.quantity || minimumQuantity)),
+          };
+        });
+    },
   },
 });
 
@@ -85,6 +101,7 @@ export const selectTotalPrice = createSelector([selectCartItems], (items) => {
 
 export const {
   addItemToCart,
+  hydrateCartFromStorage,
   removeItemFromCart,
   updateCartItemQuantity,
   removeAllItemsFromCart,

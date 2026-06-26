@@ -43,7 +43,7 @@ const FooterNewsletterForm = () => {
       onSubmit={handleNewsletterSubmit}
       className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
     >
-      <div>
+      <div className="bg-white">
         <p className="text-sm font-semibold uppercase tracking-wide text-gray-5">
           Novidades Maggenta
         </p>
