@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React from "react";
 import OrderSummary from "./OrderSummary";
 import { useAppSelector } from "@/redux/store";
@@ -17,14 +17,14 @@ const Cart = () => {
     <>
       {/* <!-- ===== Breadcrumb Section Start ===== --> */}
       <section>
-        <Breadcrumb title={"OrÃ§amento"} pages={["OrÃ§amento"]} />
+        <Breadcrumb title={"Orçamento"} pages={["Orçamento"]} />
       </section>
       {/* <!-- ===== Breadcrumb Section End ===== --> */}
       {cartItems.length > 0 ? (
         <section className="overflow-hidden py-20 bg-gray-2">
           <div className="max-w-[1800px] w-full mx-auto px-2 sm:px-3">
             <div className="flex flex-wrap items-center justify-between gap-5 mb-7.5">
-              <h2 className="font-medium text-dark text-2xl">Itens do orÃ§amento</h2>
+              <h2 className="font-medium text-dark text-2xl">Itens do orçamento</h2>
               <button type="button" onClick={() => dispatch(removeAllItemsFromCart())} className="text-blue">Limpar orçamento</button>
             </div>
 
@@ -102,7 +102,7 @@ const Cart = () => {
               </svg>
             </div>
 
-            <p className="pb-6">Seu orÃ§amento estÃ¡ vazio.</p>
+            <p className="pb-6">Seu orçamento está vazio.</p>
 
             <Link
               href="/brindes-personalizados"

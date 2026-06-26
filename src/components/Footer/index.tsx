@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import Image from "next/image";
 import FooterNewsletterForm from "./FooterNewsletterForm";
 
@@ -8,7 +8,7 @@ const Footer = () => {
   return (
     <footer className="overflow-hidden border-t border-gray-3 bg-white">
       <div className="mx-auto w-full max-w-[1800px] px-2 pt-12 sm:px-3">
-        <div className="rounded-[32px] bg-[#ccc9c6] p-4 shadow-2 sm:p-6 lg:p-8">
+        <div className="rounded-[32px] bg-white p-4 shadow-2 sm:p-6 lg:p-8">
           <FooterNewsletterForm />
         </div>
       </div>
@@ -62,7 +62,7 @@ const Footer = () => {
             </Link>
           </div>
           <div className="mt-6 grid gap-2 text-sm text-dark-3">
-            <span>Atendimento: seg. a sex., 9h Ã s 18h</span>
+            <span>Atendimento: seg. a sex., 9h às 18h</span>
             <a href="mailto:vendas@maggenta.com.br" className="hover:text-blue">
               vendas@maggenta.com.br
             </a>
@@ -74,11 +74,11 @@ const Footer = () => {
         </div>
 
         <div>
-          <h2 className="mb-5 text-custom-1 font-medium text-dark">OrÃ§ar</h2>
+          <h2 className="mb-5 text-custom-1 font-medium text-dark">Orçar</h2>
           <ul className="flex flex-col gap-3 text-dark-3">
             <li>
               <Link className="duration-200 hover:text-blue" href="/">
-                InÃ­cio
+                Início
               </Link>
             </li>
             <li>
@@ -93,7 +93,7 @@ const Footer = () => {
             </li>
             <li>
               <Link className="duration-200 hover:text-blue" href="/orcamentos">
-                OrÃ§amentos
+                Orçamentos
               </Link>
             </li>
           </ul>
@@ -119,16 +119,16 @@ const Footer = () => {
             </li>
             <li>
               <Link className="duration-200 hover:text-blue" href="/politicas-de-privacidade">
-                PolÃ­ticas de Privacidade
+                Políticas de Privacidade
               </Link>
             </li>
           </ul>
         </div>
 
         <div>
-          <h2 className="mb-5 text-custom-1 font-medium text-dark">EndereÃ§o</h2>
+          <h2 className="mb-5 text-custom-1 font-medium text-dark">Endereço</h2>
           <p className="mb-5 text-sm leading-6 text-dark-3">
-            Rua Jaguarete, 43 - Casa Verde, SÃ£o Paulo - SP, 02515-010
+            Rua Jaguarete, 43 - Casa Verde, São Paulo - SP, 02515-010
           </p>
           <p className="mb-3 font-medium text-dark">Aceitamos:</p>
           <div className="flex flex-wrap items-center gap-5">
@@ -139,7 +139,7 @@ const Footer = () => {
           </div>
           <p className="mb-3 mt-5 font-medium text-dark">Certificados:</p>
           <div className="flex flex-wrap items-center gap-5">
-            <Image src="/images/logo/certificado-brindice-guia-de-brindes-personalizados-m-a2 (1).png" alt="Certificado BrÃ­ndice" width={100} height={42} />
+            <Image src="/images/logo/certificado-brindice-guia-de-brindes-personalizados-m-a2 (1).png" alt="Certificado Bríndice" width={100} height={42} />
             <Image src="/images/logo/logo_abrinq.png" alt="Certificado Abrinq" width={73} height={44} />
           </div>
         </div>
@@ -153,10 +153,10 @@ const Footer = () => {
               Atendimento
             </Link>
             <Link href="/politicas-de-privacidade" className="hover:text-blue">
-              PolÃ­tica de privacidade
+              Política de privacidade
             </Link>
             <Link href="/termos-de-uso" className="hover:text-blue">
-              Trocas e devoluÃ§Ãµes
+              Trocas e devoluções
             </Link>
           </div>
         </div>

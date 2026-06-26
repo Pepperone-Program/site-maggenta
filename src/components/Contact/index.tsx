@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { FormEvent, useState } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
@@ -107,7 +107,7 @@ const Contact = () => {
 
                 <div>
                   <p className="mb-2 text-sm font-semibold uppercase text-dark-4">
-                    EndereÃ§o
+                    Endereço
                   </p>
                   <address className="not-italic leading-7 text-dark">
                     R. Jaguarete, 43
@@ -116,13 +116,13 @@ const Contact = () => {
                     <br />
                     CEP 02515-010
                     <br />
-                    SÃ£o Paulo - SP
+                    São Paulo - SP
                   </address>
                 </div>
 
                 <div>
                   <p className="mb-3 text-sm font-semibold uppercase text-dark-4">
-                    HorÃ¡rio
+                    Horário
                   </p>
                   <ul className="space-y-2 text-dark">
                     {hours.map((item) => (
@@ -138,7 +138,7 @@ const Contact = () => {
             <div className="rounded-md bg-white p-5 shadow-1 sm:p-8.5 xl:p-10">
               <div className="mb-7 border-b border-gray-3 pb-6">
                 <span className="text-sm font-semibold uppercase tracking-wide text-blue">
-                  FormulÃ¡rio
+                  Formulário
                 </span>
                 <h2 className="mt-2 text-2xl font-semibold text-dark">
                   Envie sua mensagem

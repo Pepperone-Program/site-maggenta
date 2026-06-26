@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { friendlyPersonalizedParam } from "@/lib/slugs";
 
 export const siteUrl = "https://www.maggenta.com.br";
@@ -48,7 +48,7 @@ export const marketKeywords = uniqueSeoKeywords([
   "brindes personalizados para empresas",
   "brindes corporativos personalizados",
   "produtos promocionais personalizados",
-  "orÃ§amento de brindes personalizados",
+  "orçamento de brindes personalizados",
   "fornecedor de brindes corporativos",
   "brindes para eventos empresariais",
   "campanhas promocionais com brindes",
@@ -63,7 +63,7 @@ export const contextualKeywords = (primary: string, context: string[] = []) =>
       `${primary} brindes personalizados`,
       `${primary} para empresas`,
       `${primary} corporativo`,
-      `orÃ§amento ${primary}`,
+      `orçamento ${primary}`,
       `comprar ${primary}`,
       `fornecedor de ${primary}`,
     ],

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { FormEvent, FocusEvent, useEffect, useRef, useState } from "react";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
@@ -26,12 +26,12 @@ const DEFAULT_RETURN_ROUTE = "/brindes-para-empresas";
 
 const fields = [
   { name: "fantasia", label: "Empresa ou nome", placeholder: "Ex.: Maggenta Brindes", required: false },
-  { name: "contato", label: "Contato", placeholder: "Nome do responsÃ¡vel", required: true },
+  { name: "contato", label: "Contato", placeholder: "Nome do responsável", required: true },
   { name: "email", label: "E-mail", type: "email", placeholder: "vendas@empresa.com.br", required: true },
   { name: "tel", label: "Telefone", placeholder: "(11) 99999-9999", required: false },
-  { name: "endereco", label: "EndereÃ§o", placeholder: "Rua, avenida ou travessa", required: false },
-  { name: "endereco_n", label: "NÃºmero", placeholder: "43" },
-  { name: "endereco_compl", label: "Complemento", placeholder: "Sala, bloco ou referÃªncia" },
+  { name: "endereco", label: "Endereço", placeholder: "Rua, avenida ou travessa", required: false },
+  { name: "endereco_n", label: "Número", placeholder: "43" },
+  { name: "endereco_compl", label: "Complemento", placeholder: "Sala, bloco ou referência" },
   { name: "bairro", label: "Bairro", placeholder: "Casa Verde", required: false},
   { name: "cep", label: "CEP", placeholder: "02515-010", required: false },
   { name: "cidade", label: "Cidade", placeholder: "Sao Paulo", required: false },
@@ -215,7 +215,7 @@ const Checkout = () => {
 
   return (
     <>
-      <Breadcrumb title="Solicitar orÃ§amentos" pages={["orcamentos"]} />
+      <Breadcrumb title="Solicitar orçamentos" pages={["orcamentos"]} />
       <section className="min-h-[calc(100vh-220px)] overflow-hidden bg-gray-2 py-5 lg:py-8">
         
         <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
@@ -230,12 +230,12 @@ const Checkout = () => {
                         Solicitacao comercial
                       </span>
                       <h2 className="mt-2 text-2xl font-semibold text-dark">
-                        Dados para orÃ§amento
+                        Dados para orçamento
                       </h2>
                     </div>
                     <p className="max-w-[420px] text-sm leading-6 text-dark-4">
                       Preencha seus dados para que nossa equipe retorne com prazos,
-                      gravaÃ§Ã£o e disponibilidade.
+                      gravação e disponibilidade.
                     </p>
                   </div>
 
@@ -267,11 +267,11 @@ const Checkout = () => {
                   </div>
 
                   <label className="mt-5 block">
-                    <span className="mb-2.5 block text-dark">ObservaÃ§Ãµes</span>
+                    <span className="mb-2.5 block text-dark">Observações</span>
                     <textarea
                       name="obs"
                       rows={6}
-                      placeholder="Quantidade desejada, personalizaÃ§Ã£o, prazo, entrega ou qualquer detalhe importante."
+                      placeholder="Quantidade desejada, personalização, prazo, entrega ou qualquer detalhe importante."
                       className="w-full rounded-md border border-gray-3 bg-gray-1 p-5 outline-none duration-200 placeholder:text-dark-5 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </label>
@@ -285,14 +285,14 @@ const Checkout = () => {
                       Resumo
                     </span>
                     <h3 className="mt-2 text-2xl font-semibold text-dark">
-                      Seu orÃ§amento
+                      Seu orçamento
                     </h3>
                   </div>
 
                   <div className="max-h-[52vh] overflow-auto px-4 pb-6 pt-2.5 sm:px-8.5">
                     {cartItems.length === 0 ? (
                       <p className="py-6 text-dark-4">
-                        Adicione produtos para solicitar um orÃ§amento.
+                        Adicione produtos para solicitar um orçamento.
                       </p>
                     ) : (
                       cartItems.map((item) => (
@@ -340,7 +340,7 @@ const Checkout = () => {
                     >
                       {status === "loading"
                         ? "Enviando..."
-                        : "Enviar solicitaÃ§Ã£o de orÃ§amento"}
+                        : "Enviar solicitação de orçamento"}
                     </button>
 
                     <button
@@ -371,9 +371,9 @@ const Checkout = () => {
                       role="alert"
                       className="rounded-md border-2 border-red bg-red-light-6 px-4 py-3 text-sm text-red"
                     >
-                      <strong className="block font-medium">AtenÃ§Ã£o</strong>
+                      <strong className="block font-medium">Atenção</strong>
                       <span className="block">
-                        NÃ£o pagamos para testes de produtos, fique atento a golpes.
+                        Não pagamos para testes de produtos, fique atento a golpes.
                       </span>
                     </div>
                   </div>

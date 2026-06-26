@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
@@ -598,7 +598,7 @@ const Header = ({
               type="button"
               onClick={openCartModal}
               className="flex h-11 items-center gap-2 rounded-full bg-white px-3.5 text-dark shadow-1 transition-colors duration-200 hover:text-blue"
-              aria-label="Abrir orÃ§amento"
+              aria-label="Abrir orçamento"
             >
               <span className="relative inline-flex">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
