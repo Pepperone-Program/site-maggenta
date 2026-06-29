@@ -311,6 +311,7 @@ const mockCategorias = categoryData.map((category, index) => ({
   id_categoria: index + 1,
   categoria: category.title,
   descricao: null,
+  url_capa: category.img,
   habilitado: "S",
 }));
 
@@ -1590,7 +1591,7 @@ export async function getProductSections() {
 
 export async function getHomeCategories(): Promise<Category[]> {
   const categorias =
-    (await fetchAllFirstAvailable<(typeof mockCategorias)[number]>([
+    (await fetchAllFirstAvailable<CatalogoCategoria>([
       "/categorias",
       "/produtos/categorias",
     ], 100)) || mockCategorias;
@@ -1600,10 +1601,7 @@ export async function getHomeCategories(): Promise<Category[]> {
     .map((category, index) => ({
       id: Number(category.id_categoria),
       title: String(category.categoria),
-      img: safeImageSrc(
-        "url_capa" in category ? category.url_capa : null,
-        ""
-      ),
+      img: safeImageSrc(category.url_capa, categoryIcon(index)),
     }));
 }
 

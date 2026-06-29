@@ -25,7 +25,7 @@ const SingleItem = ({ item, priority = false }: { item: Category; priority?: boo
             priority={priority}
             loading={priority ? "eager" : "lazy"}
             sizes="44px"
-            className="max-h-11 w-auto object-contain"
+            className="h-11 w-11 rounded-full object-cover"
           />
         ) : (
           <span className="text-xl font-semibold text-blue">

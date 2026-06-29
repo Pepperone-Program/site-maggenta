@@ -4,7 +4,6 @@ import { Autoplay } from "swiper/modules";
 import testimonialsData from "./testimonialsData";
 import Image from "next/image";
 
-// Import Swiper styles
 import "swiper/css/navigation";
 import "swiper/css";
 import SingleItem from "./SingleItem";
