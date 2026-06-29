@@ -137,6 +137,11 @@ export default async function RootLayout({
           src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`}
         />
         <script
+          id="google-ads-aw-928315079"
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=AW-928315079"
+        />
+        <script
           id="google-analytics-init"
           dangerouslySetInnerHTML={{
             __html: `
@@ -145,6 +150,7 @@ export default async function RootLayout({
               gtag('js', new Date());
               gtag('config', '${googleAnalyticsId}');
               gtag('config', '${googleAdsId}');
+              gtag('config', 'AW-928315079');
             `,
           }}
         />

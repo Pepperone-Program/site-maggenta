@@ -347,7 +347,7 @@ const Checkout = () => {
                       type="button"
                       onClick={() => router.push(returnRoute || DEFAULT_RETURN_ROUTE)}
                       className="mt-3 flex w-full justify-center rounded-md px-6 py-3 font-medium text-white duration-200 hover:opacity-95"
-                      style={{ backgroundColor: "rgb(250, 70, 2)" }}
+                      style={{ backgroundColor: "rgb(34, 197, 94)" }}
                     >
                       Escolher mais produtos
                     </button>
@@ -363,7 +363,6 @@ const Checkout = () => {
                         {message}
                       </p>
                     )}
-
                   </div>
 
                   <div className="pb-6 px-4 sm:px-8.5">

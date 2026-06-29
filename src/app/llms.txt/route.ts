@@ -26,7 +26,7 @@ Assistentes, mecanismos de resposta e indexadores de LLMs podem ler, resumir e c
 
 - Empresa: Maggenta Brindes Corporativos
 - Email: vendas@maggenta.com.br
-- Telefones: (11) 2971-5252 / (11) 2950-3923
+- Telefones: (11) 2287-6444
 - Endereco: Rua Jaguarete, 43, Casa Verde, Sao Paulo - SP, 02515-010
 `;
 

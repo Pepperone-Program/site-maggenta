@@ -85,7 +85,7 @@ const Contact = () => {
                       onClick={() => trackEvent("phone_click", { source: "contact_page" })}
                       className="hover:text-blue"
                     >
-                      (11) 2971-5252
+                      (11) 2287-6444
                     </a>
                     <span> / </span>
                     <a
@@ -93,7 +93,7 @@ const Contact = () => {
                       onClick={() => trackEvent("phone_click", { source: "contact_page" })}
                       className="hover:text-blue"
                     >
-                      (11) 2950-3923
+                      (11) 2287-6444
                     </a>
                   </div>
                   <a

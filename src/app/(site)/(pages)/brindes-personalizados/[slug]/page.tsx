@@ -3,11 +3,8 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import ShopDetails from "@/components/ShopDetails";
 import { productPath } from "@/lib/products";
-import {
-  getProdutoBySlug,
-  getRelatedProducts,
-} from "@/lib/api";
-import { buildSeoOther, contextualKeywords, ogImageUrl, siteName, siteUrl } from "@/lib/seo";
+import { getProdutoBySlug, getRelatedProducts } from "@/lib/api";
+import { buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
 
 export const revalidate = 300;
 export const dynamicParams = true;
@@ -37,21 +34,12 @@ export async function generateMetadata({
   }
 
   const canonical = new URL(productPath(product), siteUrl).toString();
-  const productImage = product.imgs.previews[0]
+  const image = product.imgs.previews[0]
     ? new URL(product.imgs.previews[0], siteUrl).toString()
     : new URL("/images/logo/logo.svg", siteUrl).toString();
-  const image = ogImageUrl({
-    title: product.title,
-    subtitle: product.codigo
-      ? `Código ${product.codigo} | ${product.category}`
-      : product.category,
-    image: productImage,
-  });
-  const description =
-    product.description ||
-    product.shortDescription ||
-    `Solicite orcamento para ${product.title} personalizado na Maggenta.`;
-  const title = `${product.title} - ${product.codigo || product.id} - ${product.title} | Maggenta Brindes`;
+  const productCode = product.codigo || String(product.id);
+  const description = `Encontre ${product.title} e muito mais ${productCode}. Veja aqui`;
+  const title = `${product.title} - ${productCode} - ${product.title} | Maggenta Brindes`;
 
   return {
     title: {
@@ -60,8 +48,8 @@ export async function generateMetadata({
     description,
     keywords: contextualKeywords(product.title, [
       product.category,
-      product.codigo || "",
-      `${product.title} ${product.codigo || ""}`,
+      productCode,
+      `${product.title} ${productCode}`,
       `${product.category} personalizados`,
       `${product.title} com logo`,
       `${product.title} quantidade minima ${product.quantidadeMinima || ""}`,
@@ -96,7 +84,7 @@ export async function generateMetadata({
           url: image,
           alt: product.title,
           width: 1200,
-          height: 630,
+          height: 1200,
         },
       ],
     },
@@ -111,12 +99,15 @@ export async function generateMetadata({
         title,
         description,
         canonical,
-        subject: `${product.title}, ${product.category}, ${product.codigo || product.id}`,
+        subject: `${product.title}, ${product.category}, ${productCode}`,
       }),
+      "og:image": image,
       "og:image:secure_url": image,
+      "og:image:width": "1200",
+      "og:image:height": "1200",
       "og:image:type": image.includes(".png") ? "image/png" : "image/jpeg",
       "product:category": product.category,
-      "product:retailer_item_id": product.codigo || String(product.id),
+      "product:retailer_item_id": productCode,
     },
   };
 }
@@ -135,9 +126,7 @@ const ProductPage = async ({ params }: ProductPageProps) => {
 
   const relatedProducts = await getRelatedProducts(product, 4);
   const canonical = new URL(productPath(product), siteUrl).toString();
-  const images = product.imgs.previews.map((image) =>
-    new URL(image, siteUrl).toString()
-  );
+  const images = product.imgs.previews.map((image) => new URL(image, siteUrl).toString());
 
   const jsonLd = {
     "@context": "https://schema.org",
