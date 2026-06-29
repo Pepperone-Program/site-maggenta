@@ -74,7 +74,7 @@ const DataPromocionalSlugPage = async ({ params, searchParams }: PageProps) => {
     getCatalogoDataPromocional(dataPromocionalId, {
       empresaId: 1,
       page: toNumber(query.page) || 1,
-      limit: toNumber(query.limit) || 100,
+      limit: toNumber(query.limit) || 24,
       datas_promocionais: firstParam(query.datas_promocionais) || String(dataPromocionalId),
       subcategorias: firstParam(query.subcategorias),
       publicos_alvos: firstParam(query.publicos_alvos),
@@ -100,7 +100,7 @@ const DataPromocionalSlugPage = async ({ params, searchParams }: PageProps) => {
           quantidade_minima_min: firstParam(query.quantidade_minima_min) || "",
           quantidade_minima_max: firstParam(query.quantidade_minima_max) || "",
           datas_promocionais: firstParam(query.datas_promocionais) || String(dataPromocionalId),
-          limit: firstParam(query.limit) || "100",
+          limit: firstParam(query.limit) || "24",
         }}
         categoryOptions={categorias}
         publicOptions={publicosAlvos}

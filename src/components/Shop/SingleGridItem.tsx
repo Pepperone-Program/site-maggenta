@@ -1,15 +1,11 @@
-"use client";
-
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { productPath } from "@/lib/products";
 import { Product } from "@/types/product";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
-import ProductCode from "@/components/Common/ProductCode";
-import { minimumCartQuantity, useAddProductToCart } from "@/lib/hooks/useAddProductToCart";
 import { formatReviewCount, productReviewCount } from "@/lib/reviews";
+import ProductQuoteButton from "./ProductQuoteButton";
 
 const launchBadgeStyle = {
   backgroundColor: "rgb(250, 70, 22)",
@@ -21,20 +17,11 @@ type SingleGridItemProps = {
 };
 
 const SingleGridItem = ({ item, badgeLabel }: SingleGridItemProps) => {
-  const router = useRouter();
-  const addProductToCart = useAddProductToCart();
   const href = productPath(item);
   const reviewCount = formatReviewCount(productReviewCount(item));
-
-  const prefetchProduct = () => {
-    router.prefetch(href);
-  };
-
-  const handleAddToCart = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    addProductToCart(item, minimumCartQuantity(item), { autoClosePreviewMs: 3500 });
-  };
+  const normalizedCode = String(item.codigo || "").trim();
+  const primaryImage = item.imgs.previews[0];
+  const hoverImage = item.imgs.previews[1] || primaryImage;
 
   return (
     <div className="group flex h-full flex-col rounded-[28px] border border-transparent bg-white p-4 shadow-[0_14px_34px_rgba(157,23,77,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-blue/45 hover:shadow-[0_20px_42px_rgba(157,23,77,0.14)]">
@@ -51,24 +38,23 @@ const SingleGridItem = ({ item, badgeLabel }: SingleGridItemProps) => {
           href={href}
           aria-label={`Ver detalhes de ${item.title}`}
           className="relative block h-full w-full"
-          prefetch
-          onMouseEnter={prefetchProduct}
-          onFocus={prefetchProduct}
-          onTouchStart={prefetchProduct}
+          prefetch={false}
         >
           <ImageWithFallback
-            src={item.imgs.previews[0]}
+            src={primaryImage}
             alt={item.title}
             fill
             sizes="(min-width: 1536px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
             className="object-contain transition-opacity duration-500 group-hover:opacity-0"
+            loading="lazy"
           />
           <ImageWithFallback
-            src={item.imgs.previews[1] || item.imgs.previews[0]}
+            src={hoverImage}
             alt={`${item.title} - segunda imagem`}
             fill
             sizes="(min-width: 1536px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
             className="object-contain opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+            loading="lazy"
           />
         </Link>
       </div>
@@ -97,29 +83,21 @@ const SingleGridItem = ({ item, badgeLabel }: SingleGridItemProps) => {
           WebkitLineClamp: 2,
         }}
       >
-        <Link
-          href={href}
-          prefetch
-          onMouseEnter={prefetchProduct}
-          onFocus={prefetchProduct}
-          onTouchStart={prefetchProduct}
-        >
+        <Link href={href} prefetch={false}>
           {item.title}
         </Link>
       </p>
 
-      <ProductCode
-        code={item.codigo}
-        className="mb-3 text-center text-custom-sm font-medium text-dark-4 duration-200 hover:text-dark"
-      />
+      {normalizedCode && (
+        <span className="mb-3 text-center text-custom-sm font-medium text-dark-4 duration-200 hover:text-dark">
+          Código: {normalizedCode}
+        </span>
+      )}
 
-      <button
-        type="button"
-        onClick={handleAddToCart}
+      <ProductQuoteButton
+        item={item}
         className="mx-auto mt-auto flex min-h-11 w-full max-w-[220px] items-center justify-center rounded-full bg-blue px-5 py-2 text-custom-sm font-medium text-white shadow-[0_14px_30px_rgba(157,23,77,0.24)] duration-200 hover:bg-blue-dark"
-      >
-        Orçar
-      </button>
+      />
     </div>
   );
 };

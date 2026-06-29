@@ -40,7 +40,7 @@ const PublicosAlvosPage = async ({ searchParams }: PublicosAlvosPageProps) => {
     getCatalogoPublicoAlvo(publicoAlvoId, {
       empresaId: 1,
       page: toNumber(params.page) || 1,
-      limit: toNumber(params.limit) || 100,
+      limit: toNumber(params.limit) || 24,
       publicos_alvos: firstParam(params.publicos_alvos) || String(publicoAlvoId),
       datas_promocionais: firstParam(params.datas_promocionais),
       subcategorias: firstParam(params.subcategorias),
@@ -83,7 +83,7 @@ const PublicosAlvosPage = async ({ searchParams }: PublicosAlvosPageProps) => {
           quantidade_minima_min: firstParam(params.quantidade_minima_min) || "",
           quantidade_minima_max: firstParam(params.quantidade_minima_max) || "",
           datas_promocionais: firstParam(params.datas_promocionais) || "",
-          limit: firstParam(params.limit) || "100",
+          limit: firstParam(params.limit) || "24",
         }}
         categoryOptions={categorias}
         publicOptions={publicosAlvos}

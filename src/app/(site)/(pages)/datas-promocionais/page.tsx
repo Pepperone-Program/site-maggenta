@@ -40,7 +40,7 @@ const DatasPromocionaísPage = async ({ searchParams }: DatasPromocionaísPagePr
     getCatalogoDataPromocional(dataPromocionalId, {
       empresaId: 1,
       page: toNumber(params.page) || 1,
-      limit: toNumber(params.limit) || 100,
+      limit: toNumber(params.limit) || 24,
       datas_promocionais: firstParam(params.datas_promocionais) || String(dataPromocionalId),
       subcategorias: firstParam(params.subcategorias),
       publicos_alvos: firstParam(params.publicos_alvos),
@@ -83,7 +83,7 @@ const DatasPromocionaísPage = async ({ searchParams }: DatasPromocionaísPagePr
           quantidade_minima_min: firstParam(params.quantidade_minima_min) || "",
           quantidade_minima_max: firstParam(params.quantidade_minima_max) || "",
           datas_promocionais: firstParam(params.datas_promocionais) || String(dataPromocionalId),
-          limit: firstParam(params.limit) || "100",
+          limit: firstParam(params.limit) || "24",
         }}
         categoryOptions={categorias}
         publicOptions={publicosAlvos}

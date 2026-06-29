@@ -84,8 +84,10 @@ const SubcategoriaPage = async ({ params, searchParams }: PageProps) => {
   const slug = routeParams.slug || "";
   const subcategoriaId = toNumber(slug) || 0;
   const subcategoriaName = titleFromSlug(slug) || "Subcategoria";
+  const page = toNumber(firstParam(query.page)) || 1;
+  const limit = toNumber(firstParam(query.limit)) || 24;
   const [catalogo, categorias, publicosAlvos, datasPromocionais] = await Promise.all([
-    getCatalogoSubcategoriaProdutos(subcategoriaId, subcategoriaName),
+    getCatalogoSubcategoriaProdutos(subcategoriaId, subcategoriaName, { page, limit }),
     getCatalogoCategorias(),
     getPublicosAlvos(),
     getDatasPromocionais(),
@@ -93,8 +95,18 @@ const SubcategoriaPage = async ({ params, searchParams }: PageProps) => {
   const canonicalPath = subcategoryPath(subcategoriaId || 0, subcategoriaName);
   const currentPath = `/subcategorias/${slug}`;
 
-  if (currentPath !== canonicalPath || firstParam(query.page)) {
-    permanentRedirect(canonicalPath);
+  if (currentPath !== canonicalPath) {
+    const redirectParams = new URLSearchParams();
+
+    Object.entries(query).forEach(([key, value]) => {
+      const firstValue = firstParam(value);
+      if (firstValue) {
+        redirectParams.set(key, firstValue);
+      }
+    });
+
+    const redirectQuery = redirectParams.toString();
+    permanentRedirect(`${canonicalPath}${redirectQuery ? `?${redirectQuery}` : ""}`);
   }
 
   return (
@@ -104,7 +116,7 @@ const SubcategoriaPage = async ({ params, searchParams }: PageProps) => {
         activeFilters={{
           categoria: String(subcategoriaId || 1),
           subcategorias: String(subcategoriaId || ""),
-          limit: "100",
+          limit: firstParam(query.limit) || "24",
         }}
         categoryOptions={categorias}
         publicOptions={publicosAlvos}

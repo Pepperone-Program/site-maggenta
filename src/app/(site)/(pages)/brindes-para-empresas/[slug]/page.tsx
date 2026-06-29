@@ -7,16 +7,16 @@ import {
   getCatalogoTipoProduto,
   friendlyPersonalizedParam,
   personalizedTitle,
-  searchProdutosSiteAll,
+  searchProdutosSiteCatalogo,
   searchProdutosSiteWithDestination,
 } from "@/lib/api";
 import { buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
-import { Product } from "@/types/product";
 
 export const revalidate = 120;
 
 type PageProps = {
   params?: Promise<{ slug?: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -79,42 +79,21 @@ const titleFromSlug = (slug: string) =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 
-const searchCatalogo = (term: string, products: Product[]) => ({
-  tipo_produto: {
-    id_empresa: 1,
-    id_tipo_produto: 0,
-    tipo_produto: term,
-    descricao: `Resultados encontrados para "${term}" com base no nome do produto.`,
-    habilitado: "S",
-  },
-  filtros: {
-    subcategorias: [],
-    publicos_alvos: [],
-    datas_promocionais: [],
-    quantidade_minima: {
-      min: 0,
-      max: 0,
-    },
-  },
-  items: products,
-  total: products.length,
-  page: 1,
-  limit: products.length || 100,
-  totalPages: 1,
-});
+const firstParam = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] : value;
 
-const resolveCatalogo = async (slug: string) => {
+const resolveCatalogo = async (slug: string, page = 1, limit = 24) => {
   const tipoId = toNumber(slug);
 
   if (tipoId) {
-    return getCatalogoTipoProduto(tipoId);
+    return getCatalogoTipoProduto(tipoId, { page, limit });
   }
 
   const term = titleFromSlug(slug);
-  const products = await searchProdutosSiteAll(term);
+  const catalogo = await searchProdutosSiteCatalogo(term, { page, limit });
 
-  if (products.length) {
-    return searchCatalogo(term, products);
+  if (catalogo.total > 0) {
+    return catalogo;
   }
 
   const { destinoBusca } = await searchProdutosSiteWithDestination(term, 1);
@@ -122,15 +101,20 @@ const resolveCatalogo = async (slug: string) => {
   if (destinoBusca?.tipo === "subcategoria" && destinoBusca.id_subcategoria) {
     return getCatalogoSubcategoria(destinoBusca.id_subcategoria, {
       idCategoria: destinoBusca.id_categoria || undefined,
+      page,
+      limit,
     });
   }
 
-  return getCatalogoTipoProduto(12);
+  return getCatalogoTipoProduto(12, { page, limit });
 };
 
-const BrindesParaEmpresasTipoPage = async ({ params }: PageProps) => {
+const BrindesParaEmpresasTipoPage = async ({ params, searchParams }: PageProps) => {
   const routeParams = (await params) || {};
-  const catalogo = await resolveCatalogo(routeParams.slug || "");
+  const query = (await searchParams) || {};
+  const page = toNumber(firstParam(query.page)) || 1;
+  const limit = toNumber(firstParam(query.limit)) || 24;
+  const catalogo = await resolveCatalogo(routeParams.slug || "", page, limit);
   const title = catalogo.tipo_produto?.tipo_produto || "Brindes para empresas";
   const tipoId = catalogo.tipo_produto?.id_tipo_produto || toNumber(routeParams.slug) || 0;
   const canonicalPath = `/brindes-para-empresas/${encodeURIComponent(
@@ -138,7 +122,17 @@ const BrindesParaEmpresasTipoPage = async ({ params }: PageProps) => {
   )}`;
 
   if (`/brindes-para-empresas/${routeParams.slug || ""}` !== canonicalPath) {
-    permanentRedirect(canonicalPath);
+    const redirectParams = new URLSearchParams();
+
+    Object.entries(query).forEach(([key, value]) => {
+      const firstValue = firstParam(value);
+      if (firstValue) {
+        redirectParams.set(key, firstValue);
+      }
+    });
+
+    const redirectQuery = redirectParams.toString();
+    permanentRedirect(`${canonicalPath}${redirectQuery ? `?${redirectQuery}` : ""}`);
   }
 
   return (
@@ -147,6 +141,11 @@ const BrindesParaEmpresasTipoPage = async ({ params }: PageProps) => {
         products={catalogo.items}
         title={personalizedTitle(title)}
         description={catalogo.tipo_produto?.descricao || ""}
+        total={catalogo.total}
+        page={catalogo.page}
+        limit={catalogo.limit}
+        totalPages={catalogo.totalPages}
+        basePath={canonicalPath}
       />
     </main>
   );

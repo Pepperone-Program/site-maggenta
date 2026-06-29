@@ -240,6 +240,10 @@ export type SearchDestinationApi = {
 export type SearchProdutosSiteResult = {
   products: Product[];
   destinoBusca: SearchDestinationApi | null;
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
   exactProduct?: Product | null;
   exactProductId?: number | null;
   exactProductCode?: string | null;
@@ -247,6 +251,10 @@ export type SearchProdutosSiteResult = {
 
 type SearchProdutosSiteApiData = {
   items?: ProdutoApi[];
+  total?: number;
+  page?: number;
+  limit?: number;
+  totalPages?: number;
   destino_busca?: SearchDestinationApi | null;
   match_exato_codigo?: boolean;
   id_produto?: number;
@@ -260,11 +268,6 @@ type DataPromocionalApi = {
   descricao?: string | null;
   ordem?: number | null;
   habilitado?: ApiFlag;
-};
-
-type DataPromocionalProdutoApi = {
-  id_data_promocional: number;
-  id_produto: number;
 };
 
 type SubcategoriaProdutoApi = {
@@ -340,11 +343,6 @@ const sortByOrderAndName = <T extends Record<string, unknown>>(
 
 const isEnabled = (value?: ApiFlag) => !value || value === "S";
 const isYes = (value?: ApiFlag) => value === "S" || value === "s";
-const parseIdList = (value?: string) =>
-  (value || "")
-    .split(",")
-    .map((item) => Number(item))
-    .filter((item) => Number.isFinite(item) && item > 0);
 
 const apiBaseUrl = () => (process.env.NEXT_API_URL || "").replace(/\/$/, "");
 
@@ -759,62 +757,11 @@ const appendCatalogParam = (
   params.set(key, String(value));
 };
 
-const fetchRemainingCatalogItems = async (
-  endpoint: string,
-  params: URLSearchParams,
-  firstItems: ProdutoApi[],
-  total = firstItems.length,
-  totalPages = 1,
-  limit = 100
-) => {
-  let items = firstItems;
-  const safeTotalPages = Math.max(Number(totalPages || 1), 1);
-  const restPages = Array.from(
-    { length: Math.max(safeTotalPages - 1, 0) },
-    (_, index) => index + 2
-  );
-
-  if (restPages.length) {
-    const restItems = await Promise.all(
-      restPages.map(async (nextPage) => {
-        const pageParams = new URLSearchParams(params);
-        pageParams.set("page", String(nextPage));
-        const pagePayload = await apiRequest(`${endpoint}?${pageParams.toString()}`);
-        const pageData =
-          pagePayload && typeof pagePayload === "object" && "data" in pagePayload
-            ? (pagePayload.data as { items?: ProdutoApi[] })
-            : null;
-
-        return pageData?.items || [];
-      })
-    );
-
-    items = [...items, ...restItems.flat()];
-  }
-
-  if (Number(total || 0) > items.length && safeTotalPages <= 1) {
-    const wideParams = new URLSearchParams(params);
-    wideParams.set("page", "1");
-    wideParams.set("limit", String(Math.min(Math.max(Number(total), limit), 500)));
-    const widePayload = await apiRequest(`${endpoint}?${wideParams.toString()}`);
-    const wideData =
-      widePayload && typeof widePayload === "object" && "data" in widePayload
-        ? (widePayload.data as { items?: ProdutoApi[] })
-        : null;
-
-    if ((wideData?.items?.length || 0) > items.length) {
-      items = wideData?.items || items;
-    }
-  }
-
-  return items;
-};
-
 export async function getCatalogoCategoria(
   idCategoria = 1,
   query: CatalogoProdutosQuery = {}
 ): Promise<CatalogoProdutos> {
-  const page = 1;
+  const page = sanitizeCatalogPage(query.page);
   const limit = sanitizeCatalogLimit(query.limit);
   const params = new URLSearchParams({
     empresaId: String(query.empresaId || 1),
@@ -873,24 +820,7 @@ export async function getCatalogoCategoria(
   }
 
   const categoryName = data.categoria?.categoria;
-  const reportedTotal = Number(data.total || 0);
-  const allItems = await fetchRemainingCatalogItems(
-    `/categorias/${encodeURIComponent(String(idCategoria))}/catalogo`,
-    params,
-    data.items || [],
-    reportedTotal,
-    Number(data.totalPages || 1),
-    limit
-  );
-  const selectedDataIds = parseIdList(query.datas_promocionais || query.data_promocional);
-  const dataProductIds = selectedDataIds.length
-    ? await getProdutosIdsByDatasPromocionais(selectedDataIds)
-    : null;
-  const dataProductSet = dataProductIds ? new Set(dataProductIds) : null;
-  const sourceItems =
-    dataProductSet && allItems.length
-      ? allItems.filter((product) => dataProductSet.has(product.id_produto))
-      : allItems;
+  const sourceItems = data.items || [];
 
   return {
     categoria: data.categoria || null,
@@ -904,13 +834,10 @@ export async function getCatalogoCategoria(
     items: sourceItems.map((product) =>
       mapApiProdutoToProduct(product, [], categoryName)
     ),
-    total:
-      dataProductSet && allItems.length
-        ? sourceItems.length
-        : Number(reportedTotal || sourceItems.length || 0),
-    page,
-    limit: sourceItems.length || Number(data.limit || limit),
-    totalPages: 1,
+    total: Number(data.total || sourceItems.length || 0),
+    page: Number(data.page || page),
+    limit: Number(data.limit || limit),
+    totalPages: Math.max(Number(data.totalPages || 1), 1),
   };
 }
 
@@ -993,24 +920,9 @@ export async function getCatalogoPublicoAlvo(
       ? (payload.data as CatalogoPublicoAlvoResponse)
       : null;
   const titulo = data?.publico_alvo?.publico_alvo || "Publico-alvo";
-  const dataWithAllItems = data
-    ? {
-        ...data,
-        items: await fetchRemainingCatalogItems(
-          `/publicos-alvos/${encodeURIComponent(String(idPublicoAlvo))}/catalogo`,
-          params,
-          data.items || [],
-          Number(data.total || 0),
-          Number(data.totalPages || 1),
-          limit
-        ),
-        page: 1,
-        totalPages: 1,
-      }
-    : null;
   const mapped = mapCatalogDataToProdutos({
-    data: dataWithAllItems,
-    page: 1,
+    data,
+    page,
     limit,
     fallbackTitle: titulo,
     fallbackDescription: data?.publico_alvo?.descricao || null,
@@ -1068,24 +980,9 @@ export async function getCatalogoDataPromocional(
       ? (payload.data as CatalogoDataPromocionalResponse)
       : null;
   const titulo = data?.data_promocional?.data_promocional || "Data promocional";
-  const dataWithAllItems = data
-    ? {
-        ...data,
-        items: await fetchRemainingCatalogItems(
-          `/datas-promocionais/${encodeURIComponent(String(idDataPromocional))}/catalogo`,
-          params,
-          data.items || [],
-          Number(data.total || 0),
-          Number(data.totalPages || 1),
-          limit
-        ),
-        page: 1,
-        totalPages: 1,
-      }
-    : null;
   const mapped = mapCatalogDataToProdutos({
-    data: dataWithAllItems,
-    page: 1,
+    data,
+    page,
     limit,
     fallbackTitle: titulo,
     fallbackDescription: data?.data_promocional?.descricao || null,
@@ -1119,12 +1016,13 @@ export async function getCatalogoDataPromocional(
 
 export async function getCatalogoTipoProduto(
   idTipoProduto = 12,
-  query: Pick<CatalogoProdutosQuery, "empresaId"> = {}
+  query: Pick<CatalogoProdutosQuery, "empresaId" | "page" | "limit"> = {}
 ): Promise<CatalogoTipoProduto> {
-  const limit = 100;
+  const page = sanitizeCatalogPage(query.page);
+  const limit = sanitizeWideCatalogLimit(query.limit);
   const params = new URLSearchParams({
     empresaId: String(query.empresaId || 1),
-    page: "1",
+    page: String(page),
     limit: String(limit),
   });
   const firstPayload = await apiRequest(
@@ -1163,25 +1061,8 @@ export async function getCatalogoTipoProduto(
     };
   }
 
-  const totalPages = Math.max(Number(firstData.totalPages || 1), 1);
-  const restPages = Array.from({ length: Math.max(totalPages - 1, 0) }, (_, index) => index + 2);
-  const restItems = await Promise.all(
-    restPages.map(async (page) => {
-      const pageParams = new URLSearchParams(params);
-      pageParams.set("page", String(page));
-      const payload = await apiRequest(
-        `/tipos-produtos/${encodeURIComponent(String(idTipoProduto))}/catalogo?${pageParams.toString()}`
-      );
-      const data =
-        payload && typeof payload === "object" && "data" in payload
-          ? (payload.data as { items?: ProdutoApi[] })
-          : null;
-
-      return data?.items || [];
-    })
-  );
   const tipoNome = firstData.tipo_produto?.tipo_produto;
-  const items = [...(firstData.items || []), ...restItems.flat()];
+  const items = firstData.items || [];
 
   return {
     tipo_produto: firstData.tipo_produto || null,
@@ -1194,9 +1075,9 @@ export async function getCatalogoTipoProduto(
     },
     items: items.map((product) => mapApiProdutoToProduct(product, [], tipoNome)),
     total: Number(firstData.total || items.length),
-    page: 1,
-    limit: items.length || limit,
-    totalPages: 1,
+    page: Number(firstData.page || page),
+    limit: Number(firstData.limit || limit),
+    totalPages: Math.max(Number(firstData.totalPages || 1), 1),
   };
 }
 
@@ -1257,37 +1138,6 @@ export async function getPublicosAlvos(
     .filter((publico) => Number.isFinite(publico.id) && publico.title);
 }
 
-export async function getProdutosIdsByDatasPromocionais(
-  ids: number[]
-): Promise<number[]> {
-  const uniqueIds = Array.from(new Set(ids)).filter((id) => Number.isFinite(id) && id > 0);
-
-  if (!uniqueIds.length) {
-    return [];
-  }
-
-  const groups = await Promise.all(
-    uniqueIds.map(async (id) => {
-      const produtos = await apiFetchAllPages<DataPromocionalProdutoApi>(
-        `/datas-promocionais/${encodeURIComponent(String(id))}/produtos`,
-        100,
-        50
-      );
-
-      return produtos || [];
-    })
-  );
-
-  return Array.from(
-    new Set(
-      groups
-        .flat()
-        .map((item) => Number(item.id_produto))
-        .filter((id) => Number.isFinite(id) && id > 0)
-    )
-  );
-}
-
 export async function getProdutosForSitemap(limit = 10000): Promise<Product[]> {
   const pageSize = 500;
   const maxPages = Math.max(1, Math.ceil(limit / pageSize));
@@ -1316,28 +1166,36 @@ export async function getProdutosSite(limit = 12): Promise<Product[]> {
     .slice(0, limit);
 }
 
+export async function getProdutosSitePaginated(
+  query: Pick<CatalogoProdutosQuery, "empresaId" | "page" | "limit"> = {}
+): Promise<Omit<CatalogoProdutos, "categoria" | "filtros">> {
+  const page = sanitizeCatalogPage(query.page);
+  const limit = sanitizeWideCatalogLimit(query.limit);
+  const payload = await apiRequest(
+    `/produtos/site?empresaId=${encodeURIComponent(
+      String(query.empresaId || 1)
+    )}&page=${encodeURIComponent(String(page))}&limit=${encodeURIComponent(String(limit))}`
+  );
+  const data =
+    payload && typeof payload === "object" && "data" in payload
+      ? (payload.data as PaginatedApiData<ProdutoApi>)
+      : null;
+  const items = data?.items || [];
+
+  return {
+    items: items
+      .filter((product) => isEnabled(product.habilitado) && isEnabled(product.site))
+      .map((product) => mapApiProdutoToProduct(product)),
+    total: Number(data?.total || items.length || 0),
+    page: Number(data?.page || page),
+    limit: Number(data?.limit || limit),
+    totalPages: Math.max(Number(data?.totalPages || 1), 1),
+  };
+}
+
 export async function searchProdutosSite(query: string, limit = 10): Promise<Product[]> {
   const result = await searchProdutosSiteWithDestination(query, limit);
   return result.products;
-}
-
-export async function searchProdutosSiteAll(query: string): Promise<Product[]> {
-  const search = query.trim();
-
-  if (!search) {
-    return [];
-  }
-
-  const produtos =
-    (await apiFetchAllPages<ProdutoApi>(
-      `/produtos/site/busca?q=${encodeURIComponent(search)}`,
-      100,
-      80
-    )) || [];
-
-  return produtos
-    .filter((product) => isEnabled(product.habilitado) && isEnabled(product.site))
-    .map((product) => mapApiProdutoToProduct(product));
 }
 
 export async function getProdutoById(id: number): Promise<Product | null> {
@@ -1374,66 +1232,39 @@ export async function getProdutosIdsBySubcategoria(idSubcategoria: number): Prom
 
 export async function getCatalogoSubcategoriaProdutos(
   idSubcategoria: number,
-  subcategoriaNome = "Subcategoria"
+  subcategoriaNome = "Subcategoria",
+  query: Pick<CatalogoProdutosQuery, "empresaId" | "page" | "limit"> = {}
 ): Promise<CatalogoProdutos> {
-  const ids = await getProdutosIdsBySubcategoria(idSubcategoria);
-  const allProducts = await getProdutosForSitemap(10000);
-  const byId = new Map(allProducts.map((product) => [product.id, product]));
-  const missingIds = ids.filter((id) => !byId.has(id));
-  const missingProducts = await Promise.all(missingIds.map((id) => getProdutoById(id)));
-
-  missingProducts.forEach((product) => {
-    if (product) {
-      byId.set(product.id, product);
-    }
-  });
-
-  const items = ids.map((id) => byId.get(id)).filter(Boolean) as Product[];
-  const quantities = items
-    .map((item) => Number(item.quantidadeMinima || 0))
-    .filter((value) => Number.isFinite(value) && value > 0);
+  const catalogo = await getCatalogoSubcategoria(idSubcategoria, query);
 
   return {
     categoria: {
       id_empresa: 1,
       id_categoria: idSubcategoria,
-      categoria: subcategoriaNome,
-      descricao: null,
+      categoria: catalogo.tipo_produto?.tipo_produto || subcategoriaNome,
+      descricao: catalogo.tipo_produto?.descricao || null,
       icon: null,
       habilitado: "S",
       url_capa: null,
     },
-    filtros: {
-      subcategorias: [
-        {
-          id_subcategoria: idSubcategoria,
-          subcategoria: subcategoriaNome,
-          total: ids.length || items.length,
-        },
-      ],
-      publicos_alvos: [],
-      datas_promocionais: [],
-      quantidade_minima: {
-        min: quantities.length ? Math.min(...quantities) : 0,
-        max: quantities.length ? Math.max(...quantities) : 0,
-      },
-    },
-    items,
-    total: ids.length || items.length,
-    page: 1,
-    limit: items.length || 100,
-    totalPages: 1,
+    filtros: catalogo.filtros,
+    items: catalogo.items,
+    total: catalogo.total,
+    page: catalogo.page,
+    limit: catalogo.limit,
+    totalPages: catalogo.totalPages,
   };
 }
 
 export async function getCatalogoSubcategoria(
   idSubcategoria: number,
-  query: Pick<CatalogoProdutosQuery, "empresaId"> & { idCategoria?: number } = {}
+  query: Pick<CatalogoProdutosQuery, "empresaId" | "page" | "limit"> & { idCategoria?: number } = {}
 ): Promise<CatalogoTipoProduto> {
-  const limit = 100;
+  const page = sanitizeCatalogPage(query.page);
+  const limit = sanitizeWideCatalogLimit(query.limit);
   const params = new URLSearchParams({
     empresaId: String(query.empresaId || 1),
-    page: "1",
+    page: String(page),
     limit: String(limit),
   });
   const firstPayload = await apiRequest(
@@ -1453,25 +1284,8 @@ export async function getCatalogoSubcategoria(
       : null;
 
   if (firstData) {
-    const totalPages = Math.max(Number(firstData.totalPages || 1), 1);
-    const restPages = Array.from({ length: Math.max(totalPages - 1, 0) }, (_, index) => index + 2);
-    const restItems = await Promise.all(
-      restPages.map(async (page) => {
-        const pageParams = new URLSearchParams(params);
-        pageParams.set("page", String(page));
-        const payload = await apiRequest(
-          `/subcategorias/${encodeURIComponent(String(idSubcategoria))}/catalogo?${pageParams.toString()}`
-        );
-        const data =
-          payload && typeof payload === "object" && "data" in payload
-            ? (payload.data as { items?: ProdutoApi[] })
-            : null;
-
-        return data?.items || [];
-      })
-    );
     const subcategoriaNome = firstData.subcategoria?.subcategoria || "Subcategoria";
-    const items = [...(firstData.items || []), ...restItems.flat()];
+    const items = firstData.items || [];
 
     return {
       tipo_produto: {
@@ -1490,16 +1304,16 @@ export async function getCatalogoSubcategoria(
       },
       items: items.map((product) => mapApiProdutoToProduct(product, [], subcategoriaNome)),
       total: Number(firstData.total || items.length),
-      page: 1,
-      limit: items.length || limit,
-      totalPages: 1,
+      page: Number(firstData.page || page),
+      limit: Number(firstData.limit || limit),
+      totalPages: Math.max(Number(firstData.totalPages || 1), 1),
     };
   }
 
   if (query.idCategoria) {
     const catalogo = await getCatalogoCategoria(query.idCategoria, {
       empresaId: query.empresaId || 1,
-      page: 1,
+      page,
       limit,
       subcategorias: String(idSubcategoria),
     });
@@ -1545,12 +1359,15 @@ export async function getCatalogoSubcategoria(
 
 export async function searchProdutosSiteWithDestination(
   query: string,
-  limit = 10
+  limit = 10,
+  page = 1
 ): Promise<SearchProdutosSiteResult> {
   const search = query.trim();
+  const safePage = sanitizeCatalogPage(page);
+  const safeLimit = sanitizeWideCatalogLimit(limit);
 
   if (!search) {
-    return { products: [], destinoBusca: null };
+    return { products: [], destinoBusca: null, total: 0, page: 1, limit: safeLimit, totalPages: 0 };
   }
 
   const parseSearchData = (payload: unknown) =>
@@ -1570,6 +1387,10 @@ export async function searchProdutosSiteWithDestination(
     return {
       products: exactProduct ? [exactProduct] : [],
       destinoBusca: null,
+      total: exactProduct ? 1 : 0,
+      page: 1,
+      limit: 1,
+      totalPages: exactProduct ? 1 : 0,
       exactProduct,
       exactProductId: Number.isFinite(exactProductId) ? exactProductId : null,
       exactProductCode: data.codigo || null,
@@ -1595,7 +1416,7 @@ export async function searchProdutosSiteWithDestination(
   const payload = await apiRequest(
     `/produtos/site/busca?q=${encodeURIComponent(
       search
-    )}&empresaId=1&page=1&limit=${limit}`
+    )}&empresaId=1&page=${safePage}&limit=${safeLimit}`
   );
   const data = parseSearchData(payload);
   const exactResult = await resolveExactProduct(data);
@@ -1636,12 +1457,43 @@ export async function searchProdutosSiteWithDestination(
       }
 
       return a.title.localeCompare(b.title, "pt-BR", { sensitivity: "base" });
-    })
-    .slice(0, limit);
+    });
 
   return {
     products,
     destinoBusca: data?.destino_busca || null,
+    total: Number(data?.total || products.length || 0),
+    page: Number(data?.page || safePage),
+    limit: Number(data?.limit || safeLimit),
+    totalPages: Math.max(Number(data?.totalPages || (products.length ? 1 : 0)), 0),
+  };
+}
+
+export async function searchProdutosSiteCatalogo(
+  query: string,
+  options: Pick<CatalogoProdutosQuery, "page" | "limit"> = {}
+): Promise<CatalogoTipoProduto> {
+  const term = query.trim();
+  const result = await searchProdutosSiteWithDestination(
+    term,
+    options.limit || 24,
+    options.page || 1
+  );
+
+  return {
+    tipo_produto: {
+      id_empresa: 1,
+      id_tipo_produto: 0,
+      tipo_produto: term,
+      descricao: `Resultados encontrados para "${term}" com base no nome do produto.`,
+      habilitado: "S",
+    },
+    filtros: emptyCatalogoFiltros,
+    items: result.products,
+    total: result.total,
+    page: result.page,
+    limit: result.limit,
+    totalPages: result.totalPages,
   };
 }
 

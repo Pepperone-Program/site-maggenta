@@ -1,25 +1,15 @@
-"use client";
-
-import React, { useCallback } from "react";
+import React from "react";
 import Link from "next/link";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
-import ProductCode from "@/components/Common/ProductCode";
 import { Product } from "@/types/product";
 import { formatDisplayPrice, productPath } from "@/lib/products";
-import { minimumCartQuantity, useAddProductToCart } from "@/lib/hooks/useAddProductToCart";
+import ProductQuoteButton from "@/components/Shop/ProductQuoteButton";
 
 const ProductItem = ({ item }: { item: Product }) => {
-  const addProductToCart = useAddProductToCart();
   const href = productPath(item);
-
-  const handleAddToCart = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      event.preventDefault();
-      event.stopPropagation();
-      addProductToCart(item, minimumCartQuantity(item), { autoClosePreviewMs: 3000 });
-    },
-    [addProductToCart, item]
-  );
+  const normalizedCode = String(item.codigo || "").trim();
+  const primaryImage = item.imgs.previews[0];
+  const hoverImage = item.imgs.previews[1] || primaryImage;
 
   return (
     <div className="group flex h-full min-h-[430px] flex-col rounded-[28px] border border-transparent bg-white p-4 text-center shadow-[0_14px_34px_rgba(157,23,77,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-blue/45 hover:shadow-[0_20px_42px_rgba(157,23,77,0.14)]">
@@ -28,9 +18,10 @@ const ProductItem = ({ item }: { item: Product }) => {
           href={href}
           aria-label={`Ver detalhes de ${item.title}`}
           className="relative block h-full w-full"
+          prefetch={false}
         >
           <ImageWithFallback
-            src={item.imgs.previews[0]}
+            src={primaryImage}
             alt={item.title}
             fill
             sizes="(min-width: 1536px) 340px, (min-width: 1280px) 20vw, (min-width: 640px) 50vw, 100vw"
@@ -40,7 +31,7 @@ const ProductItem = ({ item }: { item: Product }) => {
             loading="lazy"
           />
           <ImageWithFallback
-            src={item.imgs.previews[1] || item.imgs.previews[0]}
+            src={hoverImage}
             alt={`${item.title} - segunda imagem`}
             fill
             sizes="(min-width: 1536px) 340px, (min-width: 1280px) 20vw, (min-width: 640px) 50vw, 100vw"
@@ -62,36 +53,35 @@ const ProductItem = ({ item }: { item: Product }) => {
           WebkitLineClamp: 2,
         }}
       >
-        <Link href={href}>{item.title}</Link>
+        <Link href={href} prefetch={false}>
+          {item.title}
+        </Link>
       </p>
 
-      <ProductCode
-        code={item.codigo}
-        className="mb-5 text-normal text-dark-4 transition-all hover:text-dark"
-      />
+      {normalizedCode && (
+        <span className="mb-5 text-normal text-dark-4 transition-all hover:text-dark">
+          Código: {normalizedCode}
+        </span>
+      )}
 
       {item.discountedPrice > 0 ? (
         <span className="mt-auto flex items-center justify-center gap-2 font-medium text-lg">
           <span className="text-dark">{formatDisplayPrice(item.discountedPrice)}</span>
           {item.price > 0 && (
-            <span className="text-dark-4 line-through">
-              {formatDisplayPrice(item.price)}
-            </span>
+            <span className="text-dark-4 line-through">{formatDisplayPrice(item.price)}</span>
           )}
         </span>
       ) : (
         <div className="mt-auto flex justify-center">
-          <button
-            type="button"
-            onClick={handleAddToCart}
+          <ProductQuoteButton
+            item={item}
+            autoClosePreviewMs={3000}
             className="inline-flex w-full justify-center rounded-full bg-blue px-6 py-2.5 text-custom-sm font-medium text-white shadow-[0_14px_30px_rgba(157,23,77,0.24)] duration-200 hover:bg-blue-dark"
-          >
-            Orçar
-          </button>
+          />
         </div>
       )}
     </div>
   );
 };
 
-export default React.memo(ProductItem);
+export default ProductItem;

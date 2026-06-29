@@ -39,10 +39,20 @@ const destinationPath = (
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("q") || "";
   const limit = Number(request.nextUrl.searchParams.get("limit") || 10);
-  const { products, destinoBusca, exactProduct, exactProductId, exactProductCode } =
-    await searchProdutosSiteWithDestination(
+  const requestedPage = Number(request.nextUrl.searchParams.get("page") || 1);
+  const {
+    products,
+    destinoBusca,
+    exactProduct,
+    exactProductId,
+    exactProductCode,
+    total,
+    page,
+    totalPages,
+  } = await searchProdutosSiteWithDestination(
     query,
-    Number.isFinite(limit) ? limit : 10
+    Number.isFinite(limit) ? limit : 10,
+    Number.isFinite(requestedPage) ? requestedPage : 1
   );
   const destinoPath = destinationPath(destinoBusca);
   const exactProductPath =
@@ -81,10 +91,10 @@ export async function GET(request: NextRequest) {
         : null,
       data: {
         items,
-        total: items.length,
-        page: 1,
-        limit,
-        totalPages: items.length ? 1 : 0,
+        total: exactProductPath ? 1 : total,
+        page,
+        limit: Number.isFinite(limit) ? limit : 10,
+        totalPages: exactProductPath ? 1 : totalPages,
       },
     },
     {

@@ -205,8 +205,18 @@ const CategoriasPage = async ({ params, searchParams }: PageProps) => {
   );
   const currentPath = `/categorias/${routeParams.slug || categoriaId}`;
 
-  if (currentPath !== canonicalPath || firstParam(query.page)) {
-    permanentRedirect(canonicalPath);
+  if (currentPath !== canonicalPath) {
+    const redirectParams = new URLSearchParams();
+
+    Object.entries(query).forEach(([key, value]) => {
+      const firstValue = firstParam(value);
+      if (firstValue) {
+        redirectParams.set(key, firstValue);
+      }
+    });
+
+    const redirectQuery = redirectParams.toString();
+    permanentRedirect(`${canonicalPath}${redirectQuery ? `?${redirectQuery}` : ""}`);
   }
 
   return (

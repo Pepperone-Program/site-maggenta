@@ -1,6 +1,5 @@
-"use client";
-
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { safeImageSrc } from "@/lib/images";
 
 type ImageWithFallbackProps = {
   src: string;
@@ -21,19 +20,7 @@ type ImageWithFallbackProps = {
 const fallbackImage = "/images/logo/logo.svg";
 
 const ImageWithFallback = ({ src, fill, style, ...props }: ImageWithFallbackProps) => {
-  const [hasError, setHasError] = useState(false);
-  const [currentSrc, setCurrentSrc] = useState(src);
-
-  useEffect(() => {
-    setHasError(false);
-    setCurrentSrc(src);
-  }, [src]);
-
   if (!src) {
-    return null;
-  }
-
-  if (hasError) {
     return null;
   }
 
@@ -52,7 +39,7 @@ const ImageWithFallback = ({ src, fill, style, ...props }: ImageWithFallbackProp
 
   return (
     <img
-      src={currentSrc}
+      src={safeImageSrc(src, fallbackImage)}
       alt={props.alt}
       width={props.width}
       height={props.height}
@@ -60,14 +47,6 @@ const ImageWithFallback = ({ src, fill, style, ...props }: ImageWithFallbackProp
       decoding="async"
       className={props.className}
       style={imageStyle}
-      onError={() => {
-        if (currentSrc !== fallbackImage) {
-          setCurrentSrc(fallbackImage);
-          return;
-        }
-
-        setHasError(true);
-      }}
     />
   );
 };
