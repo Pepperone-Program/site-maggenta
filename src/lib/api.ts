@@ -95,6 +95,15 @@ export type BannerApi = {
   tamanho_tela?: "desktop" | "mobile" | string | null;
 };
 
+type BannersAtivosResponse = {
+  items?: BannerApi[];
+  grouped?: Partial<Record<BannerTipo | string, BannerApi[]>>;
+  total?: number;
+  page?: number;
+  limit?: number;
+  totalPages?: number;
+};
+
 type ProdutoImageApi = {
   filename?: string;
   ordem?: number;
@@ -1599,8 +1608,14 @@ export async function getHomeCategories(): Promise<Category[]> {
 }
 
 export async function getActiveBanners(tipo?: BannerTipo): Promise<BannerApi[]> {
-  const query = tipo ? `?tipo=${encodeURIComponent(tipo)}` : "";
-  const banners = (await apiFetchAllPages<BannerApi>(`/banners/ativos${query}`, 100)) || [];
+  const payload = await apiRequest("/banners/ativos?page=1&limit=100");
+  const data =
+    payload && typeof payload === "object" && "data" in payload
+      ? (payload.data as BannersAtivosResponse)
+      : null;
+  const banners = tipo
+    ? data?.grouped?.[tipo] || data?.items?.filter((banner) => banner.tipo === tipo) || []
+    : data?.items || [];
 
   return banners
     .filter((banner) => banner.habilitado === "S" && isValidImageSrc(banner.url_banner))
