@@ -182,6 +182,7 @@ const ShopWithSidebar = ({
   dateOptions = [],
   pageTitle: customPageTitle,
   basePath = "/brindes-personalizados",
+  subcategoriesContextCategoryId,
 }: {
   catalogo?: CatalogoProdutos;
   products?: Product[];
@@ -191,6 +192,7 @@ const ShopWithSidebar = ({
   dateOptions?: CatalogoOption[];
   pageTitle?: string;
   basePath?: string;
+  subcategoriesContextCategoryId?: number;
 }) => {
   const router = useRouter();
   const [productStyle, setProductStyle] = useState("grid");
@@ -204,6 +206,7 @@ const ShopWithSidebar = ({
   );
   const activeCategoryId =
     parseInt(String(activeFilters.categoria || catalogo.categoria?.id_categoria || 1), 10) || 1;
+  const subcategoriesOriginCategoryId = subcategoriesContextCategoryId || activeCategoryId;
   const pageTitle = customPageTitle || `${categoryName} personalizados`;
   const items = products || catalogo.items;
   const selectedSubcategorias = useMemo(
@@ -416,8 +419,16 @@ const ShopWithSidebar = ({
     const subcategoryParam = selectedSubcategory
       ? friendlyPersonalizedParam(id, selectedSubcategory.label)
       : String(id);
+    const params = new URLSearchParams();
 
-    router.push(`/subcategorias/${encodeURIComponent(subcategoryParam)}`);
+    if (subcategoriesOriginCategoryId > 0) {
+      params.set("categoria", String(subcategoriesOriginCategoryId));
+    }
+
+    const query = params.toString();
+    router.push(
+      `/subcategorias/${encodeURIComponent(subcategoryParam)}${query ? `?${query}` : ""}`
+    );
   };
 
   const selectCategory = (id: number) => {

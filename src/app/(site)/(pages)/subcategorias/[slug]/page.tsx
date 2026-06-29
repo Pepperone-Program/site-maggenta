@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import { permanentRedirect } from "next/navigation";
 import ShopWithSidebar from "@/components/ShopWithSidebar";
 import {
+  getCatalogoCategoria,
   getCatalogoCategorias,
   getCatalogoSubcategoriaProdutos,
   getDatasPromocionais,
@@ -86,12 +87,34 @@ const SubcategoriaPage = async ({ params, searchParams }: PageProps) => {
   const subcategoriaName = titleFromSlug(slug) || "Subcategoria";
   const page = toNumber(firstParam(query.page)) || 1;
   const limit = toNumber(firstParam(query.limit)) || 24;
+  const categoriaIdFromQuery = toNumber(firstParam(query.categoria));
   const [catalogo, categorias, publicosAlvos, datasPromocionais] = await Promise.all([
-    getCatalogoSubcategoriaProdutos(subcategoriaId, subcategoriaName, { page, limit }),
+    getCatalogoSubcategoriaProdutos(subcategoriaId, subcategoriaName, {
+      page,
+      limit,
+      idCategoria: categoriaIdFromQuery,
+    }),
     getCatalogoCategorias(),
     getPublicosAlvos(),
     getDatasPromocionais(),
   ]);
+  const parentCategoriaId = categoriaIdFromQuery || 0;
+  const parentCatalogo = parentCategoriaId
+    ? await getCatalogoCategoria(parentCategoriaId, { page: 1, limit: 24 })
+    : null;
+  const parentSubcategories = parentCatalogo?.filtros.subcategorias || [];
+  const parentContainsCurrentSubcategory = parentSubcategories.some(
+    (item) => item.id_subcategoria === subcategoriaId
+  );
+  const catalogoComFiltrosDaCategoria = parentCatalogo && parentContainsCurrentSubcategory
+    ? {
+        ...catalogo,
+        filtros: {
+          ...catalogo.filtros,
+          subcategorias: parentSubcategories,
+        },
+      }
+    : catalogo;
   const canonicalPath = subcategoryPath(subcategoriaId || 0, subcategoriaName);
   const currentPath = `/subcategorias/${slug}`;
 
@@ -112,9 +135,9 @@ const SubcategoriaPage = async ({ params, searchParams }: PageProps) => {
   return (
     <main>
       <ShopWithSidebar
-        catalogo={catalogo}
+        catalogo={catalogoComFiltrosDaCategoria}
         activeFilters={{
-          categoria: String(subcategoriaId || 1),
+          categoria: String(parentCategoriaId || 1),
           subcategorias: String(subcategoriaId || ""),
           limit: firstParam(query.limit) || "24",
         }}
@@ -123,6 +146,7 @@ const SubcategoriaPage = async ({ params, searchParams }: PageProps) => {
         dateOptions={datasPromocionais}
         pageTitle={`${subcategoriaName} personalizado`}
         basePath={canonicalPath}
+        subcategoriesContextCategoryId={parentCategoriaId || undefined}
       />
     </main>
   );

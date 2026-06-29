@@ -1244,7 +1244,7 @@ export async function getProdutosIdsBySubcategoria(idSubcategoria: number): Prom
 export async function getCatalogoSubcategoriaProdutos(
   idSubcategoria: number,
   subcategoriaNome = "Subcategoria",
-  query: Pick<CatalogoProdutosQuery, "empresaId" | "page" | "limit"> = {}
+  query: Pick<CatalogoProdutosQuery, "empresaId" | "page" | "limit"> & { idCategoria?: number } = {}
 ): Promise<CatalogoProdutos> {
   const catalogo = await getCatalogoSubcategoria(idSubcategoria, query);
 
@@ -1273,6 +1273,35 @@ export async function getCatalogoSubcategoria(
 ): Promise<CatalogoTipoProduto> {
   const page = sanitizeCatalogPage(query.page);
   const limit = sanitizeWideCatalogLimit(query.limit);
+
+  if (query.idCategoria) {
+    const catalogo = await getCatalogoCategoria(query.idCategoria, {
+      empresaId: query.empresaId || 1,
+      page,
+      limit,
+      subcategorias: String(idSubcategoria),
+    });
+    const subcategoriaNome =
+      catalogo.filtros.subcategorias.find((item) => item.id_subcategoria === idSubcategoria)
+        ?.subcategoria || catalogo.items[0]?.category || "Subcategoria";
+
+    return {
+      tipo_produto: {
+        id_empresa: 1,
+        id_tipo_produto: idSubcategoria,
+        tipo_produto: subcategoriaNome,
+        descricao: catalogo.categoria?.descricao || null,
+        habilitado: "S",
+      },
+      filtros: catalogo.filtros,
+      items: catalogo.items,
+      total: catalogo.total,
+      page: catalogo.page,
+      limit: catalogo.limit,
+      totalPages: catalogo.totalPages,
+    };
+  }
+
   const params = new URLSearchParams({
     empresaId: String(query.empresaId || 1),
     page: String(page),
@@ -1318,34 +1347,6 @@ export async function getCatalogoSubcategoria(
       page: Number(firstData.page || page),
       limit: Number(firstData.limit || limit),
       totalPages: Math.max(Number(firstData.totalPages || 1), 1),
-    };
-  }
-
-  if (query.idCategoria) {
-    const catalogo = await getCatalogoCategoria(query.idCategoria, {
-      empresaId: query.empresaId || 1,
-      page,
-      limit,
-      subcategorias: String(idSubcategoria),
-    });
-    const subcategoriaNome =
-      catalogo.filtros.subcategorias.find((item) => item.id_subcategoria === idSubcategoria)
-        ?.subcategoria || catalogo.items[0]?.category || "Subcategoria";
-
-    return {
-      tipo_produto: {
-        id_empresa: 1,
-        id_tipo_produto: idSubcategoria,
-        tipo_produto: subcategoriaNome,
-        descricao: catalogo.categoria?.descricao || null,
-        habilitado: "S",
-      },
-      filtros: catalogo.filtros,
-      items: catalogo.items,
-      total: catalogo.total,
-      page: catalogo.page,
-      limit: catalogo.limit,
-      totalPages: catalogo.totalPages,
     };
   }
 

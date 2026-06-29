@@ -236,6 +236,7 @@ const CategoriasPage = async ({ params, searchParams }: PageProps) => {
         publicOptions={publicosAlvos}
         dateOptions={datasPromocionais}
         basePath={canonicalPath}
+        subcategoriesContextCategoryId={categoriaId}
       />
     </main>
   );
