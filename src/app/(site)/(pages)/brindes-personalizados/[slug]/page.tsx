@@ -1,4 +1,4 @@
-import React from "react";
+import React, { cache } from "react";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import ShopDetails from "@/components/ShopDetails";
@@ -9,9 +9,10 @@ import {
 } from "@/lib/api";
 import { buildSeoOther, contextualKeywords, ogImageUrl, siteName, siteUrl } from "@/lib/seo";
 
-export const dynamic = "force-dynamic";
-export const fetchCache = "force-no-store";
+export const revalidate = 300;
 export const dynamicParams = true;
+
+const getCachedProdutoBySlug = cache(getProdutoBySlug);
 
 type ProductPageProps = {
   params: Promise<{
@@ -23,7 +24,7 @@ export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = await getProdutoBySlug(slug);
+  const product = await getCachedProdutoBySlug(slug);
 
   if (!product) {
     return {
@@ -122,7 +123,7 @@ export async function generateMetadata({
 
 const ProductPage = async ({ params }: ProductPageProps) => {
   const { slug } = await params;
-  const product = await getProdutoBySlug(slug);
+  const product = await getCachedProdutoBySlug(slug);
 
   if (!product) {
     redirect("/");

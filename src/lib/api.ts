@@ -2,6 +2,7 @@ import shopData from "@/components/Shop/shopData";
 import categoryData from "@/components/Home/Categories/categoryData";
 import { Product } from "@/types/product";
 import { Category } from "@/types/category";
+import { unstable_cache } from "next/cache";
 import { fetchWithTimeout } from "@/lib/timed-fetch";
 import { isValidImageSrc, safeImageSrc } from "@/lib/images";
 import {
@@ -1509,7 +1510,7 @@ export async function getProdutoBySlug(slug: string): Promise<Product | null> {
 }
 
 export async function getRelatedProducts(product: Product, limit = 4) {
-  const products = await getProdutosSite(100);
+  const products = await getProdutosSite(limit);
 
   return products
     .filter((item) => item.id !== product.id)
@@ -1638,7 +1639,7 @@ const toMenuItems = <T extends Record<string, unknown>>(
               : "/brindes-personalizados",
     }));
 
-export async function getMenuGroups(): Promise<ApiMenuGroup[]> {
+export const getMenuGroups = unstable_cache(async (): Promise<ApiMenuGroup[]> => {
   const menuRequestInit: RequestInit = {};
   const [categorias, tipos, publicos, datas] = await Promise.all([
     getCatalogoCategorias(menuRequestInit),
@@ -1698,4 +1699,4 @@ export async function getMenuGroups(): Promise<ApiMenuGroup[]> {
       })),
     },
   ];
-}
+}, ["menu-groups"], { revalidate: 3600 });
