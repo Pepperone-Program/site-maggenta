@@ -2,6 +2,10 @@
 const path = require("path");
 
 const apiUrl = process.env.NEXT_API_URL;
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.maggenta.com.br").replace(
+  /\/$/,
+  ""
+);
 
 const apiRemotePattern = (() => {
   if (!apiUrl) {
@@ -26,8 +30,6 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   async redirects() {
-    const canonicalHost = "www.maggenta.com.br";
-
     return [
       {
         source: "/:path*",
@@ -37,18 +39,7 @@ const nextConfig = {
             value: "maggenta.com.br",
           },
         ],
-        destination: `https://${canonicalHost}/:path*`,
-        permanent: true,
-      },
-      {
-        source: "/:path*",
-        has: [
-          {
-            type: "host",
-            value: "site-peppeerone.vercel.app",
-          },
-        ],
-        destination: `https://${canonicalHost}/:path*`,
+        destination: `${siteUrl}/:path*`,
         permanent: true,
       },
       {

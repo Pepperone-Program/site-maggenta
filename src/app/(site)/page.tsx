@@ -16,8 +16,6 @@ export const metadata: Metadata = {
     "empresa de brindes",
     "brindes premium personalizados",
     "loja de brindes personalizados",
-    "peperone brindes",
-    "pepperoni brindes",
   ]),
   alternates: {
     canonical: "/",

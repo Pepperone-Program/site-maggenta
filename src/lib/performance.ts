@@ -1,4 +1,4 @@
-// Performance optimization strategies for Pepperone
+// Performance optimization strategies for Maggenta
 
 import React from "react";
 

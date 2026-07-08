@@ -74,7 +74,7 @@ export const persistAttribution = (attribution: AttributionParams) => {
     return;
   }
 
-  window.localStorage.setItem("pepperone_attribution", JSON.stringify(attribution));
+  window.localStorage.setItem("maggenta_attribution", JSON.stringify(attribution));
 };
 
 export const getPersistedAttribution = (): AttributionParams => {
@@ -82,7 +82,7 @@ export const getPersistedAttribution = (): AttributionParams => {
     return {};
   }
 
-  const raw = window.localStorage.getItem("pepperone_attribution");
+  const raw = window.localStorage.getItem("maggenta_attribution");
 
   if (!raw) {
     return {};

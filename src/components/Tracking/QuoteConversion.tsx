@@ -33,6 +33,10 @@ const readConversionCustomer = (): ConversionCustomer | null => {
 
 const QuoteConversion = () => {
   useEffect(() => {
+    if (!googleAdsConversionLabel) {
+      return;
+    }
+
     const conversionWindow = window as GtagWindow;
 
     if (typeof conversionWindow.gtag !== "function") {

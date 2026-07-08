@@ -20,8 +20,8 @@ import {
   trackEvent,
 } from "@/lib/tracking";
 
-const ROUTE_STORAGE_KEY = "pepperone:last-internal-route";
-const QUOTE_CUSTOMER_STORAGE_KEY = "pepperone:quote-customer";
+const ROUTE_STORAGE_KEY = "maggenta:last-internal-route";
+const QUOTE_CUSTOMER_STORAGE_KEY = "maggenta:quote-customer";
 const DEFAULT_RETURN_ROUTE = "/brindes-para-empresas";
 
 const fields = [

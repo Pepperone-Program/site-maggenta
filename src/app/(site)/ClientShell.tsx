@@ -1,7 +1,6 @@
 "use client";
 
 import { ReactNode, Suspense, useEffect, useState } from "react";
-import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
 import Header, { type HeaderMenuGroup } from "../../components/Header";
 import { CartModalProvider } from "../context/CartSidebarModalContext";
@@ -16,8 +15,8 @@ import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-const ROUTE_STORAGE_KEY = "pepperone:last-internal-route";
-const ROUTE_CURRENT_KEY = "pepperone:current-internal-route";
+const ROUTE_STORAGE_KEY = "maggenta:last-internal-route";
+const ROUTE_CURRENT_KEY = "maggenta:current-internal-route";
 
 const RouteHistoryTracker = () => {
   const pathname = usePathname();
@@ -60,13 +59,10 @@ const ClientShell = ({
 
   return (
     <>
-      <MarketingPixels />
+      <Suspense fallback={null}>
+        <MarketingPixels />
+      </Suspense>
       <ClarityInit />
-      <Script
-        async
-        src="https://integrazap.com.br/gadget-v.1/wapp-flutuante.js?x=019d7ce4c9075179faf49505675e4494&y=349319781679&z=maggenta.com.br"
-        strategy="afterInteractive"
-      />
       <Analytics/>
       <QueryClientProvider client={queryClient}>
         <ReduxProvider>

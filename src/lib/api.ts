@@ -1111,6 +1111,26 @@ export async function getCatalogoCategorias(
     .filter((category) => Number.isFinite(category.id) && category.title);
 }
 
+export async function getCatalogoTiposProdutos(
+  init: RequestInit = {}
+): Promise<CatalogoOption[]> {
+  const tipos =
+    (await fetchAllFirstAvailable<(typeof mockTiposProdutos)[number]>([
+      "/tipos-produtos/habilitados",
+      "/tipos_produtos/habilitados",
+      "/tiposProdutos/habilitados",
+    ], 100, init)) || mockTiposProdutos;
+
+  return tipos
+    .filter((tipo) => isEnabled(tipo.habilitado))
+    .sort(sortByOrderAndName("tipo_produto"))
+    .map((tipo) => ({
+      id: Number(tipo.id_tipo_produto),
+      title: String(tipo.tipo_produto),
+    }))
+    .filter((tipo) => Number.isFinite(tipo.id) && tipo.title);
+}
+
 export async function getDatasPromocionais(
   init: RequestInit = {}
 ): Promise<CatalogoOption[]> {
@@ -1622,46 +1642,11 @@ export async function getActiveBanners(tipo?: BannerTipo): Promise<BannerApi[]> 
     .sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
 }
 
-const toMenuItems = <T extends Record<string, unknown>>(
-  data: T[],
-  idKey: keyof T,
-  titleKey: keyof T,
-  filterKey: string
-) =>
-  data
-    .filter((item) => isEnabled(item.habilitado as ApiFlag))
-    .map((item) => ({
-      id: String(item[idKey]),
-      title: String(item[titleKey]),
-      path:
-        filterKey === "categoria"
-          ? `/categorias/${encodeURIComponent(
-              friendlyPersonalizedParam(String(item[idKey]), String(item[titleKey]))
-            )}`
-        : filterKey === "publico"
-            ? `/publicos-alvos/${encodeURIComponent(
-                friendlyParam(String(item[idKey]), String(item[titleKey]))
-              )}`
-            : filterKey === "data"
-              ? `/datas-promocionais/${encodeURIComponent(
-                  friendlyParam(String(item[idKey]), String(item[titleKey]))
-                )}`
-              : filterKey === "tipo"
-                ? `/brindes-para-empresas/${encodeURIComponent(
-                    friendlyPersonalizedParam(String(item[idKey]), String(item[titleKey]))
-                  )}`
-              : "/brindes-personalizados",
-    }));
-
 export const getMenuGroups = unstable_cache(async (): Promise<ApiMenuGroup[]> => {
   const menuRequestInit: RequestInit = {};
   const [categorias, tipos, publicos, datas] = await Promise.all([
     getCatalogoCategorias(menuRequestInit),
-    fetchAllFirstAvailable<(typeof mockTiposProdutos)[number]>([
-      "/tipos-produtos/habilitados",
-      "/tipos_produtos/habilitados",
-      "/tiposProdutos/habilitados",
-    ], 100, menuRequestInit),
+    getCatalogoTiposProdutos(menuRequestInit),
     getPublicosAlvos(menuRequestInit),
     getDatasPromocionais(menuRequestInit),
   ]);
@@ -1683,7 +1668,13 @@ export const getMenuGroups = unstable_cache(async (): Promise<ApiMenuGroup[]> =>
       id: "brindes",
       title: "Brindes",
       path: "/brindes-para-empresas",
-      items: toMenuItems(tipos || mockTiposProdutos, "id_tipo_produto", "tipo_produto", "tipo"),
+      items: tipos.map((tipo) => ({
+        id: String(tipo.id),
+        title: tipo.title,
+        path: `/brindes-para-empresas/${encodeURIComponent(
+          friendlyPersonalizedParam(tipo.id, tipo.title)
+        )}`,
+      })),
     },
     {
       id: "lancamentos",

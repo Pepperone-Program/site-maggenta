@@ -6,7 +6,6 @@ import ClientShell from "./ClientShell";
 import Footer from "@/components/Footer";
 import { getMenuGroups } from "@/lib/api";
 import { buildSeoOther, marketKeywords, ogImageUrl, siteName, siteUrl } from "@/lib/seo";
-import { googleAdsId, googleAnalyticsId, googleTagManagerId } from "@/lib/google-tags";
 
 const defaultTitle = "Brindes Personalizados | Maggenta Brindes ";
 const defaultDescription =
@@ -121,40 +120,6 @@ export default async function RootLayout({
       <head>
         <link rel="alternate" type="text/plain" href="/llms.txt" title="LLMs.txt" />
         <script
-          id="google-tag-manager-init"
-          dangerouslySetInnerHTML={{
-            __html: `window.dataLayer = window.dataLayer || []; window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });`,
-          }}
-        />
-        <script
-          id="google-tag-manager"
-          async
-          src={`https://www.googletagmanager.com/gtm.js?id=${googleTagManagerId}`}
-        />
-        <script
-          id="google-analytics"
-          async
-          src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`}
-        />
-        <script
-          id="google-ads-aw-928315079"
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=AW-928315079"
-        />
-        <script
-          id="google-analytics-init"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${googleAnalyticsId}');
-              gtag('config', '${googleAdsId}');
-              gtag('config', 'AW-928315079');
-            `,
-          }}
-        />
-        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify([organizationSchema, websiteSchema]),
@@ -162,14 +127,6 @@ export default async function RootLayout({
         />
       </head>
       <body>
-        <noscript>
-          <iframe
-            src={`https://www.googletagmanager.com/ns.html?id=${googleTagManagerId}`}
-            height="0"
-            width="0"
-            style={{ display: "none", visibility: "hidden" }}
-          />
-        </noscript>
         <ClientShell initialMenuGroups={initialMenuGroups}>{children}</ClientShell>
         <Footer />
       </body>

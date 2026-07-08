@@ -1,4 +1,4 @@
-﻿const siteUrl = "https://www.maggenta.com.br";
+import { siteUrl } from "@/lib/seo";
 
 export const revalidate = 86400;
 

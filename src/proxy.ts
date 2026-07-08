@@ -1,6 +1,11 @@
 ﻿import { NextResponse, type NextRequest } from "next/server";
 
-const canonicalHost = "www.maggenta.com.br";
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.maggenta.com.br").replace(
+  /\/$/,
+  ""
+);
+const canonicalUrl = new URL(siteUrl);
+const canonicalHost = canonicalUrl.hostname;
 const legacyAssetPrefixes = [
   "/content/stream/",
   "/static/uploads/",
@@ -14,11 +19,10 @@ export function proxy(request: NextRequest) {
   const homeUrl = new URL("/", request.url);
 
   if (
-    request.nextUrl.hostname === "maggenta.com.br" ||
-    request.nextUrl.hostname === "site-peppeerone.vercel.app"
+    request.nextUrl.hostname === "maggenta.com.br"
   ) {
     url.hostname = canonicalHost;
-    url.protocol = "https";
+    url.protocol = canonicalUrl.protocol.replace(":", "");
     return NextResponse.redirect(url, 308);
   }
 

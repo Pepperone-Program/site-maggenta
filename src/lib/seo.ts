@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { friendlyPersonalizedParam } from "@/lib/slugs";
 
-export const siteUrl = "https://www.maggenta.com.br";
+const normalizeSiteUrl = (value?: string) =>
+  (value || "https://www.maggenta.com.br").replace(/\/$/, "");
+
+export const siteUrl = normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL);
 export const siteName = "Maggenta Brindes";
 export const seoAuthor = "Maggenta Brindes Personalizados";
 
@@ -39,8 +42,6 @@ export const prioritySeoKeywords = [
   "empresa de brindes",
   "brindes premium personalizados",
   "loja de brindes personalizados",
-  "peperone brindes",
-  "pepperoni brindes",
 ];
 
 export const marketKeywords = uniqueSeoKeywords([

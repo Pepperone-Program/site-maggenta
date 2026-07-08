@@ -14,7 +14,7 @@ const ClarityInit = () => {
       const { default: Clarity } = await import("@microsoft/clarity");
 
       Clarity.init(projectId);
-      Clarity.setTag("site", "pepperone");
+      Clarity.setTag("site", "maggenta");
       Clarity.setTag("funnel", "orcamento");
     };
 
