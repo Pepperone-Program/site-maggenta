@@ -14,7 +14,9 @@ const defaultOgImage = ogImageUrl({
   title: "Maggenta Brindes",
   subtitle: "Brindes corporativos personalizados para empresas",
 });
-const siteIcon = "/images/logo/Simbolo-maggenta.png";
+const faviconIcon = "/favicon.ico?v=20260710";
+const siteIcon = "/icon.png?v=20260710";
+const appleIcon = "/apple-icon.png?v=20260710";
 const brandLogo = "/images/logo/NOVO_LOGO_MAGG_HORIZONTAL_COR.png";
 const organizationSchema = {
   "@context": "https://schema.org",
@@ -69,19 +71,23 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
+        url: faviconIcon,
+        type: "image/x-icon",
+      },
+      {
         url: siteIcon,
         type: "image/png",
       },
     ],
     shortcut: [
       {
-        url: siteIcon,
-        type: "image/png",
+        url: faviconIcon,
+        type: "image/x-icon",
       },
     ],
     apple: [
       {
-        url: siteIcon,
+        url: appleIcon,
         type: "image/png",
       },
     ],
@@ -141,9 +147,10 @@ export default async function RootLayout({
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <link rel="alternate" type="text/plain" href="/llms.txt" title="LLMs.txt" />
+        <link rel="icon" href={faviconIcon} sizes="any" />
         <link rel="icon" href={siteIcon} type="image/png" />
-        <link rel="shortcut icon" href={siteIcon} type="image/png" />
-        <link rel="apple-touch-icon" href={siteIcon} />
+        <link rel="shortcut icon" href={faviconIcon} />
+        <link rel="apple-touch-icon" href={appleIcon} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
