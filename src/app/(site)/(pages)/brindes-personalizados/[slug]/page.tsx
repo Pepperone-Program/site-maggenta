@@ -39,7 +39,8 @@ export async function generateMetadata({
     : new URL("/images/logo/logo.svg", siteUrl).toString();
   const productCode = product.codigo || String(product.id);
   const description = `Encontre ${product.title} e muito mais ${productCode}. Veja aqui`;
-  const title = `${product.title} - ${productCode} - ${product.title} | Maggenta Brindes`;
+  const shareTitle = `${product.title} - ${productCode}`;
+  const title = `${shareTitle} | Maggenta Brindes`;
 
   return {
     title: {
@@ -73,7 +74,7 @@ export async function generateMetadata({
       },
     },
     openGraph: {
-      title: product.title,
+      title: shareTitle,
       description,
       type: "website",
       url: canonical,
@@ -82,7 +83,7 @@ export async function generateMetadata({
       images: [
         {
           url: image,
-          alt: product.title,
+          alt: shareTitle,
           width: 1200,
           height: 1200,
         },
@@ -90,7 +91,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: product.title,
+      title: shareTitle,
       description,
       images: [image],
     },

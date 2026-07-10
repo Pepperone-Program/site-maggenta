@@ -14,6 +14,7 @@ const defaultOgImage = ogImageUrl({
   title: "Maggenta Brindes",
   subtitle: "Brindes corporativos personalizados para empresas",
 });
+const siteIcon = "/images/logo/Simbolo-maggenta.png";
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
@@ -64,6 +65,26 @@ export const metadata: Metadata = {
   description: defaultDescription,
   keywords: marketKeywords,
   applicationName: siteName,
+  icons: {
+    icon: [
+      {
+        url: siteIcon,
+        type: "image/png",
+      },
+    ],
+    shortcut: [
+      {
+        url: siteIcon,
+        type: "image/png",
+      },
+    ],
+    apple: [
+      {
+        url: siteIcon,
+        type: "image/png",
+      },
+    ],
+  },
   verification: {
     google: "mgvzGTTx3EwBN_LTzrGsWq3yl0ClkS3KGvwLkNC-lU4",
   },
@@ -119,6 +140,9 @@ export default async function RootLayout({
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <link rel="alternate" type="text/plain" href="/llms.txt" title="LLMs.txt" />
+        <link rel="icon" href={siteIcon} type="image/png" />
+        <link rel="shortcut icon" href={siteIcon} type="image/png" />
+        <link rel="apple-touch-icon" href={siteIcon} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
