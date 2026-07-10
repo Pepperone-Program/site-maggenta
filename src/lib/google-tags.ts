@@ -16,7 +16,10 @@ export const googleAdsId = publicEnv(
   "AW-928315079"
 );
 export const googleAdsConversionLabel =
-  publicEnv(process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL);
+  publicEnv(
+    process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL,
+    "9-1dCN-r480cEMft07oD"
+  );
 export const bingUetId = publicEnv(
   process.env.NEXT_PUBLIC_BING_UET_ID,
   "187200970"
