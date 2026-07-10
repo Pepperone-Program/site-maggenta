@@ -16,7 +16,7 @@ const Footer = () => {
         <div>
           <Link href="/" aria-label="Maggenta">
             <img
-              src="/images/logo/logo.svg?v=20260623"
+              src="/images/logo/NOVO_LOGO_MAGG_HORIZONTAL_COR.png"
               alt="Maggenta"
               width={160}
               height={40}

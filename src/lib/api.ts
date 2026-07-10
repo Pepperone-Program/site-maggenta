@@ -633,6 +633,34 @@ const withUnit = (value: string | number | null | undefined, unit: string) => {
   return text.toLowerCase().endsWith(unit.toLowerCase()) ? text : `${text} ${unit}`;
 };
 
+const decimalText = (value: string | number | null | undefined) => {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+
+  const numeric = Number(String(value).replace(",", "."));
+
+  if (!Number.isFinite(numeric) || numeric <= 0) {
+    return undefined;
+  }
+
+  return numeric.toFixed(1);
+};
+
+const integerText = (value: string | number | null | undefined) => {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+
+  const numeric = Number(String(value).replace(",", "."));
+
+  if (!Number.isFinite(numeric) || numeric <= 0) {
+    return undefined;
+  }
+
+  return String(Math.round(numeric));
+};
+
 export const mapApiProdutoToProduct = (
   product: ProdutoApi,
   images: ProdutoImageApi[] = [],
@@ -708,6 +736,12 @@ export const mapApiProdutoToProduct = (
     reviews: 0,
     price: 0,
     discountedPrice: 0,
+    dimensions: {
+      altura: decimalText(product.altura),
+      largura: decimalText(product.largura),
+      profundidade: decimalText(product.profundidade),
+      peso: integerText(product.peso),
+    },
     badge,
     dataInclusao: product.data_inclusao || undefined,
     lancamento: isYes(product.lancamento),
@@ -1566,6 +1600,9 @@ export async function getProductSections() {
           : null;
       })
       .filter(Boolean) as Product[] | undefined;
+  const mostQuotedItems = mostQuoted || [];
+  const mostQuotedFallbackProducts =
+    mostQuotedItems.length < 10 ? await getProdutos(30) : [];
 
   const recent = [...products].sort(
     (a, b) =>
@@ -1573,39 +1610,60 @@ export async function getProductSections() {
       new Date(a.dataInclusao || 0).getTime()
   );
 
-  const sectionFallback = (items: Product[], offset = 0) =>
-    (items.length ? items : products.slice(offset, offset + 8)).slice(0, 8);
+  const uniqueProducts = (items: Product[]) => {
+    const seen = new Set<number>();
+
+    return items.filter((product) => {
+      if (seen.has(product.id)) {
+        return false;
+      }
+
+      seen.add(product.id);
+      return true;
+    });
+  };
+  const fillSectionProducts = (
+    items: Product[],
+    target = 8,
+    fallbackOffset = 0,
+    extraFallback: Product[] = []
+  ) =>
+    uniqueProducts([
+      ...items,
+      ...extraFallback,
+      ...products.slice(fallbackOffset),
+    ]).slice(0, target);
 
   return [
     {
       id: "recentes",
       eyebrow: "Novidades",
       title: "Produtos mais recentes",
-      products: sectionFallback(recent),
+      products: fillSectionProducts(recent),
     },
     {
       id: "mais-orcados",
       eyebrow: "Mais Pedidos",
       title: "Mais Procurados",
-      products: sectionFallback(mostQuoted || [], 1),
+      products: fillSectionProducts(mostQuotedItems, 10, 1, mostQuotedFallbackProducts),
     },
     {
       id: "lancamentos",
       eyebrow: "Lançamentos",
       title: "Lançamentos",
-      products: sectionFallback(products.filter((product) => product.lancamento), 2),
+      products: fillSectionProducts(products.filter((product) => product.lancamento), 8, 2),
     },
     {
       id: "promocao",
       eyebrow: "Promoção",
       title: "Produtos em promoção",
-      products: sectionFallback(products.filter((product) => product.promocao), 3),
+      products: fillSectionProducts(products.filter((product) => product.promocao), 8, 3),
     },
     {
       id: "premium",
       eyebrow: "Linha premium",
       title: "Produtos premium",
-      products: sectionFallback(products.filter((product) => product.premium), 4),
+      products: fillSectionProducts(products.filter((product) => product.premium), 8, 4),
     },
   ];
 }

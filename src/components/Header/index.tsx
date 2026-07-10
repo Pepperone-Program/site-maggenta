@@ -377,13 +377,13 @@ const Header = ({
 
       <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
         <div
-          className={`relative grid grid-cols-[auto_1fr_auto] items-center gap-4 transition-all duration-200 sm:grid-cols-[auto_1fr_auto] xl:grid-cols-[auto_1fr_auto] ${
+          className={`relative grid grid-cols-[auto_1fr_auto] items-center gap-4 transition-all duration-200 ${
             stickyMenu ? "py-3" : "py-4"
           }`}
         >
           <Link className="flex-shrink-0 sm:flex-shrink-0 xl:flex-shrink-0" href="/" aria-label="Maggenta">
             <img
-              src="/images/logo/logo.svg?v=20260623"
+              src="/images/logo/NOVO_LOGO_MAGG_HORIZONTAL_COR.png"
               alt="Maggenta"
               width={190}
               height={32}
@@ -392,12 +392,12 @@ const Header = ({
           </Link>
 
           <nav
-            className={`absolute left-0 right-0 top-full w-full flex-col rounded-b-[28px] border-none border-gray-3 bg-white p-0 shadow-2 sm:static sm:block sm:w-auto sm:translate-x-0 sm:translate-y-0 sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none ${
+            className={`absolute left-0 right-0 top-full w-full flex-col rounded-b-[28px] border-none border-gray-3 bg-white p-0 shadow-2 min-[1200px]:static min-[1200px]:block min-[1200px]:w-auto min-[1200px]:translate-x-0 min-[1200px]:translate-y-0 min-[1200px]:border-0 min-[1200px]:bg-transparent min-[1200px]:p-0 min-[1200px]:shadow-none ${
             
               navigationOpen ? "flex" : "hidden"
             }`}
           >
-            <ul className="flex flex-col gap-5 px-2 py-3 sm:flex-row sm:px-0 sm:py-0 sm:items-center sm:justify-center sm:gap-9">
+            <ul className="flex flex-col gap-5 px-2 py-3 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-center min-[1200px]:gap-9 min-[1200px]:px-0 min-[1200px]:py-0">
               {menuGroups.map((menuItem) => (
                 <li
                   key={menuItem.id}
@@ -434,9 +434,9 @@ const Header = ({
 
                           toggleMenu(menuItem.id);
                         }}
-                        className="flex min-h-11 items-center gap-1 py-2 text-left text-sm font-medium text-dark hover:text-blue sm:min-h-0 sm:py-0"
+                        className="flex min-h-11 items-center gap-1 py-2 text-left text-sm font-medium text-dark hover:text-blue min-[1200px]:min-h-0 min-[1200px]:py-0"
                       >
-                        <span className="relative before:absolute before:left-0 before:-top-2 before:h-[3px] before:w-0 before:rounded-b-[3px] before:bg-blue before:duration-200 sm:group-hover:before:w-full">
+                        <span className="relative before:absolute before:left-0 before:-top-2 before:h-[3px] before:w-0 before:rounded-b-[3px] before:bg-blue before:duration-200 min-[1200px]:group-hover:before:w-full">
                           {menuItem.title}
                         </span>
                       </button>
@@ -446,12 +446,12 @@ const Header = ({
                         onMouseLeave={closeMenu}
                         data-active={activeMenuId === menuItem.id ? "true" : undefined}
                         data-dropdown-id={menuItem.id}
-                        className={`static pt-0 sm:absolute sm:left-[calc(50%+140px)] sm:top-full sm:z-9999 sm:w-auto sm:max-w-[calc(100vw-32px)] sm:-translate-x-1/2 sm:pt-0 ${
+                        className={`static pt-0 min-[1200px]:absolute min-[1200px]:left-[calc(50%+140px)] min-[1200px]:top-full min-[1200px]:z-9999 min-[1200px]:w-auto min-[1200px]:max-w-[calc(100vw-32px)] min-[1200px]:-translate-x-1/2 min-[1200px]:pt-0 ${
                           activeMenuId === menuItem.id ? "block" : "hidden"
                         }`}
                       >
-                        <div className="mt-0 overflow-x-auto rounded-2xl border border-gray-3 bg-white p-2 pt-0 shadow-2 sm:rounded-[24px] sm:px-8 sm:py-7 sm:pt-7">
-                          <div className="flex flex-col gap-x-12 gap-y-1 sm:flex-row">
+                        <div className="mt-0 overflow-x-auto rounded-2xl border border-gray-3 bg-white p-2 pt-0 shadow-2 min-[1200px]:rounded-[24px] min-[1200px]:px-8 min-[1200px]:py-7 min-[1200px]:pt-7">
+                          <div className="flex flex-col gap-x-12 gap-y-1 min-[1200px]:flex-row">
                             {menuColumns(menuItem.items, 16).map((column, columnIndex) => (
                               <ul
                                 key={`${menuItem.id}-${columnIndex}`}
@@ -465,7 +465,7 @@ const Header = ({
                                         setNavigationOpen(false);
                                         setActiveMenuId(null);
                                       }}
-                                      className="block min-h-11 rounded-full px-3 py-1 text-sm font-light uppercase text-dark hover:bg-gray-1 hover:text-blue sm:min-h-0 sm:text-xs"
+                                      className="block min-h-11 rounded-full px-3 py-1 text-sm font-light uppercase text-dark hover:bg-gray-1 hover:text-blue min-[1200px]:min-h-0 min-[1200px]:text-xs"
                                     >
                                       {item.title}
                                     </Link>
@@ -481,7 +481,7 @@ const Header = ({
                     <Link
                       href={menuItem.path || "/"}
                       onClick={() => setNavigationOpen(false)}
-                      className="relative flex min-h-11 items-center py-2 text-sm font-medium text-dark hover:text-blue before:absolute before:left-0 before:-top-2 before:h-[3px] before:w-0 before:rounded-b-[3px] before:bg-blue before:duration-200 sm:min-h-0 sm:hover:before:w-full sm:py-0"
+                      className="relative flex min-h-11 items-center py-2 text-sm font-medium text-dark hover:text-blue before:absolute before:left-0 before:-top-2 before:h-[3px] before:w-0 before:rounded-b-[3px] before:bg-blue before:duration-200 min-[1200px]:min-h-0 min-[1200px]:py-0 min-[1200px]:hover:before:w-full"
                     >
                       {menuItem.title}
                     </Link>
@@ -587,7 +587,7 @@ const Header = ({
 
             <a
               href="tel:+551122876444"
-              className="hidden min-w-max flex-col leading-tight text-blue lg:flex"
+              className="hidden min-w-max flex-col leading-tight text-blue min-[1200px]:flex"
               aria-label="Ligue para Maggenta Brindes"
             >
               <span className="text-xs font-medium text-blue/80">Ligue-nos agora</span>
@@ -627,7 +627,7 @@ const Header = ({
 
             <button
               aria-label="Abrir menu"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-3 bg-white shadow-1 sm:hidden"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-3 bg-white shadow-1 min-[1200px]:hidden"
               onClick={() => setNavigationOpen((value) => !value)}
               type="button"
             >

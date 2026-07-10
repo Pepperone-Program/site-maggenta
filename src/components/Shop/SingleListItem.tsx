@@ -3,6 +3,7 @@ import Link from "next/link";
 import { productPath } from "@/lib/products";
 import { Product } from "@/types/product";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
+import ProductSpecsSummary from "@/components/Common/ProductSpecsSummary";
 import ProductQuoteButton from "./ProductQuoteButton";
 
 const launchBadgeStyle = {
@@ -63,6 +64,11 @@ const SingleListItem = ({ item, badgeLabel }: SingleListItemProps) => {
               {item.title}
             </Link>
           </p>
+
+          <ProductSpecsSummary
+            dimensions={item.dimensions}
+            className="mb-2 items-center sm:items-start"
+          />
 
           {normalizedCode && (
             <span className="mb-4 text-custom-sm font-medium text-dark-4 duration-200 hover:text-dark">

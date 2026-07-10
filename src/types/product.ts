@@ -13,6 +13,12 @@ export type Product = {
     label: string;
     value: string;
   }[];
+  dimensions?: {
+    altura?: string;
+    largura?: string;
+    profundidade?: string;
+    peso?: string;
+  };
   reviews: number;
   price: number;
   discountedPrice: number;

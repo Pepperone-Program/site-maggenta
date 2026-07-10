@@ -4,6 +4,7 @@ import ImageWithFallback from "@/components/Common/ImageWithFallback";
 import { Product } from "@/types/product";
 import { formatDisplayPrice, productPath } from "@/lib/products";
 import ProductQuoteButton from "@/components/Shop/ProductQuoteButton";
+import ProductSpecsSummary from "@/components/Common/ProductSpecsSummary";
 
 const ProductItem = ({ item }: { item: Product }) => {
   const href = productPath(item);
@@ -57,6 +58,8 @@ const ProductItem = ({ item }: { item: Product }) => {
           {item.title}
         </Link>
       </p>
+
+      <ProductSpecsSummary dimensions={item.dimensions} className="mb-2" />
 
       {normalizedCode && (
         <span className="mb-5 text-normal text-dark-4 transition-all hover:text-dark">

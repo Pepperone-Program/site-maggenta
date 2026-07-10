@@ -16,7 +16,6 @@ type QuotePayload = {
 };
 
 const requiredFields = [
-  "contato",
   "email",
 ];
 

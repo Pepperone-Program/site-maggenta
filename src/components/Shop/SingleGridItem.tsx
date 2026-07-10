@@ -5,6 +5,7 @@ import { productPath } from "@/lib/products";
 import { Product } from "@/types/product";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
 import { formatReviewCount, productReviewCount } from "@/lib/reviews";
+import ProductSpecsSummary from "@/components/Common/ProductSpecsSummary";
 import ProductQuoteButton from "./ProductQuoteButton";
 
 const launchBadgeStyle = {
@@ -87,6 +88,8 @@ const SingleGridItem = ({ item, badgeLabel }: SingleGridItemProps) => {
           {item.title}
         </Link>
       </p>
+
+      <ProductSpecsSummary dimensions={item.dimensions} className="mb-2 text-center" />
 
       {normalizedCode && (
         <span className="mb-3 text-center text-custom-sm font-medium text-dark-4 duration-200 hover:text-dark">

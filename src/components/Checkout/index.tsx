@@ -26,7 +26,7 @@ const DEFAULT_RETURN_ROUTE = "/brindes-para-empresas";
 
 const fields = [
   { name: "fantasia", label: "Empresa ou nome", placeholder: "Ex.: Maggenta Brindes", required: false },
-  { name: "contato", label: "Contato", placeholder: "Nome do responsável", required: true },
+  { name: "contato", label: "Contato", placeholder: "Nome do responsável", required: false },
   { name: "email", label: "E-mail", type: "email", placeholder: "vendas@empresa.com.br", required: true },
   { name: "tel", label: "Telefone", placeholder: "(11) 99999-9999", required: false },
   { name: "endereco", label: "Endereço", placeholder: "Rua, avenida ou travessa", required: false },

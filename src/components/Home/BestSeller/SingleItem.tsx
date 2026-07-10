@@ -8,6 +8,7 @@ import Link from "next/link";
 import { addItemToWishlist } from "@/redux/features/wishlist-slice";
 import { formatPrice, productPath } from "@/lib/products";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
+import ProductSpecsSummary from "@/components/Common/ProductSpecsSummary";
 import { minimumCartQuantity, useAddProductToCart } from "@/lib/hooks/useAddProductToCart";
 
 const SingleItem = ({ item }: { item: Product }) => {
@@ -74,6 +75,8 @@ const SingleItem = ({ item }: { item: Product }) => {
           <h3 className="font-medium text-dark ease-out duration-200 hover:text-blue mb-1.5">
             <Link href={productPath(item)}> {item.title} </Link>
           </h3>
+
+          <ProductSpecsSummary dimensions={item.dimensions} className="mb-2" />
 
           <span className="flex items-center justify-center gap-2 font-medium text-lg">
             <span className="text-dark">{formatPrice(item.discountedPrice)}</span>
