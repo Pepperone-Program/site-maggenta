@@ -611,7 +611,7 @@ const ensureProductImages = (images: string[], fallback: string) => {
   const validImages = uniqueValidImages(images);
   const safeFallback = isValidImageSrc(fallback)
     ? fallback
-    : "/images/logo/logo.svg";
+    : "/images/logo/NOVO_LOGO_MAGG_HORIZONTAL_COR.png";
 
   if (validImages.length >= 2) {
     return validImages;

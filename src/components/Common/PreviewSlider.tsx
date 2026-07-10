@@ -105,7 +105,7 @@ const PreviewSliderModal = () => {
               className="max-h-[82vh] w-auto object-contain"
             />
             <Image
-              src="/images/logo/logo-vertical.svg"
+              src="/images/logo/NOVO_LOGO_MAGG_HORIZONTAL_COR.png"
               alt="Marca d'agua Maggenta"
               width={280}
               height={280}

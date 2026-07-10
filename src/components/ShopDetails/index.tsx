@@ -271,7 +271,7 @@ const ShopDetails = ({
                       }}
                     />
                     <ImageWithFallback
-                      src="/images/logo/logo-vertical.svg"
+                      src="/images/logo/NOVO_LOGO_MAGG_HORIZONTAL_COR.png"
                       alt="Marca d'agua Maggenta"
                       width={260}
                       height={260}

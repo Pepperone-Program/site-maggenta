@@ -14,6 +14,9 @@ import { categoryPath, siteUrl, subcategoryPath } from "@/lib/seo";
 
 type SitemapEntry = MetadataRoute.Sitemap[number];
 
+export const dynamic = "force-dynamic";
+export const revalidate = 300;
+
 const staticRoutes = [
   "",
   "/brindes-personalizados",

@@ -15,12 +15,13 @@ const defaultOgImage = ogImageUrl({
   subtitle: "Brindes corporativos personalizados para empresas",
 });
 const siteIcon = "/images/logo/Simbolo-maggenta.png";
+const brandLogo = "/images/logo/NOVO_LOGO_MAGG_HORIZONTAL_COR.png";
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "Maggenta Brindes Corporativos",
   url: siteUrl,
-  logo: `${siteUrl}/images/logo/logo.svg`,
+  logo: `${siteUrl}${brandLogo}`,
   email: "vendas@maggenta.com.br",
   telephone: "+55-11-2287-6444",
   sameAs: [

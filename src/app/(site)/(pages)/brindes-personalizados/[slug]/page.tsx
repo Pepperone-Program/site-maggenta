@@ -36,7 +36,7 @@ export async function generateMetadata({
   const canonical = new URL(productPath(product), siteUrl).toString();
   const image = product.imgs.previews[0]
     ? new URL(product.imgs.previews[0], siteUrl).toString()
-    : new URL("/images/logo/logo.svg", siteUrl).toString();
+    : new URL("/images/logo/NOVO_LOGO_MAGG_HORIZONTAL_COR.png", siteUrl).toString();
   const productCode = product.codigo || String(product.id);
   const description = `Encontre ${product.title} e muito mais ${productCode}. Veja aqui`;
   const shareTitle = `${product.title} - ${productCode}`;

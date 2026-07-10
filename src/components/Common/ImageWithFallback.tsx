@@ -17,7 +17,7 @@ type ImageWithFallbackProps = {
   unoptimized?: boolean;
 };
 
-const fallbackImage = "/images/logo/logo.svg";
+const fallbackImage = "/images/logo/NOVO_LOGO_MAGG_HORIZONTAL_COR.png";
 
 const ImageWithFallback = ({ src, fill, style, ...props }: ImageWithFallbackProps) => {
   if (!src) {
