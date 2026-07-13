@@ -663,7 +663,7 @@ const ShopWithSidebar = ({
                 <div
                   className={`${
                     productStyle === "grid"
-                      ? "grid min-h-[720px] grid-cols-1 gap-x-6 gap-y-10 transition-opacity duration-200 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+                      ? "grid min-h-[720px] grid-cols-2 gap-x-3 gap-y-5 transition-opacity duration-200 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-3 2xl:grid-cols-4"
                       : "flex min-h-[720px] flex-col gap-7.5 transition-opacity duration-200"
                   }`}
                 >

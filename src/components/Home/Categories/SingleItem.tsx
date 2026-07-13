@@ -13,9 +13,9 @@ const SingleItem = ({ item, priority = false }: { item: Category; priority?: boo
       href={`/categorias/${encodeURIComponent(
         friendlyPersonalizedParam(item.id, item.title)
       )}`}
-      className="group flex h-20 min-w-max items-center gap-2 px-3"
+      className="group flex h-16 min-w-max items-center gap-1.5 px-2 sm:h-20 sm:gap-2 sm:px-3"
     >
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white sm:h-12 sm:w-12">
         {hasImage ? (
           <Image
             src={item.img}
@@ -24,17 +24,17 @@ const SingleItem = ({ item, priority = false }: { item: Category; priority?: boo
             height={44}
             priority={priority}
             loading={priority ? "eager" : "lazy"}
-            sizes="44px"
-            className="h-11 w-11 rounded-full object-cover"
+            sizes="(min-width: 640px) 44px, 34px"
+            className="h-[34px] w-[34px] rounded-full object-cover sm:h-11 sm:w-11"
           />
         ) : (
-          <span className="text-xl font-semibold text-blue">
+          <span className="text-base font-semibold text-blue sm:text-xl">
             {item.title.slice(0, 1).toUpperCase()}
           </span>
         )}
       </div>
 
-      <span className="whitespace-nowrap text-base font-semibold text-dark transition-colors duration-200 group-hover:text-blue">
+      <span className="whitespace-nowrap text-xs font-semibold text-dark transition-colors duration-200 group-hover:text-blue sm:text-base">
         {item.title}
       </span>
     </Link>

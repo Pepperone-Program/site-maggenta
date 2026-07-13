@@ -381,13 +381,13 @@ const Header = ({
             stickyMenu ? "py-3" : "py-4"
           }`}
         >
-          <Link className="flex-shrink-0 sm:flex-shrink-0 xl:flex-shrink-0" href="/" aria-label="Maggenta">
+          <Link className="ml-2 flex-shrink-0 sm:ml-3 sm:flex-shrink-0 xl:ml-0 xl:flex-shrink-0" href="/" aria-label="Maggenta">
             <img
               src="/images/logo/NOVO_LOGO_MAGG_HORIZONTAL_COR.png"
               alt="Maggenta"
               width={190}
               height={32}
-              className="h-auto w-[118px] sm:w-[170px] lg:w-[190px]"
+              className="h-auto w-[132px] sm:w-[176px] lg:w-[190px]"
             />
           </Link>
 

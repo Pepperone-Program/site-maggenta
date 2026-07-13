@@ -459,7 +459,7 @@ const ShopDetails = ({
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 gap-x-7.5 gap-y-9 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-7.5 sm:gap-y-9 lg:grid-cols-4">
               {relatedProducts.map((item) => (
                 <ProductItem item={item} key={item.id} />
               ))}

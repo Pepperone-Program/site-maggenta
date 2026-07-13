@@ -10,12 +10,12 @@ const SkeletonBlock = ({ className = "" }: { className?: string }) => (
 );
 
 const ProductCardSkeleton = () => (
-  <div className="flex min-h-[430px] flex-col">
-    <SkeletonBlock className="mb-4 aspect-square w-full rounded-lg bg-white shadow-1" />
+  <div className="flex min-h-[300px] flex-col sm:min-h-[430px]">
+    <SkeletonBlock className="mb-3 aspect-square w-full rounded-lg bg-white shadow-1 sm:mb-4" />
     <SkeletonBlock className="mx-auto mb-2 h-4 w-32" />
     <SkeletonBlock className="mx-auto mb-2 h-5 w-4/5" />
-    <SkeletonBlock className="mx-auto mb-5 h-5 w-36" />
-    <SkeletonBlock className="mx-auto mt-auto h-11 w-full max-w-[220px] rounded-[5px] bg-white shadow-1" />
+    <SkeletonBlock className="mx-auto mb-4 h-5 w-28 sm:mb-5 sm:w-36" />
+    <SkeletonBlock className="mx-auto mt-auto h-9 w-full max-w-[220px] rounded-[5px] bg-white shadow-1 sm:h-11" />
   </div>
 );
 
@@ -61,7 +61,7 @@ const ProductListingSkeleton = ({
             </div>
 
             <div
-              className="grid min-h-[720px] grid-cols-1 gap-x-6 gap-y-10 opacity-95 transition-opacity duration-200 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+              className="grid min-h-[720px] grid-cols-2 gap-x-3 gap-y-5 opacity-95 transition-opacity duration-200 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-3 2xl:grid-cols-4"
               aria-hidden="true"
             >
               {Array.from({ length: itemCount }, (_, index) => (

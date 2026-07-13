@@ -68,13 +68,13 @@ const NewArrival = ({
             pauseOnMouseEnter: true,
           }}
           modules={[Autoplay]}
-          spaceBetween={30}
-          slidesPerView={1}
+          spaceBetween={12}
+          slidesPerView={2}
           breakpoints={{
-            640: { slidesPerView: 2 },
-            1024: { slidesPerView: 3 },
-            1280: { slidesPerView: 4 },
-            1536: { slidesPerView: 5 },
+            640: { slidesPerView: 2, spaceBetween: 30 },
+            1024: { slidesPerView: 3, spaceBetween: 30 },
+            1280: { slidesPerView: 4, spaceBetween: 30 },
+            1536: { slidesPerView: 5, spaceBetween: 30 },
           }}
           className="!bg-transparent pb-2 [&_.swiper-slide]:!bg-transparent [&_.swiper-wrapper]:!bg-transparent [&_.swiper-wrapper]:items-stretch"
         >

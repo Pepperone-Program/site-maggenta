@@ -22,17 +22,19 @@ const Testimonials = () => {
       }}
       modules={[Autoplay]}
       slidesPerView={1}
-      spaceBetween={20}
+      spaceBetween={12}
       allowTouchMove={false}
       breakpoints={{
         0: {
-          slidesPerView: 1,
+          slidesPerView: 1.18,
         },
         1000: {
           slidesPerView: 2,
+          spaceBetween: 20,
         },
         1200: {
           slidesPerView: 3,
+          spaceBetween: 20,
         },
       }}
       className="bg-transparent [&_.swiper-slide]:bg-transparent [&_.swiper-wrapper]:items-stretch [&_.swiper-wrapper]:ease-linear"
@@ -46,12 +48,12 @@ const Testimonials = () => {
   );
 
   return (
-    <section className="overflow-hidden bg-transparent pb-16.5 pt-16 sm:pt-20">
+    <section className="overflow-hidden bg-transparent pb-10 pt-10 sm:pb-16.5 sm:pt-20">
       <div className="mx-auto w-full max-w-[1800px] bg-transparent px-2 sm:px-3">
         <div className="bg-transparent">
-          <div className="swiper testimonial-carousel common-carousel bg-transparent p-5">
+          <div className="swiper testimonial-carousel common-carousel bg-transparent px-1 py-3 sm:p-5">
             {/* <!-- section title --> */}
-            <div className="relative mb-10 flex items-center justify-center text-center">
+            <div className="relative mb-5 flex items-center justify-center text-center sm:mb-10">
               <div>
                 <span className="flex items-center justify-center gap-2.5 font-medium text-black mb-1.5">
                   <Image
@@ -62,14 +64,14 @@ const Testimonials = () => {
                   />
                   Depoimentos
                 </span>
-                <h2 className="font-semibold text-xl xl:text-heading-5 text-black">
+                <h2 className="text-lg font-semibold text-black sm:text-xl xl:text-heading-5">
                   O que nossos clientes dizem
                 </h2>
               </div>
 
             </div>
 
-            <div className="space-y-5 bg-transparent">
+            <div className="space-y-3 bg-transparent sm:space-y-5">
               {renderCarousel(false)}
               {renderCarousel(true)}
             </div>
