@@ -173,10 +173,13 @@ const Header = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const [searching, setSearching] = useState(false);
   const menuCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
+  const mobileSearchInputRef = useRef<HTMLInputElement>(null);
   const touchMenuHandled = useRef(false);
   const { openCartModal } = useCartModalContext();
   const cartItems = useAppSelector((state) => state.cartReducer.items);
@@ -235,7 +238,33 @@ const Header = ({
     setNavigationOpen(false);
     setActiveMenuId(null);
     setSearchFocused(false);
+    setMobileSearchOpen(false);
   }, []);
+
+  useEffect(() => {
+    if (!mobileSearchOpen) {
+      return;
+    }
+
+    setNavigationOpen(false);
+    const focusFrame = window.requestAnimationFrame(() => {
+      mobileSearchInputRef.current?.focus();
+    });
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!mobileSearchRef.current?.contains(event.target as Node)) {
+        setMobileSearchOpen(false);
+        setSearchFocused(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [mobileSearchOpen]);
 
   useEffect(() => {
     closeSearchUi();
@@ -490,55 +519,111 @@ const Header = ({
               ))}
             </ul>
 
-            <form
-              onSubmit={handleSearchSubmit}
-              className="relative mx-2 mb-3 flex w-auto items-center justify-end transition-all duration-300 sm:hidden"
-            >
-              <input
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => {
-                  setTimeout(() => setSearchFocused(false), 300);
-                }}
-                type="search"
-                name="search"
-                aria-label="Buscar produtos"
-                placeholder="Buscar produtos"
-                className="h-11 w-full rounded-full border border-gray-3 bg-gray-1 pl-4 pr-11 text-sm text-dark outline-none transition-all duration-300 placeholder:text-dark-4 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
-              />
-              <button
-                type="submit"
-                onClick={closeSearchUi}
-                aria-label="Buscar"
-                disabled={searching}
-                aria-busy={searching}
-                className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-full text-dark transition-colors duration-200 hover:bg-gray-2 hover:text-blue disabled:cursor-wait disabled:opacity-70"
-              >
-                <SearchButtonIcon loading={searching} />
-              </button>
-              {searchFocused && searchSuggestions.length > 0 && (
-                <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-gray-3 bg-white py-2 shadow-2" onMouseDown={(e) => e.preventDefault()}>
-                  {searchSuggestions.map((suggestion) => (
-                    <Link
-                      key={suggestion.id}
-                      href={suggestion.path}
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => {
-                        setSearchQuery("");
-                        closeSearchUi();
-                      }}
-                      className="block px-4 py-2 text-left text-sm font-medium text-dark hover:bg-gray-1 hover:text-blue"
-                    >
-                      {suggestion.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </form>
           </nav>
 
           <div className="flex items-center justify-end gap-2 sm:gap-4">
+            <div ref={mobileSearchRef} className="relative flex h-11 items-center justify-end sm:hidden">
+              <form
+                onSubmit={handleSearchSubmit}
+                className={`relative flex h-11 origin-right items-center overflow-visible transition-[width,opacity,transform] duration-300 ease-out motion-reduce:transition-none ${
+                  mobileSearchOpen
+                    ? "w-[calc(100vw-168px)] max-w-[240px] scale-x-100 opacity-100"
+                    : "pointer-events-none w-0 scale-x-95 opacity-0"
+                }`}
+              >
+                <input
+                  ref={mobileSearchInputRef}
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  onFocus={() => setSearchFocused(true)}
+                  type="search"
+                  name="search"
+                  aria-label="Buscar produtos"
+                  placeholder="Buscar produtos"
+                  tabIndex={mobileSearchOpen ? 0 : -1}
+                  className="h-11 w-full rounded-full border border-gray-3 bg-gray-1 pl-4 pr-11 text-sm text-dark outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-dark-4 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                />
+                <button
+                  type="submit"
+                  aria-label="Buscar"
+                  disabled={searching}
+                  aria-busy={searching}
+                  className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-full text-dark transition-colors duration-200 hover:bg-gray-2 hover:text-blue disabled:cursor-wait disabled:opacity-70"
+                >
+                  <SearchButtonIcon loading={searching} />
+                </button>
+                {searchFocused && searchSuggestions.length > 0 && mobileSearchOpen && (
+                  <div className="absolute right-0 top-full z-50 mt-2 w-[min(78vw,360px)] overflow-hidden rounded-2xl border border-gray-3 bg-white py-2 shadow-2" onPointerDown={(event) => event.preventDefault()}>
+                    {searchSuggestions.map((suggestion) => (
+                      <Link
+                        key={suggestion.id}
+                        href={suggestion.path}
+                        onClick={() => {
+                          setSearchQuery("");
+                          closeSearchUi();
+                        }}
+                        className="block px-4 py-2 text-left text-sm font-medium text-dark hover:bg-gray-1 hover:text-blue"
+                      >
+                        {suggestion.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </form>
+
+              <div
+                aria-hidden={mobileSearchOpen}
+                className={`flex items-center gap-2 overflow-hidden transition-[max-width,opacity,transform] duration-300 ease-out motion-reduce:transition-none ${
+                  mobileSearchOpen
+                    ? "pointer-events-none max-w-0 translate-x-2 opacity-0"
+                    : "max-w-[148px] translate-x-0 opacity-100"
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={openCartModal}
+                  tabIndex={mobileSearchOpen ? -1 : 0}
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-dark shadow-1 transition-colors duration-200 hover:text-blue"
+                  aria-label="Abrir orçamento"
+                >
+                  <span className="relative inline-flex">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M7 7h13l-1.2 7.2a2 2 0 0 1-2 1.8H9.4a2 2 0 0 1-2-1.6L5.8 4.8H3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M10 20h.01M17 20h.01" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                    </svg>
+                    <span className="absolute -right-2 -top-2 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-blue text-2xs font-medium text-white">
+                      {cartItems.length}
+                    </span>
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setMobileSearchOpen(true)}
+                  tabIndex={mobileSearchOpen ? -1 : 0}
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-3 bg-white text-dark shadow-1 transition-colors duration-200 hover:text-blue"
+                  aria-label="Abrir busca"
+                  aria-expanded={mobileSearchOpen}
+                >
+                  <SearchButtonIcon loading={false} />
+                </button>
+
+                <button
+                  aria-label="Abrir menu"
+                  tabIndex={mobileSearchOpen ? -1 : 0}
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-3 bg-white shadow-1"
+                  onClick={() => setNavigationOpen((value) => !value)}
+                  type="button"
+                >
+                  <span className="relative block h-4 w-5" aria-hidden="true">
+                    <span className="absolute left-0 top-0 block h-0.5 w-full rounded bg-dark" />
+                    <span className="absolute left-0 top-1/2 block h-0.5 w-full -translate-y-1/2 rounded bg-dark" />
+                    <span className="absolute bottom-0 left-0 block h-0.5 w-full rounded bg-dark" />
+                  </span>
+                </button>
+              </div>
+            </div>
+
             <form
               onSubmit={handleSearchSubmit}
               className="relative hidden w-[132px] items-center justify-end transition-all duration-300 xsm:w-[150px] sm:flex sm:w-[220px] lg:w-[320px]"
@@ -597,7 +682,7 @@ const Header = ({
             <button
               type="button"
               onClick={openCartModal}
-              className="flex h-11 items-center gap-2 rounded-full bg-white px-3.5 text-dark shadow-1 transition-colors duration-200 hover:text-blue"
+              className="hidden h-11 items-center gap-2 rounded-full bg-white px-3.5 text-dark shadow-1 transition-colors duration-200 hover:text-blue sm:flex"
               aria-label="Abrir orçamento"
             >
               <span className="relative inline-flex">
@@ -627,7 +712,7 @@ const Header = ({
 
             <button
               aria-label="Abrir menu"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-3 bg-white shadow-1 min-[1200px]:hidden"
+              className="hidden h-11 w-11 items-center justify-center rounded-full border border-gray-3 bg-white shadow-1 sm:flex min-[1200px]:hidden"
               onClick={() => setNavigationOpen((value) => !value)}
               type="button"
             >
