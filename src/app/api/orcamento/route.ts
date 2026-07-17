@@ -16,8 +16,16 @@ type QuotePayload = {
 };
 
 const requiredFields = [
+  "contato",
   "email",
-];
+  "tel",
+] as const;
+
+const fieldLabels: Record<(typeof requiredFields)[number], string> = {
+  contato: "contato",
+  email: "e-mail",
+  tel: "telefone",
+};
 
 const text = (value: unknown) => String(value || "").trim();
 
@@ -32,7 +40,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        message: `Campos obrigatorios ausentes: ${missing.join(", ")}`,
+        message: `Campos obrigatórios ausentes: ${missing
+          .map((field) => fieldLabels[field])
+          .join(", ")}`,
       },
       { status: 422 }
     );

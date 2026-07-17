@@ -125,7 +125,7 @@ const ProductPage = async ({ params }: ProductPageProps) => {
     redirect(productPath(product));
   }
 
-  const relatedProducts = await getRelatedProducts(product, 4);
+  const relatedProducts = await getRelatedProducts(product, 5);
   const canonical = new URL(productPath(product), siteUrl).toString();
   const images = product.imgs.previews.map((image) => new URL(image, siteUrl).toString());
 

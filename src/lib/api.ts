@@ -865,6 +865,7 @@ export async function getCatalogoCategoria(
   }
 
   const categoryName = data.categoria?.categoria;
+  const categoryId = data.categoria?.id_categoria || idCategoria;
   const sourceItems = data.items || [];
 
   return {
@@ -876,9 +877,14 @@ export async function getCatalogoCategoria(
       quantidade_minima:
         data.filtros?.quantidade_minima || emptyCatalogoFiltros.quantidade_minima,
     },
-    items: sourceItems.map((product) =>
-      mapApiProdutoToProduct(product, [], categoryName)
-    ),
+    items: sourceItems.map((product) => {
+      const mappedProduct = mapApiProdutoToProduct(product, [], categoryName);
+
+      return {
+        ...mappedProduct,
+        categoryId: mappedProduct.categoryId || categoryId,
+      };
+    }),
     total: Number(data.total || sourceItems.length || 0),
     page: Number(data.page || page),
     limit: Number(data.limit || limit),
@@ -1574,12 +1580,22 @@ export async function getProdutoBySlug(slug: string): Promise<Product | null> {
   return null;
 }
 
-export async function getRelatedProducts(product: Product, limit = 4) {
-  const products = await getProdutosSite(limit);
+export async function getRelatedProducts(product: Product, limit = 5) {
+  if (!product.categoryId || limit <= 0) {
+    return [];
+  }
 
-  return products
-    .filter((item) => item.id !== product.id)
-    .sort((a, b) => Number(b.category === product.category) - Number(a.category === product.category))
+  // Fetch one extra item because the current product may be among the first
+  // results returned by the category catalog.
+  const catalog = await getCatalogoCategoria(product.categoryId, {
+    page: 1,
+    limit: limit + 1,
+  });
+
+  return catalog.items
+    .filter(
+      (item) => item.id !== product.id && item.categoryId === product.categoryId
+    )
     .slice(0, limit);
 }
 
