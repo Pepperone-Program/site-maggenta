@@ -188,7 +188,7 @@ const ShopDetails = ({
     updateQuantity(quantityInput);
   };
 
-  const handleMainImagePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+  const handleMainImagePointerMove = (event: React.PointerEvent<HTMLImageElement>) => {
     if (activeMedia === "video") {
       return;
     }
@@ -233,10 +233,7 @@ const ShopDetails = ({
             <div>
               <div
                 ref={mainImageRef}
-                onPointerEnter={() => setIsMainImageZoomed(activeMedia === "image")}
-                onPointerMove={handleMainImagePointerMove}
-                onPointerLeave={resetMainImageZoom}
-                className="relative flex aspect-[1/0.94] w-full cursor-zoom-in items-center justify-center overflow-hidden rounded-[34px] bg-white p-3 pb-26 shadow-2 sm:p-4 sm:pb-30"
+                className="relative flex aspect-[1/0.94] w-full items-center justify-center overflow-hidden rounded-[34px] bg-white p-3 pb-26 shadow-2 sm:p-4 sm:pb-30"
                 style={mainImageHeight ? { height: mainImageHeight } : undefined}
               >
                 {product.badge && (
@@ -264,7 +261,10 @@ const ShopDetails = ({
                       width={520}
                       height={520}
                       priority
-                      className="relative z-10 h-auto max-h-[74%] w-full object-contain transition-transform duration-200 ease-out"
+                      onPointerEnter={() => setIsMainImageZoomed(true)}
+                      onPointerMove={handleMainImagePointerMove}
+                      onPointerLeave={resetMainImageZoom}
+                      className="relative z-10 h-auto max-h-[74%] w-full cursor-zoom-in object-contain transition-transform duration-200 ease-out"
                       style={{
                         transform: isMainImageZoomed ? "scale(1.85)" : "scale(1)",
                         transformOrigin: imageZoomOrigin,

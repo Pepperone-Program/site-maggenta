@@ -455,6 +455,18 @@ const ShopWithSidebar = ({
   };
 
   const clearFilters = () => {
+    if (isSubcategoryRoute && subcategoriesOriginCategoryId > 0) {
+      const parentCategory = categories.find(
+        (category) => category.id === subcategoriesOriginCategoryId
+      );
+      const categoryParam = parentCategory
+        ? friendlyPersonalizedParam(parentCategory.id, parentCategory.title)
+        : String(subcategoriesOriginCategoryId);
+
+      router.push(`/categorias/${encodeURIComponent(categoryParam)}`);
+      return;
+    }
+
     router.push(
       buildCatalogHref({
         subcategorias: null,

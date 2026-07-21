@@ -15,6 +15,9 @@ type ImageWithFallbackProps = {
   className?: string;
   style?: React.CSSProperties;
   unoptimized?: boolean;
+  onPointerEnter?: React.PointerEventHandler<HTMLImageElement>;
+  onPointerMove?: React.PointerEventHandler<HTMLImageElement>;
+  onPointerLeave?: React.PointerEventHandler<HTMLImageElement>;
 };
 
 const fallbackImage = "/images/logo/NOVO_LOGO_MAGG_HORIZONTAL_COR.png";
@@ -47,6 +50,9 @@ const ImageWithFallback = ({ src, fill, style, ...props }: ImageWithFallbackProp
       decoding="async"
       className={props.className}
       style={imageStyle}
+      onPointerEnter={props.onPointerEnter}
+      onPointerMove={props.onPointerMove}
+      onPointerLeave={props.onPointerLeave}
     />
   );
 };
