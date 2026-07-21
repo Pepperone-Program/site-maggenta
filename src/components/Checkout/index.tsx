@@ -7,7 +7,11 @@ import Breadcrumb from "../Common/Breadcrumb";
 import { useAppSelector } from "@/redux/store";
 import { useDispatch } from "react-redux";
 import { type AppDispatch } from "@/redux/store";
-import { removeAllItemsFromCart } from "@/redux/features/cart-slice";
+import {
+  type CartItem,
+  removeAllItemsFromCart,
+  updateCartItemQuantity,
+} from "@/redux/features/cart-slice";
 import { fetchWithTimeout, isRequestTimeoutError } from "@/lib/timed-fetch";
 import { quoteConversionStorageKey } from "@/lib/google-tags";
 import { formatDisplayPrice } from "@/lib/products";
@@ -72,6 +76,104 @@ const persistQuoteCustomer = (customer: Record<string, unknown>) => {
   } catch {
     // Storage can be unavailable in private windows or restricted browsers.
   }
+};
+
+const QuoteSummaryItem = ({ item }: { item: CartItem }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const minimumQuantity = Math.max(1, Number(item.quantidadeMinima || 1));
+  const [quantityInput, setQuantityInput] = useState(String(item.quantity));
+
+  useEffect(() => {
+    setQuantityInput(String(item.quantity));
+  }, [item.quantity]);
+
+  const updateQuantity = (value: number) => {
+    const safeQuantity = Math.max(minimumQuantity, Math.floor(value || minimumQuantity));
+
+    dispatch(updateCartItemQuantity({ id: item.id, quantity: safeQuantity }));
+    setQuantityInput(String(safeQuantity));
+  };
+
+  const commitQuantityInput = () => {
+    const parsedQuantity = Number(quantityInput.replace(/\D/g, ""));
+    updateQuantity(Number.isFinite(parsedQuantity) ? parsedQuantity : minimumQuantity);
+  };
+
+  return (
+    <div className="flex flex-col gap-4 border-b border-gray-3 py-5 sm:flex-row sm:items-start sm:justify-between sm:gap-5">
+      <div className="flex min-w-0 gap-4">
+        <div className="relative h-18 w-18 shrink-0 overflow-hidden rounded-md border border-gray-3 bg-gray-1">
+          <ImageWithFallback
+            src={item.imgs?.previews?.[0] || item.imgs?.thumbnails?.[0] || ""}
+            alt={item.title}
+            fill
+            sizes="72px"
+            className="object-contain p-1"
+          />
+        </div>
+
+        <div className="min-w-0">
+          <p className="font-medium text-dark">{item.title}</p>
+          <p className="mt-1 text-sm text-dark-4">Código: {item.codigo || item.id}</p>
+
+          <div className="mt-3">
+            <span className="mb-1.5 block text-xs font-medium text-dark-4">Quantidade</span>
+            <div className="inline-flex h-10 items-center overflow-hidden rounded-md border border-gray-3 bg-white shadow-sm focus-within:border-blue focus-within:ring-2 focus-within:ring-blue/15">
+              <button
+                type="button"
+                onClick={() => updateQuantity(item.quantity - 1)}
+                disabled={item.quantity <= minimumQuantity}
+                aria-label={`Diminuir quantidade de ${item.title}`}
+                className="flex h-full w-10 items-center justify-center text-lg font-medium text-dark duration-200 hover:bg-gray-2 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                −
+              </button>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={quantityInput}
+                onChange={(event) => {
+                  const nextValue = event.target.value.replace(/\D/g, "");
+                  setQuantityInput(nextValue);
+
+                  const parsedQuantity = Number(nextValue);
+                  if (nextValue && parsedQuantity >= minimumQuantity) {
+                    dispatch(updateCartItemQuantity({ id: item.id, quantity: parsedQuantity }));
+                  }
+                }}
+                onBlur={commitQuantityInput}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    event.currentTarget.blur();
+                  }
+                }}
+                aria-label={`Quantidade de ${item.title}`}
+                aria-describedby={`minimum-quantity-${item.id}`}
+                className="h-full w-20 border-x border-gray-3 text-center text-sm font-semibold text-dark outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              />
+              <button
+                type="button"
+                onClick={() => updateQuantity(item.quantity + 1)}
+                aria-label={`Aumentar quantidade de ${item.title}`}
+                className="flex h-full w-10 items-center justify-center text-lg font-medium text-dark duration-200 hover:bg-gray-2"
+              >
+                +
+              </button>
+            </div>
+            <span id={`minimum-quantity-${item.id}`} className="mt-1.5 block text-xs text-dark-4">
+              Mínimo: {minimumQuantity}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <p className="pl-[88px] text-left text-dark sm:pl-0 sm:text-right">
+        {formatDisplayPrice(item.discountedPrice)}
+      </p>
+    </div>
+  );
 };
 
 const Checkout = () => {
@@ -300,33 +402,7 @@ const Checkout = () => {
                         Adicione produtos para solicitar um orçamento.
                       </p>
                     ) : (
-                      cartItems.map((item) => (
-                        <div
-                          key={item.id}
-                          className="flex items-start justify-between gap-5 border-b border-gray-3 py-5"
-                        >
-                          <div className="flex min-w-0 gap-4">
-                            <div className="relative h-18 w-18 shrink-0 overflow-hidden rounded-md border border-gray-3 bg-gray-1">
-                              <ImageWithFallback
-                                src={item.imgs.previews[0]}
-                                alt={item.title}
-                                fill
-                                sizes="72px"
-                                className="object-contain p-1"
-                              />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="font-medium text-dark">{item.title}</p>
-                              <p className="mt-1 text-sm text-dark-4">
-                                Codigo: {item.codigo || item.id} - Qtd: {item.quantity}
-                              </p>
-                            </div>
-                          </div>
-                          <p className="text-right text-dark">
-                            {formatDisplayPrice(item.discountedPrice)}
-                          </p>
-                        </div>
-                      ))
+                      cartItems.map((item) => <QuoteSummaryItem key={item.id} item={item} />)
                     )}
                   </div>
 
