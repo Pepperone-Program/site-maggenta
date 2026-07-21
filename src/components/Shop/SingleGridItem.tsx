@@ -100,7 +100,7 @@ const SingleGridItem = ({ item, badgeLabel }: SingleGridItemProps) => {
 
       <ProductQuoteButton
         item={item}
-        className="mx-auto mt-auto flex min-h-9 w-full max-w-[220px] items-center justify-center rounded-full bg-blue px-3 py-2 text-[11px] font-medium leading-4 text-white shadow-[0_10px_22px_rgba(157,23,77,0.22)] duration-200 hover:bg-blue-dark sm:min-h-11 sm:px-5 sm:text-custom-sm sm:leading-normal sm:shadow-[0_14px_30px_rgba(157,23,77,0.24)]"
+        className="mx-auto mt-auto max-w-[260px]"
       />
     </div>
   );

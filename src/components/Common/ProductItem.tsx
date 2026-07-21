@@ -75,14 +75,10 @@ const ProductItem = ({ item }: { item: Product }) => {
           )}
         </span>
       ) : (
-        <div className="mt-auto flex justify-center">
-          <ProductQuoteButton
-            item={item}
-            autoClosePreviewMs={3000}
-            className="inline-flex min-h-9 w-full items-center justify-center rounded-full bg-blue px-3 py-2 text-[11px] font-medium leading-4 text-white shadow-[0_10px_22px_rgba(157,23,77,0.22)] duration-200 hover:bg-blue-dark sm:min-h-0 sm:px-6 sm:py-2.5 sm:text-custom-sm sm:leading-normal sm:shadow-[0_14px_30px_rgba(157,23,77,0.24)]"
-          />
-        </div>
+        <span className="mt-auto" />
       )}
+
+      <ProductQuoteButton item={item} className="mt-3" />
     </div>
   );
 };

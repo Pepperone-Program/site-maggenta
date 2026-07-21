@@ -107,7 +107,15 @@ const ShopDetails = ({
         return;
       }
 
-      setMainImageHeight(Math.max(420, panel.getBoundingClientRect().height));
+      const galleryWidth = mainImageRef.current?.getBoundingClientRect().width || 0;
+      const panelHeight = panel.getBoundingClientRect().height;
+      const widthBasedHeight = galleryWidth > 0 ? galleryWidth * 0.94 : 720;
+      const viewportBasedHeight = Math.max(420, window.innerHeight - 180);
+      const nextHeight = Math.round(
+        Math.max(420, Math.min(panelHeight, widthBasedHeight, viewportBasedHeight, 720))
+      );
+
+      setMainImageHeight(nextHeight);
     };
 
     updateHeight();

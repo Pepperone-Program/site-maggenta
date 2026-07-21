@@ -78,8 +78,7 @@ const SingleListItem = ({ item, badgeLabel }: SingleListItemProps) => {
 
           <ProductQuoteButton
             item={item}
-            autoClosePreviewMs={0}
-            className="flex min-h-11 w-full max-w-[220px] items-center justify-center rounded-full bg-blue px-5 py-2 text-custom-sm font-medium text-white shadow-[0_14px_30px_rgba(157,23,77,0.24)] duration-200 hover:bg-blue-dark"
+            className="max-w-[260px]"
           />
         </div>
       </div>
