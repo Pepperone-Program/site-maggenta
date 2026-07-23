@@ -8,7 +8,7 @@ const title = "Maggenta Brindes Corporativos Personalizados para Empresas";
 const description =
   "Solicite orcamento de brindes corporativos personalizados, produtos promocionais e itens para empresas em todo o Brasil.";
 const homeUrl = `${siteUrl}/`;
-const socialImage = `${siteUrl}/og-image`;
+const socialImage = `${siteUrl}/images/seo/maggenta-home-open-graph.png?v=3`;
 
 export const metadata: Metadata = {
   title: {
