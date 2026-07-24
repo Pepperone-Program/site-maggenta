@@ -1,7 +1,7 @@
 import React from "react";
 import { Metadata } from "next";
 import ShopWithoutSidebar from "@/components/ShopWithoutSidebar";
-import { buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
+import { brandOpenGraphImages, buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
 import { getProdutosSite } from "@/lib/api";
 
 export const revalidate = 120;
@@ -26,6 +26,7 @@ export const metadata: Metadata = {
     url: `${siteUrl}/lancamentos`,
     siteName,
     locale: "pt_BR",
+    images: brandOpenGraphImages,
   },
   other: buildSeoOther({
     title: "Lançamentos | Maggenta Brindes",

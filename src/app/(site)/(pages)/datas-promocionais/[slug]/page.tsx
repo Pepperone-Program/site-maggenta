@@ -7,7 +7,7 @@ import {
   getDatasPromocionais,
   getPublicosAlvos,
 } from "@/lib/api";
-import { buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
+import { brandOpenGraphImages, buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
 
 export const revalidate = 120;
 
@@ -48,6 +48,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url: canonical,
       siteName,
       locale: "pt_BR",
+      images: brandOpenGraphImages,
     },
     other: buildSeoOther({
       title,

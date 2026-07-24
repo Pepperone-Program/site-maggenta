@@ -1,6 +1,12 @@
 import Home from "@/components/Home";
 import { Metadata } from "next";
-import { contextualKeywords, siteName, siteUrl } from "@/lib/seo";
+import {
+  brandOpenGraphImages,
+  brandSocialImage,
+  contextualKeywords,
+  siteName,
+  siteUrl,
+} from "@/lib/seo";
 
 export const revalidate = 300;
 
@@ -8,7 +14,6 @@ const title = "Maggenta Brindes Corporativos Personalizados para Empresas";
 const description =
   "Solicite orcamento de brindes corporativos personalizados, produtos promocionais e itens para empresas em todo o Brasil.";
 const homeUrl = `${siteUrl}/`;
-const socialImage = `${siteUrl}/images/seo/maggenta-home-open-graph.png?v=3`;
 
 export const metadata: Metadata = {
   title: {
@@ -36,16 +41,7 @@ export const metadata: Metadata = {
     title,
     description,
     url: homeUrl,
-    images: [
-      {
-        url: socialImage,
-        secureUrl: socialImage,
-        type: "image/png",
-        width: 1200,
-        height: 630,
-        alt: "Maggenta Brindes Corporativos",
-      },
-    ],
+    images: brandOpenGraphImages,
   },
   twitter: {
     card: "summary_large_image",
@@ -53,7 +49,7 @@ export const metadata: Metadata = {
     description,
     images: [
       {
-        url: socialImage,
+        url: brandSocialImage,
         alt: "Maggenta Brindes Corporativos",
         width: 1200,
         height: 630,

@@ -1,7 +1,7 @@
 import React from "react";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
+import { brandOpenGraphImages, buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
 import { personalizedSuffix, slugify } from "@/lib/api";
 
 export const revalidate = 120;
@@ -47,6 +47,7 @@ export async function generateMetadata({
       url: canonical,
       siteName,
       locale: "pt_BR",
+      images: brandOpenGraphImages,
     },
     other: buildSeoOther({
       title,

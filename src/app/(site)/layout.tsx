@@ -5,15 +5,18 @@ import type { ReactNode } from "react";
 import ClientShell from "./ClientShell";
 import Footer from "@/components/Footer";
 import { getMenuGroups } from "@/lib/api";
-import { buildSeoOther, marketKeywords, ogImageUrl, siteName, siteUrl } from "@/lib/seo";
+import {
+  brandOpenGraphImages,
+  brandSocialImage,
+  buildSeoOther,
+  marketKeywords,
+  siteName,
+  siteUrl,
+} from "@/lib/seo";
 
 const defaultTitle = "Brindes Personalizados | Maggenta Brindes ";
 const defaultDescription =
   "Brindes corporativos personalizados, produtos promocionais e orcamentos para empresas em todo o Brasil.";
-const defaultOgImage = ogImageUrl({
-  title: "Maggenta Brindes",
-  subtitle: "Brindes corporativos personalizados para empresas",
-});
 const faviconIcon = "/favicon.ico?v=20260710";
 const siteIcon = "/icon.png?v=20260710";
 const appleIcon = "/apple-icon.png?v=20260710";
@@ -113,20 +116,13 @@ export const metadata: Metadata = {
     title: defaultTitle,
     description: defaultDescription,
     url: "/",
-    images: [
-      {
-        url: defaultOgImage,
-        alt: "Maggenta Brindes Corporativos",
-        width: 1200,
-        height: 630,
-      },
-    ],
+    images: brandOpenGraphImages,
   },
   twitter: {
     card: "summary_large_image",
     title: defaultTitle,
     description: defaultDescription,
-    images: [defaultOgImage],
+    images: [brandSocialImage],
   },
   other: buildSeoOther({
     title: defaultTitle,

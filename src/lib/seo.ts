@@ -7,6 +7,17 @@ const normalizeSiteUrl = (value?: string) =>
 export const siteUrl = normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL);
 export const siteName = "Maggenta Brindes";
 export const seoAuthor = "Maggenta Brindes Personalizados";
+export const brandSocialImage = `${siteUrl}/images/seo/maggenta-home-open-graph.png?v=3`;
+export const brandOpenGraphImages = [
+  {
+    url: brandSocialImage,
+    secureUrl: brandSocialImage,
+    type: "image/png",
+    width: 1200,
+    height: 630,
+    alt: "Maggenta Brindes Corporativos",
+  },
+];
 
 const normalizeKeyword = (value: string) =>
   value
