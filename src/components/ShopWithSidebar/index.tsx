@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import RangeSlider from "react-range-slider-input";
 import "react-range-slider-input/dist/style.css";
@@ -12,6 +11,7 @@ import shopData from "../Shop/shopData";
 import type { CatalogoOption, CatalogoProdutos } from "@/lib/api";
 import { friendlyPersonalizedParam } from "@/lib/slugs";
 import type { Product } from "@/types/product";
+import { useInfiniteProducts } from "@/hooks/useInfiniteProducts";
 
 type ActiveFilters = {
   categoria?: string;
@@ -198,7 +198,6 @@ const ShopWithSidebar = ({
   const [productStyle, setProductStyle] = useState("grid");
   const [productSidebar, setProductSidebar] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
-  const hasMountedRef = useRef(false);
 
   const categoryName = catalogo.categoria?.categoria || "Brindes";
   const categoryDescription = sanitizeCategoryDescription(
@@ -208,7 +207,7 @@ const ShopWithSidebar = ({
     parseInt(String(activeFilters.categoria || catalogo.categoria?.id_categoria || 1), 10) || 1;
   const subcategoriesOriginCategoryId = subcategoriesContextCategoryId || activeCategoryId;
   const pageTitle = customPageTitle || `${categoryName} personalizados`;
-  const items = products || catalogo.items;
+  const initialItems = products || catalogo.items;
   const selectedSubcategorias = useMemo(
     () => parseIds(activeFilters.subcategorias),
     [activeFilters.subcategorias]
@@ -295,8 +294,6 @@ const ShopWithSidebar = ({
       a.label.localeCompare(b.label, "pt-BR", { sensitivity: "base" })
     );
   }, [catalogo.filtros.datas_promocionais, dateOptions]);
-  const firstItem = catalogo.total === 0 ? 0 : (catalogo.page - 1) * catalogo.limit + 1;
-  const lastItem = Math.min(catalogo.page * catalogo.limit, catalogo.total);
   const categories = useMemo(() => {
     const currentCategory = catalogo.categoria
       ? {
@@ -324,6 +321,25 @@ const ShopWithSidebar = ({
     activeFilters.quantidade_minima_min ||
     activeFilters.quantidade_minima_max;
   const isSubcategoryRoute = basePath.startsWith("/subcategorias/");
+  const infiniteEndpoint = useMemo(() => {
+    const params = new URLSearchParams({
+      kind: "category",
+      categoria: String(activeCategoryId),
+      limit: String(catalogo.limit),
+    });
+    Object.entries(activeFilters).forEach(([key, value]) => {
+      if (value && key !== "page" && key !== "limit") params.set(key, value);
+    });
+    return `/api/produtos/catalogo?${params.toString()}`;
+  }, [activeCategoryId, activeFilters, catalogo.limit]);
+  const infinite = useInfiniteProducts({
+    initialItems,
+    initialPage: catalogo.page,
+    totalPages: catalogo.totalPages,
+    total: catalogo.total,
+    endpoint: infiniteEndpoint,
+  });
+  const items = infinite.items;
 
   const buildCatalogHref = (
     updates: Record<string, string | number | null | undefined>
@@ -447,13 +463,6 @@ const ShopWithSidebar = ({
     });
   };
 
-  const scrollToTopSmooth = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
   const clearFilters = () => {
     if (isSubcategoryRoute && subcategoriesOriginCategoryId > 0) {
       const parentCategory = categories.find(
@@ -479,28 +488,6 @@ const ShopWithSidebar = ({
     );
   };
 
-  const pageNumbers = Array.from(
-    { length: Math.min(catalogo.totalPages, 7) },
-    (_, index) => {
-      const start = Math.max(
-        1,
-        Math.min(catalogo.page - 3, Math.max(catalogo.totalPages - 6, 1))
-      );
-      return start + index;
-    }
-  ).filter((page) => page <= catalogo.totalPages);
-
-  useEffect(() => {
-    if (!hasMountedRef.current) {
-      hasMountedRef.current = true;
-      return;
-    }
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }, [catalogo.page]);
 
   return (
     <>
@@ -618,9 +605,9 @@ const ShopWithSidebar = ({
                     <p>
                       Mostrando{" "}
                       <span className="text-dark">
-                        {formatNumber(firstItem)}-{formatNumber(lastItem)}
+                        {formatNumber(items.length)}
                       </span>{" "}
-                      de <span className="text-dark">{formatNumber(catalogo.total)}</span>{" "}
+                      de <span className="text-dark">{formatNumber(infinite.total)}</span>{" "}
                       produtos
                     </p>
                   </div>
@@ -696,67 +683,17 @@ const ShopWithSidebar = ({
                 </div>
               )}
 
-              {catalogo.totalPages > 1 && (
-                <div className="mt-15 flex justify-center">
-                  <div className="rounded-full bg-white p-2 shadow-2">
-                    <ul className="flex items-center">
-                      <li>
-                        <Link
-                          aria-label="Pagina anterior"
-                          href={buildCatalogHref({
-                            page: catalogo.page > 1 ? catalogo.page - 1 : catalogo.page,
-                          })}
-                          scroll={false}
-                          onClick={scrollToTopSmooth}
-                          className={`flex h-9 w-8 items-center justify-center rounded-full duration-200 ${
-                            catalogo.page <= 1
-                              ? "pointer-events-none text-gray-4"
-                              : "hover:bg-blue hover:text-white"
-                          }`}
-                        >
-                          &lt;
-                        </Link>
-                      </li>
-
-                      {pageNumbers.map((page) => (
-                        <li key={page}>
-                          <Link
-                            href={buildCatalogHref({ page })}
-                            scroll={false}
-                            onClick={scrollToTopSmooth}
-                            className={`flex rounded-full px-3.5 py-1.5 duration-200 hover:bg-blue hover:text-white ${
-                              page === catalogo.page ? "bg-blue text-white" : ""
-                            }`}
-                          >
-                            {page}
-                          </Link>
-                        </li>
-                      ))}
-
-                      <li>
-                        <Link
-                          aria-label="Próxima página"
-                          href={buildCatalogHref({
-                            page:
-                              catalogo.page < catalogo.totalPages
-                                ? catalogo.page + 1
-                                : catalogo.page,
-                          })}
-                          scroll={false}
-                          onClick={scrollToTopSmooth}
-                          className={`flex h-9 w-8 items-center justify-center rounded-full duration-200 ${
-                            catalogo.page >= catalogo.totalPages
-                              ? "pointer-events-none text-gray-4"
-                              : "hover:bg-blue hover:text-white"
-                          }`}
-                        >
-                          &gt;
-                        </Link>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              )}
+              <div ref={infinite.sentinelRef} className="mt-12 flex min-h-16 items-center justify-center" aria-live="polite">
+                {infinite.loading && <span className="text-sm text-dark-4">Carregando mais produtos...</span>}
+                {infinite.error && (
+                  <button type="button" onClick={infinite.loadNext} className="rounded-full bg-blue px-5 py-2.5 text-sm text-white">
+                    Tentar carregar novamente
+                  </button>
+                )}
+                {!infinite.hasMore && items.length > 0 && (
+                  <span className="text-sm text-dark-4">Todos os produtos foram carregados.</span>
+                )}
+              </div>
 
               {categoryDescription && (
                 <section className="mx-auto mt-16 max-w-[1500px] rounded-[28px] border border-white bg-white px-5 py-8 text-center shadow-2 sm:px-8 lg:px-12">

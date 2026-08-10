@@ -147,6 +147,11 @@ const BrindesParaEmpresasTipoPage = async ({ params, searchParams }: PageProps) 
         limit={catalogo.limit}
         totalPages={catalogo.totalPages}
         basePath={canonicalPath}
+        loadMoreUrl={
+          tipoId > 0
+            ? `/api/produtos/catalogo?kind=type&id=${tipoId}&limit=${catalogo.limit}`
+            : `/api/produtos/catalogo?kind=search&q=${encodeURIComponent(title)}&limit=${catalogo.limit}`
+        }
       />
     </main>
   );

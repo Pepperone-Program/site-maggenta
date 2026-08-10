@@ -70,6 +70,7 @@ const BrindesParaEmpresasPage = async ({ searchParams }: PageProps) => {
         page={catalogo.page}
         limit={catalogo.limit}
         totalPages={catalogo.totalPages}
+        loadMoreUrl={`/api/produtos/catalogo?kind=products&limit=${catalogo.limit}`}
         basePath="/brindes-para-empresas"
       />
     </main>

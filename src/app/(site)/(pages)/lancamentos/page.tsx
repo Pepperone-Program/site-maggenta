@@ -2,7 +2,7 @@ import React from "react";
 import { Metadata } from "next";
 import ShopWithoutSidebar from "@/components/ShopWithoutSidebar";
 import { brandOpenGraphImages, buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
-import { getProdutosSite } from "@/lib/api";
+import { getProdutosSitePaginated } from "@/lib/api";
 
 export const revalidate = 120;
 
@@ -38,16 +38,21 @@ export const metadata: Metadata = {
 };
 
 export default async function LancamentosPage() {
-  const products = await getProdutosSite(24);
+  const catalogo = await getProdutosSitePaginated({ page: 1, limit: 24 });
 
   return (
     <main>
       <ShopWithoutSidebar
-        products={products}
+        products={catalogo.items}
         title="Lançamentos Personalizados"
         description="Os 24 primeiros produtos do catálogo Maggenta em destaque para lançamentos, campanhas e oportunidades de relacionamento com clientes."
         breadcrumbPages={["Lançamentos Personalizados"]}
         productBadgeLabel="Lançamento"
+        total={catalogo.total}
+        page={catalogo.page}
+        limit={catalogo.limit}
+        totalPages={catalogo.totalPages}
+        loadMoreUrl={`/api/produtos/catalogo?kind=products&limit=${catalogo.limit}`}
       />
     </main>
   );

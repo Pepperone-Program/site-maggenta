@@ -1,6 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
-import Link from "next/link";
+import React, { useState } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 
 import SingleGridItem from "../Shop/SingleGridItem";
@@ -8,6 +7,7 @@ import SingleListItem from "../Shop/SingleListItem";
 
 import shopData from "../Shop/shopData";
 import { Product } from "@/types/product";
+import { useInfiniteProducts } from "@/hooks/useInfiniteProducts";
 
 const ShopWithoutSidebar = ({
   products = shopData,
@@ -17,9 +17,8 @@ const ShopWithoutSidebar = ({
   productBadgeLabel,
   total,
   page = 1,
-  limit = 24,
   totalPages,
-  basePath,
+  loadMoreUrl,
 }: {
   products?: Product[];
   title?: string;
@@ -31,58 +30,25 @@ const ShopWithoutSidebar = ({
   limit?: number;
   totalPages?: number;
   basePath?: string;
+  loadMoreUrl?: string;
 }) => {
   const [productStyle, setProductStyle] = useState("grid");
-  const [currentPage, setCurrentPage] = useState(1);
   const serverPaginated = typeof total === "number" && typeof totalPages === "number";
-  const productsPerPage = limit;
-  const pageCount = serverPaginated
-    ? Math.max(totalPages || 1, 1)
-    : Math.max(Math.ceil(products.length / productsPerPage), 1);
-  const safeCurrentPage = serverPaginated
-    ? Math.min(Math.max(page, 1), pageCount)
-    : Math.min(currentPage, pageCount);
-  const visibleProducts = useMemo(() => {
-    if (serverPaginated) {
-      return products;
-    }
-
-    const start = (safeCurrentPage - 1) * productsPerPage;
-    return products.slice(start, start + productsPerPage);
-  }, [products, productsPerPage, safeCurrentPage, serverPaginated]);
-  const totalProducts = serverPaginated ? total || 0 : products.length;
-  const firstItem = totalProducts === 0 ? 0 : (safeCurrentPage - 1) * productsPerPage + 1;
-  const lastItem = serverPaginated
-    ? Math.min(safeCurrentPage * productsPerPage, totalProducts)
-    : Math.min(firstItem + visibleProducts.length - 1, totalProducts);
+  const infinite = useInfiniteProducts({
+    initialItems: products,
+    initialPage: page,
+    totalPages: totalPages || 1,
+    total: total ?? products.length,
+    endpoint: loadMoreUrl,
+  });
+  const visibleProducts = serverPaginated ? infinite.items : products;
+  const totalProducts = serverPaginated ? infinite.total : products.length;
 
   const options = [
     { label: "Mais recentes", value: "0" },
     { label: "Mais vendidos", value: "1" },
     { label: "Menor preço", value: "2" },
   ];
-
-  const scrollToTopSmooth = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
-  const buildPageHref = (nextPage: number) => {
-    const params = new URLSearchParams();
-
-    if (nextPage > 1) {
-      params.set("page", String(nextPage));
-    }
-
-    if (limit !== 24) {
-      params.set("limit", String(limit));
-    }
-
-    const query = params.toString();
-    return query ? `${basePath || ""}?${query}` : basePath || "";
-  };
 
   return (
     <>
@@ -102,7 +68,7 @@ const ShopWithoutSidebar = ({
                     <p>
                       Mostrando{" "}
                       <span className="text-dark">
-                        {serverPaginated ? `${firstItem}-${lastItem}` : visibleProducts.length}
+                        {visibleProducts.length}
                       </span>{" "}
                       de <span className="text-dark">{totalProducts}</span> produtos
                     </p>
@@ -207,114 +173,19 @@ const ShopWithoutSidebar = ({
               </div>
               {/* <!-- Products Grid Tab Content End --> */}
 
-              {pageCount > 1 && (
-                <nav
-                  className="mt-12 flex flex-wrap items-center justify-center gap-2"
-                  aria-label="Paginacao de produtos"
-                >
-                  {serverPaginated ? (
-                    <Link
-                      href={buildPageHref(Math.max(safeCurrentPage - 1, 1))}
-                      scroll={false}
-                      onClick={scrollToTopSmooth}
-                      className={`min-h-11 rounded-md border border-gray-3 bg-white px-4 py-3 text-sm font-medium text-dark hover:border-blue hover:text-blue ${
-                        safeCurrentPage === 1 ? "pointer-events-none opacity-50" : ""
-                      }`}
-                    >
-                      Anterior
-                    </Link>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCurrentPage((page) => Math.max(page - 1, 1));
-                        scrollToTopSmooth();
-                      }}
-                      disabled={safeCurrentPage === 1}
-                      className="min-h-11 rounded-md border border-gray-3 bg-white px-4 text-sm font-medium text-dark disabled:cursor-not-allowed disabled:opacity-50 hover:border-blue hover:text-blue"
-                    >
-                      Anterior
+              {serverPaginated && (
+                <div ref={infinite.sentinelRef} className="mt-12 flex min-h-16 items-center justify-center" aria-live="polite">
+                  {infinite.loading && <span className="text-sm text-dark-4">Carregando mais produtos...</span>}
+                  {infinite.error && (
+                    <button type="button" onClick={infinite.loadNext} className="rounded-full bg-blue px-5 py-2.5 text-sm text-white">
+                      Tentar carregar novamente
                     </button>
                   )}
-
-                  {Array.from({ length: pageCount }, (_, index) => index + 1)
-                    .filter(
-                      (page) =>
-                        page === 1 ||
-                        page === pageCount ||
-                        Math.abs(page - safeCurrentPage) <= 2
-                    )
-                    .map((page, index, pages) => {
-                      const previous = pages[index - 1];
-                      const showGap = previous && page - previous > 1;
-
-                      return (
-                        <React.Fragment key={page}>
-                          {showGap && (
-                            <span className="px-2 text-sm text-dark-4">...</span>
-                          )}
-                          {serverPaginated ? (
-                            <Link
-                              href={buildPageHref(page)}
-                              scroll={false}
-                              onClick={scrollToTopSmooth}
-                              className={`flex min-h-11 min-w-11 items-center justify-center rounded-md border px-3 text-sm font-medium ${
-                                safeCurrentPage === page
-                                  ? "border-blue bg-blue text-white"
-                                  : "border-gray-3 bg-white text-dark hover:border-blue hover:text-blue"
-                              }`}
-                              aria-current={safeCurrentPage === page ? "page" : undefined}
-                            >
-                              {page}
-                            </Link>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setCurrentPage(page);
-                                scrollToTopSmooth();
-                              }}
-                              className={`min-h-11 min-w-11 rounded-md border px-3 text-sm font-medium ${
-                                safeCurrentPage === page
-                                  ? "border-blue bg-blue text-white"
-                                  : "border-gray-3 bg-white text-dark hover:border-blue hover:text-blue"
-                              }`}
-                              aria-current={safeCurrentPage === page ? "page" : undefined}
-                            >
-                              {page}
-                            </button>
-                          )}
-                        </React.Fragment>
-                      );
-                    })}
-
-                  {serverPaginated ? (
-                    <Link
-                      href={buildPageHref(Math.min(safeCurrentPage + 1, pageCount))}
-                      scroll={false}
-                      onClick={scrollToTopSmooth}
-                      className={`min-h-11 rounded-md border border-gray-3 bg-white px-4 py-3 text-sm font-medium text-dark hover:border-blue hover:text-blue ${
-                        safeCurrentPage === pageCount ? "pointer-events-none opacity-50" : ""
-                      }`}
-                    >
-                      Proxima
-                    </Link>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCurrentPage((page) => Math.min(page + 1, pageCount));
-                        scrollToTopSmooth();
-                      }}
-                      disabled={safeCurrentPage === pageCount}
-                      className="min-h-11 rounded-md border border-gray-3 bg-white px-4 text-sm font-medium text-dark disabled:cursor-not-allowed disabled:opacity-50 hover:border-blue hover:text-blue"
-                    >
-                      Proxima
-                    </button>
+                  {!infinite.hasMore && visibleProducts.length > 0 && (
+                    <span className="text-sm text-dark-4">Todos os produtos foram carregados.</span>
                   )}
-                </nav>
+                </div>
               )}
-
               {description && (
                 <div className="mx-auto mt-16 max-w-[980px] rounded-md border border-gray-3 bg-white px-5 py-8 text-justify leading-8 text-dark-4 shadow-1 sm:px-8">
                   {description}
