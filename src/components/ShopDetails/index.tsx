@@ -431,7 +431,7 @@ const ShopDetails = ({
                 <Link
                   href="/orcamentos"
                   onClick={handleAddToCart}
-                  className="flex h-13 flex-[1.6] items-center justify-center rounded-full bg-blue px-8 text-center text-sm font-semibold text-white shadow-[0_18px_36px_rgba(157,23,77,0.28)] duration-200 hover:bg-blue-dark"
+                  className="flex h-13 flex-[1.6] items-center justify-center rounded-full bg-blue px-8 py-4 text-center text-sm font-semibold text-white shadow-[0_18px_36px_rgba(157,23,77,0.28)] duration-200 hover:bg-blue-dark"
                 >
                   Adicionar ao orçamento
                 </Link>
