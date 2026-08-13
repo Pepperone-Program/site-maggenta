@@ -1485,6 +1485,21 @@ export async function searchProdutosSiteWithDestination(
     );
   };
 
+  // Alguns códigos são cadastrados com um "C" final. Antes de considerar um
+  // match exato do termo informado, damos preferência a essa variação.
+  if (!search.toLowerCase().endsWith("c")) {
+    const suffixedPayload = await apiRequest(
+      `/produtos/site/busca?q=${encodeURIComponent(
+        `${search}C`
+      )}&empresaId=1&page=1&limit=1`
+    );
+    const suffixedExactResult = await resolveExactProduct(parseSearchData(suffixedPayload));
+
+    if (suffixedExactResult) {
+      return suffixedExactResult;
+    }
+  }
+
   const payload = await apiRequest(
     `/produtos/site/busca?q=${encodeURIComponent(
       search
