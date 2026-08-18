@@ -1,10 +1,8 @@
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { productPath } from "@/lib/products";
 import { Product } from "@/types/product";
 import ImageWithFallback from "@/components/Common/ImageWithFallback";
-import { formatReviewCount, productReviewCount } from "@/lib/reviews";
 import ProductSpecsSummary from "@/components/Common/ProductSpecsSummary";
 import ProductQuoteButton from "./ProductQuoteButton";
 
@@ -19,7 +17,6 @@ type SingleGridItemProps = {
 
 const SingleGridItem = ({ item, badgeLabel }: SingleGridItemProps) => {
   const href = productPath(item);
-  const reviewCount = formatReviewCount(productReviewCount(item));
   const normalizedCode = String(item.codigo || "").trim();
   const primaryImage = item.imgs.previews[0];
   const hoverImage = item.imgs.previews[1] || primaryImage;
@@ -58,23 +55,6 @@ const SingleGridItem = ({ item, badgeLabel }: SingleGridItemProps) => {
             loading="lazy"
           />
         </Link>
-      </div>
-
-      <div className="mb-1.5 flex items-center justify-center gap-1.5 sm:mb-2 sm:gap-2.5">
-        <div className="flex items-center gap-0.5 sm:gap-1">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <Image
-              key={star}
-              src="/images/icons/icon-star.svg"
-              alt="Avaliação"
-              width={12}
-              height={12}
-              className="h-3 w-3 sm:h-[15px] sm:w-[15px]"
-            />
-          ))}
-        </div>
-
-        <p className="text-[10px] leading-4 sm:text-custom-sm sm:leading-normal">({reviewCount} avaliações)</p>
       </div>
 
       <p

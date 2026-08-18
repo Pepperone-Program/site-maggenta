@@ -155,11 +155,6 @@ const ProductPage = async ({ params }: ProductPageProps) => {
         name: "Maggenta",
       },
     },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "5",
-      reviewCount: product.reviews,
-    },
   };
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",

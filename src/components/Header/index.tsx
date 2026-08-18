@@ -185,6 +185,7 @@ const Header = ({
   const cartItems = useAppSelector((state) => state.cartReducer.items);
   const totalPrice = useSelector(selectTotalPrice);
   const trimmedSearchQuery = searchQuery.trim();
+  const normalizedSearchQuery = trimmedSearchQuery.toLocaleLowerCase("pt-BR");
   const menuQuery = useQuery<HeaderMenuGroup[]>({
     queryKey: [MENU_CACHE_KEY],
     queryFn: ({ signal }) => fetchMenuGroups(signal),
@@ -206,7 +207,7 @@ const Header = ({
     retry: false,
   });
   const searchSuggestions =
-    debouncedSearchQuery === trimmedSearchQuery && searchFocused
+    debouncedSearchQuery === normalizedSearchQuery && searchFocused
       ? Array.isArray(suggestionsQuery.data?.data?.items)
         ? suggestionsQuery.data.data.items
         : []
@@ -307,18 +308,18 @@ const Header = ({
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedSearchQuery(trimmedSearchQuery);
+      setDebouncedSearchQuery(normalizedSearchQuery);
     }, 220);
 
     return () => {
       clearTimeout(timer);
     };
-  }, [trimmedSearchQuery]);
+  }, [normalizedSearchQuery]);
 
   const handleSearchSubmit = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      const query = searchQuery.trim();
+      const query = searchQuery.trim().toLocaleLowerCase("pt-BR");
 
       if (!query) {
         closeSearchUi();

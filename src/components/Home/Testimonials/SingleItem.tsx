@@ -5,44 +5,6 @@ import Image from "next/image";
 const SingleItem = ({ testimonial }: { testimonial: Testimonial }) => {
   return (
     <div className="m-1 flex h-full min-h-[210px] flex-col rounded-[18px] bg-white px-3 py-4 shadow-[0_12px_30px_rgba(75,37,66,0.09)] sm:min-h-[310px] sm:rounded-[28px] sm:px-8.5 sm:py-7.5 sm:shadow-[0_18px_44px_rgba(75,37,66,0.10)]">
-      <div className="mb-3 flex items-center gap-0.5 sm:mb-5 sm:gap-1">
-        <Image
-          src="/images/icons/icon-star.svg"
-          alt="star icon"
-          width={12}
-          height={12}
-          className="h-3 w-3 sm:h-[15px] sm:w-[15px]"
-        />
-        <Image
-          src="/images/icons/icon-star.svg"
-          alt="star icon"
-          width={12}
-          height={12}
-          className="h-3 w-3 sm:h-[15px] sm:w-[15px]"
-        />
-        <Image
-          src="/images/icons/icon-star.svg"
-          alt="star icon"
-          width={12}
-          height={12}
-          className="h-3 w-3 sm:h-[15px] sm:w-[15px]"
-        />
-        <Image
-          src="/images/icons/icon-star.svg"
-          alt="star icon"
-          width={12}
-          height={12}
-          className="h-3 w-3 sm:h-[15px] sm:w-[15px]"
-        />
-        <Image
-          src="/images/icons/icon-star.svg"
-          alt="star icon"
-          width={12}
-          height={12}
-          className="h-3 w-3 sm:h-[15px] sm:w-[15px]"
-        />
-      </div>
-
       <p className="mb-4 line-clamp-4 text-[13px] leading-[19px] text-dark sm:mb-6 sm:line-clamp-none sm:text-base sm:leading-normal">{testimonial.review}</p>
 
       <a href="#" className="mt-auto flex items-center gap-2.5 sm:gap-4">

@@ -1434,7 +1434,9 @@ export async function searchProdutosSiteWithDestination(
   limit = 10,
   page = 1
 ): Promise<SearchProdutosSiteResult> {
-  const search = query.trim();
+  // Envia sempre a mesma forma canônica à API para que a busca textual não
+  // dependa das maiúsculas/minúsculas digitadas pelo usuário.
+  const search = query.trim().toLocaleLowerCase("pt-BR");
   const safePage = sanitizeCatalogPage(page);
   const safeLimit = sanitizeWideCatalogLimit(limit);
 
