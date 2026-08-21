@@ -40,8 +40,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const slug = routeParams.slug || "";
   const subcategoriaId = toNumber(slug) || 0;
   const subcategoriaName = titleFromSlug(slug) || "Subcategoria";
-  const title = `${subcategoriaName} Personalizado Brindes Personalizados`;
-  const description = `${subcategoriaName} Personalizado, Querendo comprar Brindes Personalizados? É aqui na Maggenta Brindes`;
+  const title = `${subcategoriaName} Personalizados para Empresas`;
+  const description = `Conheça opções de ${subcategoriaName.toLocaleLowerCase("pt-BR")} personalizados para empresas, eventos e campanhas. Peça seu orçamento com a Maggenta.`;
   const canonical = new URL(
     subcategoryPath(subcategoriaId || 0, subcategoriaName),
     siteUrl

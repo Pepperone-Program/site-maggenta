@@ -6,6 +6,7 @@ import {
   getCatalogoPublicoAlvo,
   getDatasPromocionais,
   getPublicosAlvos,
+  friendlyParam,
 } from "@/lib/api";
 import { brandOpenGraphImages, buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
 
@@ -23,8 +24,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const catalogo = await getCatalogoPublicoAlvo(publicoAlvoId, { page: 1, limit: 1 });
   const publicoName = catalogo.categoria?.categoria || "Público Alvo";
   const title = `Brindes para ${publicoName} Personalizados e Corporativos`;
-  const description = `Brindes para ${publicoName}, Querendo comprar Brindes Personalizados? É aqui na Maggenta Brindes`;
-  const canonical = new URL(`/publicos-alvos/${slug}`, siteUrl).toString();
+  const description = `Encontre brindes personalizados para ${publicoName.toLocaleLowerCase("pt-BR")}, ideais para relacionamento, eventos e campanhas corporativas. Solicite um orçamento.`;
+  const canonical = new URL(
+    `/publicos-alvos/${encodeURIComponent(friendlyParam(publicoAlvoId, publicoName))}`,
+    siteUrl
+  ).toString();
 
   return {
     title,

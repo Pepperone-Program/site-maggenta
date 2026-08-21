@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     canonical: "/publicos-alvos",
   },
   description:
-    "Brindes personalizados filtrados por público-alvo. Encontre o presente corporativo ideal para seu cliente.",
+    "Escolha brindes personalizados por público-alvo para campanhas, eventos e relacionamento. Encontre a opção ideal e solicite seu orçamento.",
 };
 
 type PublicosAlvosPageProps = {

@@ -3,7 +3,7 @@ import InstitutionalPage from "@/components/InstitutionalPage";
 
 export const metadata: Metadata = {
   title: "Políticas de Privacidade",
-  description: "Política de privacidade e tratamento de dados da Maggenta.",
+  description: "Saiba como a Maggenta coleta, utiliza, armazena e protege dados pessoais durante o atendimento, a navegação e a solicitação de orçamentos.",
   alternates: {
     canonical: "/politicas-de-privacidade",
   },

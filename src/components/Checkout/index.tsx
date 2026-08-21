@@ -14,6 +14,7 @@ import {
 } from "@/redux/features/cart-slice";
 import { fetchWithTimeout, isRequestTimeoutError } from "@/lib/timed-fetch";
 import { quoteConversionStorageKey } from "@/lib/google-tags";
+import { sendQuoteConversion, type QuoteConversionData } from "@/lib/google-ads-conversion";
 import { formatDisplayPrice } from "@/lib/products";
 import {
   type AttributionParams,
@@ -29,10 +30,10 @@ const QUOTE_CUSTOMER_STORAGE_KEY = "maggenta:quote-customer";
 const DEFAULT_RETURN_ROUTE = "/brindes-para-empresas";
 
 const fields = [
-  { name: "fantasia", label: "Empresa ou nome", placeholder: "Ex.: Maggenta Brindes", required: false },
   { name: "contato", label: "Contato", placeholder: "Nome do responsável", required: true },
   { name: "email", label: "E-mail", type: "email", placeholder: "vendas@empresa.com.br", required: true },
   { name: "tel", label: "Telefone", type: "tel", placeholder: "(11) 99999-9999", required: true },
+  { name: "fantasia", label: "Empresa ou nome", placeholder: "Ex.: Maggenta Brindes", required: false },
   { name: "endereco", label: "Endereço", placeholder: "Rua, avenida ou travessa", required: false },
   { name: "endereco_n", label: "Número", placeholder: "43" },
   { name: "endereco_compl", label: "Complemento", placeholder: "Sala, bloco ou referência" },
@@ -295,13 +296,21 @@ const Checkout = () => {
         items: cartItems.length,
         value: Number(total.toFixed(2)),
       });
-      sessionStorage.setItem(
-        quoteConversionStorageKey,
-        JSON.stringify({
-          email: String(customer.email || ""),
-          phone_number: String(customer.tel || ""),
-        })
-      );
+      const conversionData: QuoteConversionData = {
+        email: String(customer.email || ""),
+        phone_number: String(customer.tel || ""),
+        transaction_id: String(payload.data?.id_orcamento || ""),
+        value: Number(total.toFixed(2)),
+      };
+
+      // Dispara imediatamente após a confirmação da API. A página de obrigado
+      // repete o envio como fallback; o transaction_id permite a deduplicação.
+      sendQuoteConversion(conversionData);
+      try {
+        sessionStorage.setItem(quoteConversionStorageKey, JSON.stringify(conversionData));
+      } catch {
+        // Bloqueios de storage não podem transformar um orçamento aceito em erro.
+      }
       persistQuoteCustomer(quoteCustomer);
       dispatch(removeAllItemsFromCart());
       router.push("/orcamentos-obrigado");

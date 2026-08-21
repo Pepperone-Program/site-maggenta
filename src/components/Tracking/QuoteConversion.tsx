@@ -2,22 +2,11 @@
 
 import { useEffect } from "react";
 import {
-  googleAdsConversionLabel,
-  googleAdsId,
   quoteConversionStorageKey,
 } from "@/lib/google-tags";
+import { sendQuoteConversion, type QuoteConversionData } from "@/lib/google-ads-conversion";
 
-type GtagWindow = Window & {
-  gtag?: (...args: unknown[]) => void;
-  dataLayer?: unknown[];
-};
-
-type ConversionCustomer = {
-  email?: string;
-  phone_number?: string;
-};
-
-const readConversionCustomer = (): ConversionCustomer | null => {
+const readConversionCustomer = (): QuoteConversionData | null => {
   try {
     const stored = sessionStorage.getItem(quoteConversionStorageKey);
 
@@ -25,7 +14,7 @@ const readConversionCustomer = (): ConversionCustomer | null => {
       return null;
     }
 
-    return JSON.parse(stored) as ConversionCustomer;
+    return JSON.parse(stored) as QuoteConversionData;
   } catch {
     return null;
   }
@@ -33,42 +22,19 @@ const readConversionCustomer = (): ConversionCustomer | null => {
 
 const QuoteConversion = () => {
   useEffect(() => {
-    if (!googleAdsConversionLabel) {
-      return;
-    }
-
-    const conversionWindow = window as GtagWindow;
-
-    if (typeof conversionWindow.gtag !== "function") {
-      conversionWindow.dataLayer = conversionWindow.dataLayer || [];
-      conversionWindow.gtag = (...args: unknown[]) => {
-        conversionWindow.dataLayer?.push(args);
-      };
-    }
-
     const customer = readConversionCustomer();
 
     if (!customer) {
       return;
     }
 
-    const email = customer.email?.trim();
-    const phoneNumber = customer.phone_number?.replace(/[^\d+]/g, "");
-
-    if (email || phoneNumber) {
-      conversionWindow.gtag("set", "user_data", {
-        ...(email ? { email } : {}),
-        ...(phoneNumber ? { phone_number: phoneNumber } : {}),
-      });
+    if (sendQuoteConversion(customer)) {
+      try {
+        sessionStorage.removeItem(quoteConversionStorageKey);
+      } catch {
+        // O evento já foi enfileirado; falhas de storage não devem repeti-lo aqui.
+      }
     }
-
-    conversionWindow.gtag("event", "conversion", {
-      send_to: `${googleAdsId}/${googleAdsConversionLabel}`,
-      value: 1.0,
-      currency: "BRL",
-    });
-
-    sessionStorage.removeItem(quoteConversionStorageKey);
   }, []);
 
   return null;

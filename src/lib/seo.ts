@@ -125,7 +125,6 @@ export const buildSeoOther = ({
   subject: string;
 }): NonNullable<Metadata["other"]> => ({
   author: seoAuthor,
-  robots: "index, follow",
   "og:url": canonical,
   "og:title": title,
   "og:description": description,

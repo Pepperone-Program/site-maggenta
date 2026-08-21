@@ -2,9 +2,9 @@ import { Metadata } from "next";
 import InstitutionalPage from "@/components/InstitutionalPage";
 
 export const metadata: Metadata = {
-  title: "Empresa de Brindes",
+  title: "Empresa de Brindes Corporativos Personalizados",
   description:
-    "Conheça a Maggenta Promocional, nossos serviços de gravação, políticas de frete e garantia.",
+    "Conheça a Maggenta, empresa de brindes corporativos personalizados com atendimento consultivo para campanhas, eventos e ações de relacionamento.",
   alternates: {
     canonical: "/empresa-de-brindes",
   },

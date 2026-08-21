@@ -8,9 +8,9 @@ import { buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo"
 export const revalidate = 120;
 
 export const metadata: Metadata = {
-  title: "Brindes para empresas | Catálogo completo",
+  title: "Brindes para Empresas: Catálogo Completo",
   description:
-    "Catálogo completo de brindes para empresas da Maggenta, com produtos promocionais para empresas e eventos.",
+    "Confira o catálogo de brindes para empresas, eventos e campanhas promocionais. Encontre opções personalizáveis e solicite seu orçamento.",
   keywords: contextualKeywords("brindes para empresas", [
     "catálogo completo de brindes",
     "produtos promocionais para empresas",
@@ -21,9 +21,9 @@ export const metadata: Metadata = {
     canonical: "/brindes-para-empresas",
   },
   other: buildSeoOther({
-    title: "Brindes para empresas | Catálogo completo",
+    title: "Brindes para Empresas: Catálogo Completo | Maggenta Brindes",
     description:
-      "Catálogo completo de brindes para empresas da Maggenta, com produtos promocionais para empresas e eventos.",
+      "Confira o catálogo de brindes para empresas, eventos e campanhas promocionais. Encontre opções personalizáveis e solicite seu orçamento.",
     canonical: `${siteUrl}/brindes-para-empresas`,
     subject: "catálogo completo de brindes para empresas",
   }),

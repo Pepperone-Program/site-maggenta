@@ -14,9 +14,9 @@ import {
   siteUrl,
 } from "@/lib/seo";
 
-const defaultTitle = "Brindes Personalizados | Maggenta Brindes ";
+const defaultTitle = "Brindes Personalizados para Empresas | Maggenta Brindes";
 const defaultDescription =
-  "Brindes corporativos personalizados, produtos promocionais e orcamentos para empresas em todo o Brasil.";
+  "Crie brindes corporativos personalizados para ações, eventos e equipes. Atendimento consultivo, amplo catálogo e entrega para empresas em todo o Brasil.";
 const faviconIcon = "/favicon.ico?v=20260710";
 const siteIcon = "/icon.png?v=20260710";
 const appleIcon = "/apple-icon.png?v=20260710";

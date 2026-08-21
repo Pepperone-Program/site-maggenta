@@ -38,7 +38,7 @@ export async function generateMetadata({
     ? new URL(product.imgs.previews[0], siteUrl).toString()
     : new URL("/images/logo/NOVO_LOGO_MAGG_HORIZONTAL_COR.png", siteUrl).toString();
   const productCode = product.codigo || String(product.id);
-  const description = `Encontre ${product.title} e muito mais ${productCode}. Veja aqui`;
+  const description = `${product.title} personalizado, código ${productCode}, para empresas, eventos e campanhas. Confira os detalhes e solicite seu orçamento com a Maggenta.`;
   const shareTitle = `${product.title} - ${productCode}`;
   const title = `${shareTitle} | Maggenta Brindes`;
 

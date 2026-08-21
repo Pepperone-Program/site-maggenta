@@ -6,6 +6,7 @@ import {
   getCatalogoDataPromocional,
   getDatasPromocionais,
   getPublicosAlvos,
+  friendlyParam,
 } from "@/lib/api";
 import { brandOpenGraphImages, buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
 
@@ -23,8 +24,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const catalogo = await getCatalogoDataPromocional(dataPromocionalId, { page: 1, limit: 1 });
   const dataName = catalogo.categoria?.categoria || "Data Promocional";
   const title = `Brindes para ${dataName} Personalizados e Promocionais`;
-  const description = `${dataName}, Querendo comprar Brindes Personalizados? É aqui na Maggenta Brindes`;
-  const canonical = new URL(`/datas-promocionais/${slug}`, siteUrl).toString();
+  const description = `Planeje ações para ${dataName} com brindes personalizados para clientes, equipes e eventos. Conheça o catálogo e solicite seu orçamento.`;
+  const canonical = new URL(
+    `/datas-promocionais/${encodeURIComponent(friendlyParam(dataPromocionalId, dataName))}`,
+    siteUrl
+  ).toString();
 
   return {
     title,

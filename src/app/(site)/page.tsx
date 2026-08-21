@@ -10,9 +10,9 @@ import {
 
 export const revalidate = 300;
 
-const title = "Maggenta Brindes Corporativos Personalizados para Empresas";
+const title = "Brindes Corporativos Personalizados para Empresas | Maggenta";
 const description =
-  "Solicite orcamento de brindes corporativos personalizados, produtos promocionais e itens para empresas em todo o Brasil.";
+  "Encontre brindes corporativos personalizados para eventos, campanhas e equipes. Solicite seu orçamento com atendimento especializado e entrega nacional.";
 const homeUrl = `${siteUrl}/`;
 
 export const metadata: Metadata = {
@@ -28,10 +28,10 @@ export const metadata: Metadata = {
     "loja de brindes personalizados",
   ]),
   alternates: {
-    canonical: "/",
+    canonical: homeUrl,
     languages: {
-      "pt-BR": "/",
-      "x-default": "/",
+      "pt-BR": homeUrl,
+      "x-default": homeUrl,
     },
   },
   openGraph: {

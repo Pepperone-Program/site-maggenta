@@ -57,7 +57,7 @@ const MarketingPixels = () => {
     <>
       <Script
         id="google-gtag"
-        src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`}
+        src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsId}`}
         strategy="afterInteractive"
       />
       <Script

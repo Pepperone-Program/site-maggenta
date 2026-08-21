@@ -129,10 +129,7 @@ const categorySeoTitle = (categoryName: string) => {
 };
 
 const categorySeoDescription = (categoryName: string) => {
-  const agreement = personalizedAgreement(categoryName);
-  const nameWithAgreement = agreement ? `${categoryName} ${agreement}` : categoryName;
-
-  return `${nameWithAgreement}, Querendo comprar Brindes Personalizados? É aqui na Maggenta Brindes`;
+  return `Encontre ${categoryName.toLocaleLowerCase("pt-BR")} personalizados para empresas, eventos e campanhas. Compare opções e solicite um orçamento com a Maggenta.`;
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

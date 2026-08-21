@@ -3,7 +3,7 @@ import InstitutionalPage from "@/components/InstitutionalPage";
 
 export const metadata: Metadata = {
   title: "Termos de Uso",
-  description: "Termos e condições de uso dos sites e serviços Maggenta.",
+  description: "Consulte os termos e condições de uso do site, dos conteúdos e dos serviços oferecidos pela Maggenta Brindes Corporativos.",
   alternates: {
     canonical: "/termos-de-uso",
   },

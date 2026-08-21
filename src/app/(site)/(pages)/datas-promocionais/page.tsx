@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     canonical: "/datas-promocionais",
   },
   description:
-    "Brindes personalizados para datas especiais e campanhas promocionais. Encontre produtos para suas estratégias sazonais.",
+    "Planeje campanhas sazonais com brindes personalizados para datas comemorativas. Encontre ideias para clientes e equipes e solicite um orçamento.",
 };
 
 type DatasPromocionaísPageProps = {

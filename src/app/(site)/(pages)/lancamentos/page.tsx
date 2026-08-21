@@ -7,7 +7,7 @@ import { getProdutosSitePaginated } from "@/lib/api";
 export const revalidate = 120;
 
 export const metadata: Metadata = {
-  title: "Lançamentos | Maggenta Brindes",
+  title: "Lançamentos de Brindes Personalizados",
   description:
     "Veja os 24 primeiros lançamentos do catálogo Maggenta, com produtos novos e destaque para campanhas, eventos e ações promocionais.",
   keywords: contextualKeywords("lançamentos Maggenta", [
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     canonical: "/lancamentos",
   },
   openGraph: {
-    title: "Lançamentos | Maggenta Brindes",
+    title: "Lançamentos de Brindes Personalizados | Maggenta Brindes",
     description:
       "Veja os 24 primeiros lançamentos do catálogo Maggenta, com produtos novos e destaque para campanhas, eventos e ações promocionais.",
     type: "website",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     images: brandOpenGraphImages,
   },
   other: buildSeoOther({
-    title: "Lançamentos | Maggenta Brindes",
+    title: "Lançamentos de Brindes Personalizados | Maggenta Brindes",
     description:
       "Veja os 24 primeiros lançamentos do catálogo Maggenta, com produtos novos e destaque para campanhas, eventos e ações promocionais.",
     canonical: `${siteUrl}/lancamentos`,

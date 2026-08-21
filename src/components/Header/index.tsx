@@ -427,7 +427,7 @@ const Header = ({
               navigationOpen ? "flex" : "hidden"
             }`}
           >
-            <ul className="flex flex-col gap-5 px-2 py-3 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-center min-[1200px]:gap-9 min-[1200px]:px-0 min-[1200px]:py-0">
+            <ul className="flex max-h-[calc(100dvh-132px)] flex-col gap-5 overflow-y-auto overscroll-contain px-2 py-3 min-[1200px]:max-h-none min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-center min-[1200px]:gap-9 min-[1200px]:overflow-visible min-[1200px]:px-0 min-[1200px]:py-0">
               {menuGroups.map((menuItem) => (
                 <li
                   key={menuItem.id}
@@ -480,7 +480,7 @@ const Header = ({
                           activeMenuId === menuItem.id ? "block" : "hidden"
                         }`}
                       >
-                        <div className="mt-0 overflow-x-auto rounded-2xl border border-gray-3 bg-white p-2 pt-0 shadow-2 min-[1200px]:rounded-[24px] min-[1200px]:px-8 min-[1200px]:py-7 min-[1200px]:pt-7">
+                        <div className="mt-0 max-h-[min(60dvh,420px)] overflow-y-auto overscroll-contain rounded-2xl border border-gray-3 bg-white p-2 pt-0 shadow-2 min-[1200px]:max-h-none min-[1200px]:overflow-x-auto min-[1200px]:overflow-y-visible min-[1200px]:rounded-[24px] min-[1200px]:px-8 min-[1200px]:py-7 min-[1200px]:pt-7">
                           <div className="flex flex-col gap-x-12 gap-y-1 min-[1200px]:flex-row">
                             {menuColumns(menuItem.items, 16).map((column, columnIndex) => (
                               <ul

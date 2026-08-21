@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 
 const OrcamentoPage = () => {
-  redirect("/orcamentos");
+  permanentRedirect("/orcamentos");
 };
 
 export default OrcamentoPage;
