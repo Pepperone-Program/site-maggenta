@@ -478,7 +478,11 @@ const apiRequest = async (
       return null;
     }
 
-    return response.json();
+    // Aguarda o parse dentro deste try/catch. O upstream pode responder uma
+    // pagina HTML (proxy, WAF ou indisponibilidade) mesmo com status 2xx;
+    // nesse caso, a aplicacao usa os fallbacks existentes sem interromper o
+    // prerender/build.
+    return await response.json();
   } catch {
     return null;
   }
