@@ -4,7 +4,7 @@ import ShopWithoutSidebar from "@/components/ShopWithoutSidebar";
 import { brandOpenGraphImages, buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
 import { getProdutosSitePaginated } from "@/lib/api";
 
-export const revalidate = 120;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Lançamentos de Brindes Personalizados",

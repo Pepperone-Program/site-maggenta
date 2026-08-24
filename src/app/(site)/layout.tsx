@@ -4,7 +4,6 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import ClientShell from "./ClientShell";
 import Footer from "@/components/Footer";
-import { getMenuGroups } from "@/lib/api";
 import {
   brandOpenGraphImages,
   brandSocialImage,
@@ -132,13 +131,11 @@ export const metadata: Metadata = {
   }),
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  const initialMenuGroups = await getMenuGroups();
-
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
@@ -155,7 +152,7 @@ export default async function RootLayout({
         />
       </head>
       <body>
-        <ClientShell initialMenuGroups={initialMenuGroups}>{children}</ClientShell>
+        <ClientShell>{children}</ClientShell>
         <Footer />
       </body>
     </html>

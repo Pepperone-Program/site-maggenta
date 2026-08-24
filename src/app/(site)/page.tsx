@@ -8,7 +8,9 @@ import {
   siteUrl,
 } from "@/lib/seo";
 
-export const revalidate = 300;
+// Os dados da API sao carregados no runtime para que uma indisponibilidade
+// durante o build da Vercel nao publique uma home vazia nem bloqueie o deploy.
+export const dynamic = "force-dynamic";
 
 const title = "Brindes Corporativos Personalizados para Empresas | Maggenta";
 const description =
