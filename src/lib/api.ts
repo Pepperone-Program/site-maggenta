@@ -371,7 +371,14 @@ const isYes = (value?: ApiFlag) => value === "S" || value === "s";
 
 const apiBaseUrl = () => (process.env.NEXT_API_URL || "").replace(/\/$/, "");
 
-const landingPagePath = (targetUrl: string) => {
+const firstLandingPageKeyword = (keywords: string) =>
+  keywords.split(/[,;\n]/).map((keyword) => keyword.trim()).find(Boolean) || "";
+
+const landingPagePath = (
+  targetUrl: string,
+  keywords: string,
+  title: string
+) => {
   try {
     const url = new URL(targetUrl);
     if (url.protocol !== "http:" && url.protocol !== "https:") return null;
@@ -380,7 +387,9 @@ const landingPagePath = (targetUrl: string) => {
       .split("/")
       .map((segment) => decodeURIComponent(segment).trim())
       .filter(Boolean);
-    const slug = slugify(segments.at(-1) || "");
+    const slug = slugify(
+      segments.at(-1) || firstLandingPageKeyword(keywords) || title
+    );
     return slug ? `/${slug}` : null;
   } catch {
     return null;
@@ -388,7 +397,11 @@ const landingPagePath = (targetUrl: string) => {
 };
 
 const mapLandingPage = (landingPage: LandingPageApi): LandingPage | null => {
-  const path = landingPagePath(landingPage.url);
+  const path = landingPagePath(
+    landingPage.url,
+    landingPage.keywords,
+    landingPage.title
+  );
   if (!path || !landingPage.title?.trim() || !landingPage.keywords?.trim()) return null;
 
   return {
