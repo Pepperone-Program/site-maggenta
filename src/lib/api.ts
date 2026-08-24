@@ -370,6 +370,31 @@ const sortByOrderAndName = <T extends Record<string, unknown>>(
 const isEnabled = (value?: ApiFlag) => !value || value === "S";
 const isYes = (value?: ApiFlag) => value === "S" || value === "s";
 
+const API_REQUEST_ATTEMPTS = 3;
+const API_RETRY_DELAYS_MS = [250, 750];
+
+class ApiRequestError extends Error {
+  retryable: boolean;
+
+  constructor(message: string, retryable = true) {
+    super(message);
+    this.name = "ApiRequestError";
+    this.retryable = retryable;
+  }
+}
+
+const apiRequestLabel = (url: string) => {
+  try {
+    const parsedUrl = new URL(url);
+    return `${parsedUrl.origin}${parsedUrl.pathname}`;
+  } catch {
+    return "API configurada";
+  }
+};
+
+const waitForApiRetry = (delayMs: number) =>
+  new Promise((resolve) => setTimeout(resolve, delayMs));
+
 const apiBaseUrl = () => (process.env.NEXT_API_URL || "").replace(/\/$/, "");
 const landingPagesApiBaseUrl = () =>
   (
@@ -447,6 +472,96 @@ export const buildApiUrl = (path: string, baseUrl?: string) => {
   return `${base}${API_BASE_PATH}${cleanPath}`;
 };
 
+const requestApiUrl = async (
+  url: string,
+  init: RequestInit = {},
+  includeAuth = true
+) => {
+  const method = (init.method || "GET").toUpperCase();
+  const isGet = method === "GET";
+  const attempts = isGet ? API_REQUEST_ATTEMPTS : 1;
+  const requestLabel = apiRequestLabel(url);
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      const response = await fetchWithTimeout(url, {
+        ...init,
+        // O cache de pagina/rota controla a performance. A resposta bruta da
+        // API nao pode ser armazenada antes de validarmos que ela e JSON.
+        cache: "no-store",
+        headers: {
+          Accept: "application/json",
+          ...(isGet ? {} : { "Content-Type": "application/json" }),
+          ...(includeAuth ? authHeaders() : {}),
+          ...(init.headers || {}),
+        },
+      });
+
+      if (response.status === 404) {
+        return null;
+      }
+
+      if (!response.ok) {
+        throw new ApiRequestError(
+          `A API respondeu HTTP ${response.status} em ${requestLabel}.`,
+          response.status === 408 || response.status === 429 || response.status >= 500
+        );
+      }
+
+      const contentType = response.headers.get("content-type")?.toLowerCase() || "";
+      if (!contentType.includes("json")) {
+        throw new ApiRequestError(
+          `A API respondeu ${contentType || "um formato desconhecido"} em ${requestLabel}; JSON era esperado.`
+        );
+      }
+
+      let payload: unknown;
+      try {
+        payload = JSON.parse(await response.text()) as unknown;
+      } catch {
+        throw new ApiRequestError(
+          `A API respondeu JSON invalido em ${requestLabel}.`
+        );
+      }
+
+      if (
+        payload &&
+        typeof payload === "object" &&
+        "success" in payload &&
+        payload.success === false
+      ) {
+        throw new ApiRequestError(
+          `A API recusou a consulta em ${requestLabel}.`
+        );
+      }
+
+      return payload;
+    } catch (error) {
+      lastError = error;
+      const canRetry =
+        isGet &&
+        attempt < attempts &&
+        (!(error instanceof ApiRequestError) || error.retryable);
+
+      if (!canRetry) {
+        throw error;
+      }
+
+      await waitForApiRetry(API_RETRY_DELAYS_MS[attempt - 1] || 750);
+    }
+  }
+
+  throw lastError;
+};
+
+const cachedApiGet = unstable_cache(
+  (url: string, includeAuth: boolean) =>
+    requestApiUrl(url, { method: "GET" }, includeAuth),
+  ["maggenta-api-json-v1"],
+  { revalidate: 300 }
+);
+
 const apiRequest = async (
   path: string,
   init: RequestInit = {},
@@ -456,36 +571,19 @@ const apiRequest = async (
   const url = buildApiUrl(path, baseUrl);
 
   if (!url) {
-    return null;
+    throw new ApiRequestError(
+      "NEXT_API_URL nao foi configurada para as chamadas da API.",
+      false
+    );
   }
 
-  try {
-    const method = (init.method || "GET").toUpperCase();
-    const isGet = method === "GET";
-    const cache = isGet ? init.cache : "no-store";
-    const response = await fetchWithTimeout(url, {
-      ...init,
-      cache,
-      next: isGet && cache !== "no-store" ? { revalidate: 300 } : undefined,
-      headers: {
-        ...(isGet ? {} : { "Content-Type": "application/json" }),
-        ...(includeAuth ? authHeaders() : {}),
-        ...(init.headers || {}),
-      },
-    });
+  const method = (init.method || "GET").toUpperCase();
+  const canUseValidatedCache =
+    method === "GET" && init.cache !== "no-store" && !init.headers;
 
-    if (!response.ok) {
-      return null;
-    }
-
-    // Aguarda o parse dentro deste try/catch. O upstream pode responder uma
-    // pagina HTML (proxy, WAF ou indisponibilidade) mesmo com status 2xx;
-    // nesse caso, a aplicacao usa os fallbacks existentes sem interromper o
-    // prerender/build.
-    return await response.json();
-  } catch {
-    return null;
-  }
+  return canUseValidatedCache
+    ? cachedApiGet(url, includeAuth)
+    : requestApiUrl(url, init, includeAuth);
 };
 
 const authHeaders = () => {
