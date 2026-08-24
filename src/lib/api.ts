@@ -371,6 +371,11 @@ const isEnabled = (value?: ApiFlag) => !value || value === "S";
 const isYes = (value?: ApiFlag) => value === "S" || value === "s";
 
 const apiBaseUrl = () => (process.env.NEXT_API_URL || "").replace(/\/$/, "");
+const landingPagesApiBaseUrl = () =>
+  (
+    process.env.NEXT_LANDING_PAGES_API_URL ||
+    "https://backend-site.maggenta.com.br"
+  ).replace(/\/$/, "");
 
 const firstLandingPageKeyword = (keywords: string) =>
   keywords.split(/[,;\n]/).map((keyword) => keyword.trim()).find(Boolean) || "";
@@ -427,8 +432,8 @@ export const buildRawApiUrl = (path: string) => {
   return base ? `${base}${cleanPath}` : cleanPath;
 };
 
-export const buildApiUrl = (path: string) => {
-  const base = apiBaseUrl();
+export const buildApiUrl = (path: string, baseUrl?: string) => {
+  const base = (baseUrl || apiBaseUrl()).replace(/\/$/, "");
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
 
   if (!base) {
@@ -442,8 +447,13 @@ export const buildApiUrl = (path: string) => {
   return `${base}${API_BASE_PATH}${cleanPath}`;
 };
 
-const apiRequest = async (path: string, init: RequestInit = {}) => {
-  const url = buildApiUrl(path);
+const apiRequest = async (
+  path: string,
+  init: RequestInit = {},
+  includeAuth = true,
+  baseUrl?: string
+) => {
+  const url = buildApiUrl(path, baseUrl);
 
   if (!url) {
     return null;
@@ -458,8 +468,8 @@ const apiRequest = async (path: string, init: RequestInit = {}) => {
       cache,
       next: isGet && cache !== "no-store" ? { revalidate: 300 } : undefined,
       headers: {
-        "Content-Type": "application/json",
-        ...authHeaders(),
+        ...(isGet ? {} : { "Content-Type": "application/json" }),
+        ...(includeAuth ? authHeaders() : {}),
         ...(init.headers || {}),
       },
     });
@@ -537,12 +547,16 @@ async function apiFetchAllPages<T>(
   path: string,
   pageSize = 100,
   maxPages = 80,
-  init: RequestInit = {}
+  init: RequestInit = {},
+  includeAuth = true,
+  baseUrl?: string
 ): Promise<T[] | null> {
   const separator = path.includes("?") ? "&" : "?";
   const firstPayload = await apiRequest(
     `${path}${separator}page=1&limit=${pageSize}`,
-    init
+    init,
+    includeAuth,
+    baseUrl
   );
 
   if (!firstPayload) {
@@ -567,7 +581,9 @@ async function apiFetchAllPages<T>(
     pages.map(async (page) => {
       const payload = await apiRequest(
         `${path}${separator}page=${page}&limit=${pageSize}`,
-        init
+        init,
+        includeAuth,
+        baseUrl
       );
       const data =
         payload && typeof payload === "object" && "data" in payload
@@ -1302,7 +1318,14 @@ export async function getProdutosSite(limit = 12): Promise<Product[]> {
 
 export async function getLandingPages(): Promise<LandingPage[]> {
   const landingPages =
-    (await apiFetchAllPages<LandingPageApi>("/landing-pages", 100, 80)) || [];
+    (await apiFetchAllPages<LandingPageApi>(
+      "/landing-pages",
+      100,
+      80,
+      { cache: "no-store" },
+      false,
+      landingPagesApiBaseUrl()
+    )) || [];
 
   return landingPages
     .map(mapLandingPage)
