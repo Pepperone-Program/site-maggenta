@@ -98,6 +98,7 @@ export type BannerApi = {
 export type LandingPageApi = {
   id: number;
   title: string;
+  slug?: string | null;
   description?: string | null;
   keywords: string;
   url: string;
@@ -375,10 +376,14 @@ const firstLandingPageKeyword = (keywords: string) =>
   keywords.split(/[,;\n]/).map((keyword) => keyword.trim()).find(Boolean) || "";
 
 const landingPagePath = (
+  apiSlug: string | null | undefined,
   targetUrl: string,
   keywords: string,
   title: string
 ) => {
+  const explicitSlug = slugify(apiSlug || "");
+  if (explicitSlug) return `/${explicitSlug}`;
+
   try {
     const url = new URL(targetUrl);
     if (url.protocol !== "http:" && url.protocol !== "https:") return null;
@@ -398,6 +403,7 @@ const landingPagePath = (
 
 const mapLandingPage = (landingPage: LandingPageApi): LandingPage | null => {
   const path = landingPagePath(
+    landingPage.slug,
     landingPage.url,
     landingPage.keywords,
     landingPage.title
@@ -1307,19 +1313,12 @@ export async function getLandingPageByPath(path: string): Promise<LandingPage | 
   const slug = slugify(path.split("/").filter(Boolean).at(-1) || "");
   if (!slug) return null;
 
-  const payload = await apiRequest(
-    `/landing-pages?page=1&limit=100&search=${encodeURIComponent(slug)}`
-  );
-  const data = payload && typeof payload === "object" && "data" in payload
-    ? (payload.data as PaginatedApiData<LandingPageApi>)
-    : null;
-  const landingPages = (data?.items || [])
-    .map(mapLandingPage)
-    .filter((landingPage): landingPage is LandingPage => Boolean(landingPage));
+  // O contrato de pesquisa não garante busca pelo campo slug. A listagem é
+  // cacheada pelo Next e pelo backend, evitando falsos 404 sem criar uma
+  // chamada por registro.
+  const landingPages = await getLandingPages();
 
-  return landingPages.find(
-    (landingPage) => landingPage.slug === slug
-  ) || null;
+  return landingPages.find((landingPage) => landingPage.slug === slug) || null;
 }
 
 export async function getProdutosSitePaginated(
