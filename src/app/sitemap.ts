@@ -7,6 +7,7 @@ import {
   getCatalogoCategorias,
   getCatalogoTiposProdutos,
   getDatasPromocionais,
+  getLandingPages,
   getProdutosForSitemap,
   getPublicosAlvos,
 } from "@/lib/api";
@@ -48,12 +49,13 @@ const uniqueByUrl = (entries: SitemapEntry[]) =>
   Array.from(new Map(entries.map((entry) => [entry.url, entry])).values());
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [products, categorias, tipos, publicos, datas] = await Promise.all([
+  const [products, categorias, tipos, publicos, datas, landingPages] = await Promise.all([
     getProdutosForSitemap(),
     getCatalogoCategorias(),
     getCatalogoTiposProdutos(),
     getPublicosAlvos(),
     getDatasPromocionais(),
+    getLandingPages(),
   ]);
 
   const categoryCatalogs = await Promise.all(
@@ -120,6 +122,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .slice(0, 3),
   }));
 
+  const landingPageRoutes: SitemapEntry[] = landingPages.map((landingPage) => ({
+    url: absoluteUrl(landingPage.path),
+    lastModified: safeDate(landingPage.data_lp || undefined),
+    changeFrequency: "weekly",
+    priority: 0.88,
+  }));
+
   const baseRoutes: SitemapEntry[] = staticRoutes.map((route) => ({
     url: absoluteUrl(route),
     lastModified: staticLastModified,
@@ -135,5 +144,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...publicRoutes,
     ...dateRoutes,
     ...productRoutes,
+    ...landingPageRoutes,
   ]);
 }

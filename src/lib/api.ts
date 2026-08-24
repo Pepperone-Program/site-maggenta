@@ -95,6 +95,20 @@ export type BannerApi = {
   tamanho_tela?: "desktop" | "mobile" | string | null;
 };
 
+export type LandingPageApi = {
+  id: number;
+  title: string;
+  description?: string | null;
+  keywords: string;
+  url: string;
+  data_lp?: string | null;
+};
+
+export type LandingPage = LandingPageApi & {
+  slug: string;
+  path: string;
+};
+
 type BannersAtivosResponse = {
   items?: BannerApi[];
   grouped?: Partial<Record<BannerTipo | string, BannerApi[]>>;
@@ -356,6 +370,36 @@ const isEnabled = (value?: ApiFlag) => !value || value === "S";
 const isYes = (value?: ApiFlag) => value === "S" || value === "s";
 
 const apiBaseUrl = () => (process.env.NEXT_API_URL || "").replace(/\/$/, "");
+
+const landingPagePath = (targetUrl: string) => {
+  try {
+    const url = new URL(targetUrl);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+
+    const segments = url.pathname
+      .split("/")
+      .map((segment) => decodeURIComponent(segment).trim())
+      .filter(Boolean);
+    const slug = slugify(segments.at(-1) || "");
+    return slug ? `/${slug}` : null;
+  } catch {
+    return null;
+  }
+};
+
+const mapLandingPage = (landingPage: LandingPageApi): LandingPage | null => {
+  const path = landingPagePath(landingPage.url);
+  if (!path || !landingPage.title?.trim() || !landingPage.keywords?.trim()) return null;
+
+  return {
+    ...landingPage,
+    title: landingPage.title.trim(),
+    description: landingPage.description?.trim() || null,
+    keywords: landingPage.keywords.trim(),
+    path,
+    slug: path.slice(1),
+  };
+};
 
 export const buildRawApiUrl = (path: string) => {
   const base = apiBaseUrl();
@@ -1235,6 +1279,34 @@ export async function getProdutosSite(limit = 12): Promise<Product[]> {
     .filter((product) => isEnabled(product.habilitado) && isEnabled(product.site))
     .map((product) => mapApiProdutoToProduct(product))
     .slice(0, limit);
+}
+
+export async function getLandingPages(): Promise<LandingPage[]> {
+  const landingPages =
+    (await apiFetchAllPages<LandingPageApi>("/landing-pages", 100, 80)) || [];
+
+  return landingPages
+    .map(mapLandingPage)
+    .filter((landingPage): landingPage is LandingPage => Boolean(landingPage));
+}
+
+export async function getLandingPageByPath(path: string): Promise<LandingPage | null> {
+  const slug = slugify(path.split("/").filter(Boolean).at(-1) || "");
+  if (!slug) return null;
+
+  const payload = await apiRequest(
+    `/landing-pages?page=1&limit=100&search=${encodeURIComponent(slug)}`
+  );
+  const data = payload && typeof payload === "object" && "data" in payload
+    ? (payload.data as PaginatedApiData<LandingPageApi>)
+    : null;
+  const landingPages = (data?.items || [])
+    .map(mapLandingPage)
+    .filter((landingPage): landingPage is LandingPage => Boolean(landingPage));
+
+  return landingPages.find(
+    (landingPage) => landingPage.slug === slug
+  ) || null;
 }
 
 export async function getProdutosSitePaginated(
