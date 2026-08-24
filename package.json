@@ -2,6 +2,11 @@
   "name": "next-commerce-community",
   "version": "0.1.2",
   "private": true,
+  "allowScripts": {
+    "core-js@3.41.0": false,
+    "esbuild@0.27.4": true,
+    "sharp@0.34.5": true
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
