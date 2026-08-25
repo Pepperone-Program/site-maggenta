@@ -581,9 +581,22 @@ const apiRequest = async (
   const canUseValidatedCache =
     method === "GET" && init.cache !== "no-store" && !init.headers;
 
-  return canUseValidatedCache
-    ? cachedApiGet(url, includeAuth)
-    : requestApiUrl(url, init, includeAuth);
+  try {
+    return canUseValidatedCache
+      ? await cachedApiGet(url, includeAuth)
+      : await requestApiUrl(url, init, includeAuth);
+  } catch (error) {
+    // Paginas publicas nao podem virar um 500 do Next quando uma dependencia
+    // de leitura estiver temporariamente indisponivel. Os consumidores ja
+    // tratam null como lista vazia/item ausente; escritas continuam falhando
+    // explicitamente para nunca simularem sucesso.
+    if (method === "GET") {
+      console.error(`[api] Falha de leitura em ${apiRequestLabel(url)}.`, error);
+      return null;
+    }
+
+    throw error;
+  }
 };
 
 const authHeaders = () => {
