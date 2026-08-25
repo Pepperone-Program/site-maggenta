@@ -1,9 +1,10 @@
 export const API_TIMEOUT_MS = 5000;
 
-const timeoutMessage = "A API demorou mais de 5 segundos para responder.";
-
-const createTimeoutError = () =>
-  new DOMException(timeoutMessage, "TimeoutError");
+const createTimeoutError = (timeoutMs: number) =>
+  new DOMException(
+    `A API demorou mais de ${Math.ceil(timeoutMs / 1000)} segundos para responder.`,
+    "TimeoutError"
+  );
 
 export const isRequestTimeoutError = (error: unknown) =>
   error instanceof DOMException && error.name === "TimeoutError";
@@ -16,7 +17,7 @@ export async function fetchWithTimeout(
   const controller = new AbortController();
   const externalSignal = init.signal;
   const timeout = setTimeout(() => {
-    controller.abort(createTimeoutError());
+    controller.abort(createTimeoutError(timeoutMs));
   }, timeoutMs);
 
   const abortFromExternalSignal = () => {

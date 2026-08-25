@@ -338,6 +338,8 @@ const isYes = (value?: ApiFlag) => value === "S" || value === "s";
 
 const API_REQUEST_ATTEMPTS = 3;
 const API_RETRY_DELAYS_MS = [250, 750];
+const API_GET_TIMEOUT_MS = 12_000;
+const API_WRITE_TIMEOUT_MS = 20_000;
 const DEFAULT_API_URL = "https://backend.maggenta.com.br";
 
 class ApiRequestError extends Error {
@@ -471,18 +473,22 @@ const requestApiUrl = async (
 
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
-      const response = await fetchWithTimeout(url, {
-        ...init,
-        // O cache de pagina/rota controla a performance. A resposta bruta da
-        // API nao pode ser armazenada antes de validarmos que ela e JSON.
-        cache: "no-store",
-        headers: {
-          Accept: "application/json",
-          ...(isGet ? {} : { "Content-Type": "application/json" }),
-          ...(includeAuth ? authHeaders() : {}),
-          ...(init.headers || {}),
+      const response = await fetchWithTimeout(
+        url,
+        {
+          ...init,
+          // O cache de pagina/rota controla a performance. A resposta bruta da
+          // API nao pode ser armazenada antes de validarmos que ela e JSON.
+          cache: "no-store",
+          headers: {
+            Accept: "application/json",
+            ...(isGet ? {} : { "Content-Type": "application/json" }),
+            ...(includeAuth ? authHeaders() : {}),
+            ...(init.headers || {}),
+          },
         },
-      });
+        isGet ? API_GET_TIMEOUT_MS : API_WRITE_TIMEOUT_MS
+      );
 
       if (response.status === 404) {
         return null;
@@ -560,8 +566,12 @@ const apiRequest = async (
   baseUrl?: string
 ) => {
   const method = (init.method || "GET").toUpperCase();
+  // Leituras publicas usam primeiro o backend oficial. NEXT_API_URL continua
+  // sendo aceito como failover (e para ambientes locais), mas uma variavel
+  // antiga no Preview nao pode interromper o site a cada revalidacao.
+  const configuredReadBaseUrl = apiBaseUrl();
   const requestBaseUrl =
-    baseUrl || (method === "GET" ? apiBaseUrl() : apiWriteBaseUrl());
+    baseUrl || (method === "GET" ? DEFAULT_API_URL : apiWriteBaseUrl());
   const url = buildApiUrl(path, requestBaseUrl);
 
   if (!url) {
@@ -586,7 +596,9 @@ const apiRequest = async (
     // malformado. Leituras podem usar o backend publico oficial como segunda
     // origem; escritas nunca sao repetidas para evitar registros duplicados.
     const fallbackUrl =
-      method === "GET" && !baseUrl ? buildApiUrl(path, DEFAULT_API_URL) : "";
+      method === "GET" && !baseUrl
+        ? buildApiUrl(path, configuredReadBaseUrl)
+        : "";
 
     if (!fallbackUrl || fallbackUrl === url) {
       throw error;
@@ -1437,7 +1449,7 @@ export async function getLandingPages(): Promise<LandingPage[]> {
       "/landing-pages",
       100,
       80,
-      { cache: "no-store" },
+      {},
       false,
       landingPagesApiBaseUrl()
     )) || [];
@@ -1840,11 +1852,22 @@ export async function getRelatedProducts(product: Product, limit = 5) {
 
 export async function getProductSections() {
   const products = await getProdutosSite(100);
-  const stats = await fetchFirstAvailable<{ mais_orcados?: ProdutoRankingApi[] }>([
-    "/estatisticas/produtos",
-    "/produtos/estatisticas",
-    "/estatisticas-produtos",
-  ]);
+  let stats: { mais_orcados?: ProdutoRankingApi[] } | null = null;
+  try {
+    stats = await fetchFirstAvailable<{ mais_orcados?: ProdutoRankingApi[] }>([
+      "/estatisticas/produtos",
+      "/produtos/estatisticas",
+      "/estatisticas-produtos",
+    ]);
+  } catch (error) {
+    // Ranking e opcional. Uma falha nele nao pode esconder os produtos reais
+    // que ja foram recebidos e validados pela API principal.
+    console.warn(
+      `[api] Ranking de produtos indisponivel; mantendo catalogo valido: ${
+        error instanceof Error ? error.message : "falha desconhecida"
+      }`
+    );
+  }
   const byId = new Map(products.map((product) => [product.id, product]));
   const mostQuoted =
     stats?.mais_orcados
