@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     }
 
     for (const item of items) {
-      const response = await apiFetch(`/orcamentos/${quote.id_orcamento}/itens`, {
+      await apiFetch(`/orcamentos/${quote.id_orcamento}/itens`, {
         method: "POST",
         body: JSON.stringify({
           id_orcamento: quote.id_orcamento,
@@ -112,12 +112,6 @@ export async function POST(request: NextRequest) {
               : null,
         }),
       });
-
-      if (!response) {
-        throw new Error(
-          `A API nao confirmou o item ${item.codigo || item.id} do orcamento.`
-        );
-      }
     }
 
     return NextResponse.json({

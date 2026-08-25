@@ -1,8 +1,8 @@
 import { spawn, spawnSync } from "node:child_process";
 import { createServer } from "node:http";
 
-const apiPort = 4010;
-const sitePort = 3015;
+let apiPort = 0;
+const sitePort = 31000 + Math.floor(Math.random() * 1000);
 const received = [];
 let failQuoteItems = false;
 
@@ -40,7 +40,8 @@ const api = createServer(async (request, response) => {
       return json(response, 500, { success: false, message: "falha controlada" });
     }
 
-    return json(response, 200, { success: true, data: { id_item: 99 } });
+    // O backend pode confirmar o insert sem devolver uma representacao do item.
+    return json(response, 200, { success: true, data: null });
   }
 
   return json(response, 404, { success: false, message: "nao encontrado" });
@@ -49,7 +50,10 @@ const api = createServer(async (request, response) => {
 const listen = (server, port) =>
   new Promise((resolve, reject) => {
     server.once("error", reject);
-    server.listen(port, "127.0.0.1", resolve);
+    server.listen(port, "127.0.0.1", () => {
+      const address = server.address();
+      resolve(typeof address === "object" && address ? address.port : port);
+    });
   });
 
 const close = (server) => new Promise((resolve) => server.close(resolve));
@@ -94,9 +98,10 @@ const quotePayload = {
 };
 
 let site;
+let siteOutput = "";
 
 try {
-  await listen(api, apiPort);
+  apiPort = await listen(api, 0);
   site = spawn(
     process.platform === "win32" ? "npm.cmd" : "npm",
     ["start", "--", "-p", String(sitePort)],
@@ -108,9 +113,15 @@ try {
         NEXT_API_TOKEN: "contract-test-token",
       },
       shell: process.platform === "win32",
-      stdio: "ignore",
+      stdio: ["ignore", "pipe", "pipe"],
     }
   );
+  site.stdout?.on("data", (chunk) => {
+    siteOutput += chunk.toString();
+  });
+  site.stderr?.on("data", (chunk) => {
+    siteOutput += chunk.toString();
+  });
   site.unref();
 
   await waitForSite();
@@ -129,7 +140,11 @@ try {
     received.filter((entry) => entry.kind === "quote").length !== 1 ||
     received.filter((entry) => entry.kind === "item").length !== 1
   ) {
-    throw new Error("O fluxo de sucesso nao gravou orcamento e item corretamente.");
+    throw new Error(
+      `O fluxo de sucesso falhou: status=${successResponse.status} payload=${JSON.stringify(
+        successPayload
+      )} received=${JSON.stringify(received)} server=${siteOutput.slice(-2000)}`
+    );
   }
 
   failQuoteItems = true;
