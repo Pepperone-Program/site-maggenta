@@ -30,7 +30,17 @@ const fieldLabels: Record<(typeof requiredFields)[number], string> = {
 const text = (value: unknown) => String(value || "").trim();
 
 export async function POST(request: NextRequest) {
-  const payload = (await request.json()) as QuotePayload;
+  let payload: QuotePayload;
+
+  try {
+    payload = (await request.json()) as QuotePayload;
+  } catch {
+    return NextResponse.json(
+      { success: false, message: "Dados do orcamento invalidos." },
+      { status: 400 }
+    );
+  }
+
   const customer = payload.customer || {};
   const items = payload.items || [];
 
@@ -74,14 +84,17 @@ export async function POST(request: NextRequest) {
     entrega: "A combinar",
   };
 
-  const quote = await apiFetch<{ id_orcamento?: number }>("/orcamentos", {
-    method: "POST",
-    body: JSON.stringify(quoteBody),
-  });
-  const idOrcamento = quote?.id_orcamento || Date.now();
-  let usedFallback = !quote?.id_orcamento;
+  try {
+    const quote = await apiFetch<{ id_orcamento?: number }>("/orcamentos", {
+      method: "POST",
+      body: JSON.stringify(quoteBody),
+    });
+    const idOrcamento = Number(quote?.id_orcamento);
 
-  if (quote?.id_orcamento) {
+    if (!Number.isFinite(idOrcamento) || idOrcamento <= 0) {
+      throw new Error("A API nao confirmou o numero do orcamento.");
+    }
+
     for (const item of items) {
       const response = await apiFetch(`/orcamentos/${quote.id_orcamento}/itens`, {
         method: "POST",
@@ -101,18 +114,35 @@ export async function POST(request: NextRequest) {
       });
 
       if (!response) {
-        usedFallback = true;
+        throw new Error(
+          `A API nao confirmou o item ${item.codigo || item.id} do orcamento.`
+        );
       }
     }
-  }
 
-  return NextResponse.json({
-    success: true,
-    fallback: usedFallback,
-    data: {
-      id_orcamento: idOrcamento,
-      data_orcamento: dataOrcamento,
-      total_itens: items.length,
-    },
-  });
+    return NextResponse.json({
+      success: true,
+      data: {
+        id_orcamento: idOrcamento,
+        data_orcamento: dataOrcamento,
+        total_itens: items.length,
+      },
+    });
+  } catch (error) {
+    console.error("[api/orcamento] Falha ao gravar o orcamento na API.", {
+      message: error instanceof Error ? error.message : "falha desconhecida",
+    });
+
+    return NextResponse.json(
+      {
+        success: false,
+        message:
+          "Nao foi possivel registrar o orcamento agora. Seus produtos continuam no carrinho; tente novamente.",
+      },
+      {
+        status: 502,
+        headers: { "Cache-Control": "no-store" },
+      }
+    );
+  }
 }

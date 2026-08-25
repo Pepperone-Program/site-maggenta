@@ -286,11 +286,7 @@ const Checkout = () => {
       }
 
       setStatus("success");
-      setMessage(
-        payload.fallback
-          ? "Recebemos sua solicitacao localmente. A API nao respondeu agora, mas os dados foram mantidos no formato correto."
-          : "Solicitacao enviada com sucesso. Em breve entraremos em contato."
-      );
+      setMessage("Solicitacao enviada com sucesso. Em breve entraremos em contato.");
       trackEvent("lead_submit", {
         source: "orcamento_form",
         items: cartItems.length,

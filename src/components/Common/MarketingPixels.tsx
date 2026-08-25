@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
@@ -52,6 +52,14 @@ const useMarketingPageViews = () => {
 
 const MarketingPixels = () => {
   useMarketingPageViews();
+  const [canLoadIntegrazap, setCanLoadIntegrazap] = useState(false);
+
+  useEffect(() => {
+    const hostname = window.location.hostname.toLowerCase();
+    setCanLoadIntegrazap(
+      hostname === "maggenta.com.br" || hostname === "www.maggenta.com.br"
+    );
+  }, []);
 
   return (
     <>
@@ -113,7 +121,9 @@ const MarketingPixels = () => {
         src={`https://popups.rdstation.com.br/accounts/${rdStationAccountId}/popups.js`}
         strategy="lazyOnload"
       />
-      <Script id="integrazap-floating-widget" src={integrazapSrc} strategy="lazyOnload" />
+      {canLoadIntegrazap && (
+        <Script id="integrazap-floating-widget" src={integrazapSrc} strategy="lazyOnload" />
+      )}
       {cloudflareBeaconToken && (
         <Script
           id="cloudflare-insights"

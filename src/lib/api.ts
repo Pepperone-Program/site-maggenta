@@ -338,6 +338,7 @@ const isYes = (value?: ApiFlag) => value === "S" || value === "s";
 
 const API_REQUEST_ATTEMPTS = 3;
 const API_RETRY_DELAYS_MS = [250, 750];
+const DEFAULT_API_URL = "https://backend.maggenta.com.br";
 
 class ApiRequestError extends Error {
   retryable: boolean;
@@ -361,7 +362,8 @@ const apiRequestLabel = (url: string) => {
 const waitForApiRetry = (delayMs: number) =>
   new Promise((resolve) => setTimeout(resolve, delayMs));
 
-const apiBaseUrl = () => (process.env.NEXT_API_URL || "").replace(/\/$/, "");
+const apiBaseUrl = () =>
+  (process.env.NEXT_API_URL || DEFAULT_API_URL).replace(/\/$/, "");
 const landingPagesApiBaseUrl = () =>
   (
     process.env.NEXT_LANDING_PAGES_API_URL ||
@@ -543,7 +545,7 @@ const apiRequest = async (
 
   if (!url) {
     throw new ApiRequestError(
-      "NEXT_API_URL nao foi configurada para as chamadas da API.",
+      "A URL da API nao foi configurada para as chamadas do servidor.",
       false
     );
   }
