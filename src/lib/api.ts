@@ -362,8 +362,24 @@ const apiRequestLabel = (url: string) => {
 const waitForApiRetry = (delayMs: number) =>
   new Promise((resolve) => setTimeout(resolve, delayMs));
 
+const normalizeApiBaseUrl = (value: string | undefined, fallback: string) => {
+  const candidate = (value || "")
+    .trim()
+    .replace(/^['"]|['"]$/g, "")
+    .replace(/\/$/, "");
+
+  try {
+    const url = new URL(candidate || fallback);
+    if (url.protocol !== "https:" && url.protocol !== "http:") return fallback;
+    url.pathname = url.pathname.replace(/\/api\/v1\/?$/, "") || "/";
+    return url.toString().replace(/\/$/, "");
+  } catch {
+    return fallback;
+  }
+};
+
 const apiBaseUrl = () =>
-  (process.env.NEXT_API_URL || DEFAULT_API_URL).replace(/\/$/, "");
+  normalizeApiBaseUrl(process.env.NEXT_API_URL, DEFAULT_API_URL);
 const landingPagesApiBaseUrl = () =>
   (
     process.env.NEXT_LANDING_PAGES_API_URL ||
@@ -554,9 +570,29 @@ const apiRequest = async (
   const canUseValidatedCache =
     method === "GET" && init.cache !== "no-store" && !init.headers;
 
-  return canUseValidatedCache
-    ? cachedApiGet(url, includeAuth)
-    : requestApiUrl(url, init, includeAuth);
+  const execute = (requestUrl: string) =>
+    canUseValidatedCache
+      ? cachedApiGet(requestUrl, includeAuth)
+      : requestApiUrl(requestUrl, init, includeAuth);
+
+  try {
+    return await execute(url);
+  } catch (error) {
+    // O ambiente Preview pode ter NEXT_API_URL ausente, antiga ou com valor
+    // malformado. Leituras podem usar o backend publico oficial como segunda
+    // origem; escritas nunca sao repetidas para evitar registros duplicados.
+    const fallbackUrl =
+      method === "GET" && !baseUrl ? buildApiUrl(path, DEFAULT_API_URL) : "";
+
+    if (!fallbackUrl || fallbackUrl === url) {
+      throw error;
+    }
+
+    console.warn(
+      `[api] Alternando ${apiRequestLabel(url)} para o backend oficial apos falha de leitura.`
+    );
+    return execute(fallbackUrl);
+  }
 };
 
 const authHeaders = () => {
