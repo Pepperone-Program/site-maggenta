@@ -33,7 +33,7 @@ const fields = [
   { name: "contato", label: "Contato", placeholder: "Nome do responsável", required: true },
   { name: "email", label: "E-mail", type: "email", placeholder: "vendas@empresa.com.br", required: true },
   { name: "tel", label: "Telefone", type: "tel", placeholder: "(11) 99999-9999", required: true },
-  { name: "fantasia", label: "Empresa ou nome", placeholder: "Ex.: Maggenta Brindes", required: false },
+  { name: "fantasia", label: "Empresa ou nome", placeholder: "Ex: Maggenta Brindes", required: false },
   { name: "endereco", label: "Endereço", placeholder: "Rua, avenida ou travessa", required: false },
   { name: "endereco_n", label: "Número", placeholder: "43" },
   { name: "endereco_compl", label: "Complemento", placeholder: "Sala, bloco ou referência" },
@@ -75,7 +75,7 @@ const persistQuoteCustomer = (customer: Record<string, unknown>) => {
   try {
     window.localStorage.setItem(QUOTE_CUSTOMER_STORAGE_KEY, JSON.stringify(customer));
   } catch {
-    // Storage can be unavailable in private windows or restricted browsers.
+    // O navegador pode bloquear storage; isso nao impede o envio do orcamento.
   }
 };
 
