@@ -380,6 +380,8 @@ const normalizeApiBaseUrl = (value: string | undefined, fallback: string) => {
 
 const apiBaseUrl = () =>
   normalizeApiBaseUrl(process.env.NEXT_API_URL, DEFAULT_API_URL);
+const apiWriteBaseUrl = () =>
+  normalizeApiBaseUrl(process.env.NEXT_API_WRITE_URL, DEFAULT_API_URL);
 const landingPagesApiBaseUrl = () =>
   (
     process.env.NEXT_LANDING_PAGES_API_URL ||
@@ -557,7 +559,10 @@ const apiRequest = async (
   includeAuth = true,
   baseUrl?: string
 ) => {
-  const url = buildApiUrl(path, baseUrl);
+  const method = (init.method || "GET").toUpperCase();
+  const requestBaseUrl =
+    baseUrl || (method === "GET" ? apiBaseUrl() : apiWriteBaseUrl());
+  const url = buildApiUrl(path, requestBaseUrl);
 
   if (!url) {
     throw new ApiRequestError(
@@ -566,7 +571,6 @@ const apiRequest = async (
     );
   }
 
-  const method = (init.method || "GET").toUpperCase();
   const canUseValidatedCache =
     method === "GET" && init.cache !== "no-store" && !init.headers;
 

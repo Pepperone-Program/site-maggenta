@@ -109,7 +109,9 @@ try {
       cwd: process.cwd(),
       env: {
         ...process.env,
-        NEXT_API_URL: `http://127.0.0.1:${apiPort}`,
+        // Uma origem de leitura quebrada nao pode desviar as escritas.
+        NEXT_API_URL: "http://127.0.0.1:9",
+        NEXT_API_WRITE_URL: `http://127.0.0.1:${apiPort}`,
         NEXT_API_TOKEN: "contract-test-token",
       },
       shell: process.platform === "win32",
