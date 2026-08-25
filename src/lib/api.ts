@@ -1,4 +1,3 @@
-import shopData from "@/components/Shop/shopData";
 import categoryData from "@/components/Home/Categories/categoryData";
 import { Product } from "@/types/product";
 import { Category } from "@/types/category";
@@ -302,55 +301,22 @@ type SubcategoriaProdutoApi = {
 };
 
 const API_BASE_PATH = "/api/v1";
-const mockProdutos: ProdutoApi[] = shopData.map((product, index) => ({
-  id_produto: product.id,
-  id_tipo_produto: index % 4,
-  produto: product.title,
-  descricao: product.description,
-  codigo: `PEP-${String(product.id).padStart(4, "0")}`,
-  altura: product.specs.find((spec) => /altura|capacidade/i.test(spec.label))?.value,
-  largura: product.specs.find((spec) => /largura/i.test(spec.label))?.value,
-  profundidade: product.specs.find((spec) => /profundidade/i.test(spec.label))?.value,
-  peso: product.specs.find((spec) => /peso/i.test(spec.label))?.value,
-  imagem: product.imgs.previews[0],
-  data_inclusao: new Date(Date.UTC(2026, 0, 1) - index * 86400000).toISOString(),
-  obs: product.shortDescription,
-  site: "S",
-  lancamento: index < 3 ? "S" : "N",
-  promocao: index % 3 === 0 ? "S" : "N",
-  premium: product.badge === "Premium" || index % 5 === 0 ? "S" : "N",
-  habilitado: "S",
-}));
-
-const mockCategorias = categoryData.map((category, index) => ({
-  id_categoria: index + 1,
-  categoria: category.title,
-  descricao: null,
-  url_capa: category.img,
-  habilitado: "S",
-}));
-
 const categoryIcon = (index: number) =>
   categoryData[index % categoryData.length]?.img || "/images/categories/categories-01.png";
 
-const mockTiposProdutos = [
-  { id_tipo_produto: 1, tipo_produto: "Mochilas e bolsas", habilitado: "S" },
-  { id_tipo_produto: 2, tipo_produto: "Garrafas e copos", habilitado: "S" },
-  { id_tipo_produto: 3, tipo_produto: "Escritorio", habilitado: "S" },
-  { id_tipo_produto: 4, tipo_produto: "Tecnologia", habilitado: "S" },
-];
+type TipoProdutoApi = {
+  id_tipo_produto: number;
+  tipo_produto: string;
+  ordem?: number | null;
+  habilitado?: ApiFlag;
+};
 
-const mockPublicosAlvos = [
-  { id_publico_alvo: 1, publico_alvo: "Corporativo", ordem: 1, habilitado: "S" },
-  { id_publico_alvo: 2, publico_alvo: "Eventos", ordem: 2, habilitado: "S" },
-  { id_publico_alvo: 3, publico_alvo: "Colaboradores", ordem: 3, habilitado: "S" },
-];
-
-const mockDatasPromocionais = [
-  { id_data_promocional: 1, data_promocional: "Dia das Maes", ordem: 1, habilitado: "S" },
-  { id_data_promocional: 2, data_promocional: "Dia dos Pais", ordem: 2, habilitado: "S" },
-  { id_data_promocional: 3, data_promocional: "Black Friday", ordem: 3, habilitado: "S" },
-];
+type PublicoAlvoApi = {
+  id_publico_alvo: number;
+  publico_alvo: string;
+  ordem?: number | null;
+  habilitado?: ApiFlag;
+};
 
 const sortByOrderAndName = <T extends Record<string, unknown>>(
   titleKey: keyof T
@@ -544,6 +510,11 @@ const requestApiUrl = async (
         attempt < attempts &&
         (!(error instanceof ApiRequestError) || error.retryable);
 
+      const reason = error instanceof Error ? error.message : "falha desconhecida";
+      console.warn(
+        `[api] ${method} ${requestLabel} falhou na tentativa ${attempt}/${attempts}: ${reason}`
+      );
+
       if (!canRetry) {
         throw error;
       }
@@ -581,22 +552,9 @@ const apiRequest = async (
   const canUseValidatedCache =
     method === "GET" && init.cache !== "no-store" && !init.headers;
 
-  try {
-    return canUseValidatedCache
-      ? await cachedApiGet(url, includeAuth)
-      : await requestApiUrl(url, init, includeAuth);
-  } catch (error) {
-    // Paginas publicas nao podem virar um 500 do Next quando uma dependencia
-    // de leitura estiver temporariamente indisponivel. Os consumidores ja
-    // tratam null como lista vazia/item ausente; escritas continuam falhando
-    // explicitamente para nunca simularem sucesso.
-    if (method === "GET") {
-      console.error(`[api] Falha de leitura em ${apiRequestLabel(url)}.`, error);
-      return null;
-    }
-
-    throw error;
-  }
+  return canUseValidatedCache
+    ? cachedApiGet(url, includeAuth)
+    : requestApiUrl(url, init, includeAuth);
 };
 
 const authHeaders = () => {
@@ -1330,10 +1288,10 @@ export async function getCatalogoCategorias(
   init: RequestInit = {}
 ): Promise<CatalogoOption[]> {
   const categorias =
-    (await fetchAllFirstAvailable<(typeof mockCategorias)[number]>([
+    (await fetchAllFirstAvailable<CatalogoCategoria>([
       "/categorias",
       "/produtos/categorias",
-    ], 100, init)) || mockCategorias;
+    ], 100, init)) || [];
 
   return categorias
     .filter((category) => isEnabled(category.habilitado))
@@ -1349,11 +1307,11 @@ export async function getCatalogoTiposProdutos(
   init: RequestInit = {}
 ): Promise<CatalogoOption[]> {
   const tipos =
-    (await fetchAllFirstAvailable<(typeof mockTiposProdutos)[number]>([
+    (await fetchAllFirstAvailable<TipoProdutoApi>([
       "/tipos-produtos/habilitados",
       "/tipos_produtos/habilitados",
       "/tiposProdutos/habilitados",
-    ], 100, init)) || mockTiposProdutos;
+    ], 100, init)) || [];
 
   return tipos
     .filter((tipo) => isEnabled(tipo.habilitado))
@@ -1371,7 +1329,7 @@ export async function getDatasPromocionais(
   const datas =
     (await fetchAllFirstAvailable<DataPromocionalApi>([
       "/datas-promocionais",
-    ], 10, init)) || mockDatasPromocionais;
+    ], 10, init)) || [];
 
   return datas
     .filter((data) => isEnabled(data.habilitado))
@@ -1387,11 +1345,11 @@ export async function getPublicosAlvos(
   init: RequestInit = {}
 ): Promise<CatalogoOption[]> {
   const publicos =
-    (await fetchAllFirstAvailable<(typeof mockPublicosAlvos)[number]>([
+    (await fetchAllFirstAvailable<PublicoAlvoApi>([
       "/publicos-alvos",
       "/publicos_alvos",
       "/publicos-alvo",
-    ], 100, init)) || mockPublicosAlvos;
+    ], 100, init)) || [];
 
   return publicos
     .filter((publico) => isEnabled(publico.habilitado))
@@ -1928,7 +1886,7 @@ export async function getHomeCategories(): Promise<Category[]> {
     (await fetchAllFirstAvailable<CatalogoCategoria>([
       "/categorias",
       "/produtos/categorias",
-    ], 100)) || mockCategorias;
+    ], 100)) || [];
 
   return categorias
     .filter((category) => isEnabled(category.habilitado))

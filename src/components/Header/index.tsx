@@ -104,30 +104,14 @@ const SearchButtonIcon = ({ loading }: { loading: boolean }) =>
 const defaultMenuGroups: HeaderMenuGroup[] = [
   { id: "inicio", title: "Inicio", path: "/" },
   {
-    id: "categorias",
-    title: "Categorias",
-    items: [{ id: "1", title: "Produtos", path: "/brindes-personalizados" }],
-  },
-  {
     id: "brindes",
     title: "Brindes",
     path: "/brindes-para-empresas",
-    items: [{ id: "1", title: "Corporativos", path: "/brindes-personalizados" }],
   },
   {
     id: "lancamentos",
     title: "Lançamentos",
     path: "/lancamentos",
-  },
-  {
-    id: "publicos",
-    title: "Publicos alvos",
-    items: [{ id: "1", title: "Empresas", path: "/publicos-alvos/1-empresas" }],
-  },
-  {
-    id: "datas",
-    title: "Datas promocionais",
-    items: [{ id: "1", title: "Black Friday", path: "/brindes-personalizados" }],
   },
 ];
 
