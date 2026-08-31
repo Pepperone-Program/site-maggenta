@@ -275,10 +275,21 @@ export type SearchProdutosSiteResult = {
 
 type SearchProdutosSiteApiData = {
   items?: ProdutoApi[];
+  relatedItems?: ProdutoApi[];
+  groups?: {
+    primary?: ProdutoApi[];
+    related?: ProdutoApi[];
+  };
   total?: number;
+  relatedTotal?: number;
   page?: number;
   limit?: number;
   totalPages?: number;
+  nextCursor?: string | null;
+  searchId?: string;
+  rankingVersion?: string;
+  mode?: "legacy" | "advanced";
+  query?: string;
   destino_busca?: SearchDestinationApi | null;
   match_exato_codigo?: boolean;
   id_produto?: number;
@@ -381,7 +392,7 @@ const normalizeApiBaseUrl = (value: string | undefined, fallback: string) => {
 };
 
 const apiBaseUrl = () =>
-  normalizeApiBaseUrl(process.env.NEXT_API_URL, DEFAULT_API_URL);
+  normalizeApiBaseUrl(process.env.NEXT_API_URL, "");
 const apiWriteBaseUrl = () =>
   normalizeApiBaseUrl(process.env.NEXT_API_WRITE_URL, DEFAULT_API_URL);
 const landingPagesApiBaseUrl = () =>
@@ -566,12 +577,10 @@ const apiRequest = async (
   baseUrl?: string
 ) => {
   const method = (init.method || "GET").toUpperCase();
-  // Leituras publicas usam primeiro o backend oficial. NEXT_API_URL continua
-  // sendo aceito como failover (e para ambientes locais), mas uma variavel
-  // antiga no Preview nao pode interromper o site a cada revalidacao.
-  const configuredReadBaseUrl = apiBaseUrl();
+  // NEXT_API_URL e a unica origem das leituras publicas. Uma configuracao
+  // ausente ou invalida deve falhar explicitamente, sem trocar de backend.
   const requestBaseUrl =
-    baseUrl || (method === "GET" ? DEFAULT_API_URL : apiWriteBaseUrl());
+    baseUrl || (method === "GET" ? apiBaseUrl() : apiWriteBaseUrl());
   const url = buildApiUrl(path, requestBaseUrl);
 
   if (!url) {
@@ -589,26 +598,7 @@ const apiRequest = async (
       ? cachedApiGet(requestUrl, includeAuth)
       : requestApiUrl(requestUrl, init, includeAuth);
 
-  try {
-    return await execute(url);
-  } catch (error) {
-    // O ambiente Preview pode ter NEXT_API_URL ausente, antiga ou com valor
-    // malformado. Leituras podem usar o backend publico oficial como segunda
-    // origem; escritas nunca sao repetidas para evitar registros duplicados.
-    const fallbackUrl =
-      method === "GET" && !baseUrl
-        ? buildApiUrl(path, configuredReadBaseUrl)
-        : "";
-
-    if (!fallbackUrl || fallbackUrl === url) {
-      throw error;
-    }
-
-    console.warn(
-      `[api] Alternando ${apiRequestLabel(url)} para o backend oficial apos falha de leitura.`
-    );
-    return execute(fallbackUrl);
-  }
+  return execute(url);
 };
 
 const authHeaders = () => {
@@ -1721,27 +1711,31 @@ export async function searchProdutosSiteWithDestination(
     );
   };
 
-  // Alguns códigos são cadastrados com um "C" final. Antes de considerar um
-  // match exato do termo informado, damos preferência a essa variação.
-  if (!search.toLowerCase().endsWith("c")) {
-    const suffixedPayload = await apiRequest(
-      `/produtos/site/busca?q=${encodeURIComponent(
-        `${search}C`
-      )}&empresaId=1&page=1&limit=1`
-    );
-    const suffixedExactResult = await resolveExactProduct(parseSearchData(suffixedPayload));
-
-    if (suffixedExactResult) {
-      return suffixedExactResult;
-    }
-  }
-
   const payload = await apiRequest(
     `/produtos/site/busca?q=${encodeURIComponent(
       search
     )}&empresaId=1&page=${safePage}&limit=${safeLimit}`
   );
-  const data = parseSearchData(payload);
+  let data = parseSearchData(payload);
+
+  // A rota inteligente e canonica. Enquanto o mesmo backend estiver em modo
+  // legado, a rota compativel ?busca= evita falsos negativos sem trocar a
+  // origem definida em NEXT_API_URL nem alterar a ordem retornada pela API.
+  if (!data?.items?.length && !data?.destino_busca && data?.mode !== "advanced") {
+    const legacyParams = new URLSearchParams({
+      busca: search,
+      empresaId: "1",
+      page: String(safePage),
+      limit: String(safeLimit),
+    });
+    const legacyData = parseSearchData(
+      await apiRequest(`/produtos/site?${legacyParams.toString()}`)
+    );
+
+    if (legacyData?.items?.length || legacyData?.destino_busca) {
+      data = legacyData;
+    }
+  }
   const exactResult = await resolveExactProduct(data);
 
   if (exactResult) {
@@ -1765,22 +1759,7 @@ export async function searchProdutosSiteWithDestination(
     }
   }
 
-  const normalizedSearch = slugify(search);
-
-  const products = produtos
-    .map((product) => mapApiProdutoToProduct(product))
-    .sort((a, b) => {
-      const aTitle = slugify(a.title);
-      const bTitle = slugify(b.title);
-      const aStartsWithTitle = aTitle.startsWith(normalizedSearch);
-      const bStartsWithTitle = bTitle.startsWith(normalizedSearch);
-
-      if (aStartsWithTitle !== bStartsWithTitle) {
-        return aStartsWithTitle ? -1 : 1;
-      }
-
-      return a.title.localeCompare(b.title, "pt-BR", { sensitivity: "base" });
-    });
+  const products = produtos.map((product) => mapApiProdutoToProduct(product));
 
   return {
     products,

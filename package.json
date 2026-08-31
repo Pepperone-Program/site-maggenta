@@ -12,7 +12,8 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint",
-    "test:api-contract": "node scripts/smoke-api-contract.mjs"
+    "test:api-contract": "node scripts/smoke-api-contract.mjs",
+    "test:search-contract": "node scripts/smoke-search-contract.mjs"
   },
   "dependencies": {
     "@microsoft/clarity": "^1.0.2",
