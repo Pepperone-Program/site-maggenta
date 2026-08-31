@@ -33,6 +33,22 @@ const products = [
   },
 ];
 
+const umbrellaProducts = [
+  ...Array.from({ length: 3 }, (_, index) => ({
+    ...products[0],
+    id_produto: 8000 + index,
+    produto: `Guarda Chuva Personalizado ${index + 1}`,
+    codigo: `GCH${index + 1}`,
+  })),
+  {
+    ...products[0],
+    id_produto: 9000,
+    produto: "Mochila para Notebook Personalizada",
+    descricao: "Possui bolso lateral para guarda chuva.",
+    codigo: "MC405",
+  },
+];
+
 const json = (response, status, payload) => {
   response.writeHead(status, { "Content-Type": "application/json" });
   response.end(JSON.stringify(payload));
@@ -49,6 +65,20 @@ const api = createServer((request, response) => {
       return json(response, 503, {
         success: false,
         message: "falha controlada",
+      });
+    }
+
+    if (query === "guarda chuva") {
+      return json(response, 200, {
+        success: true,
+        data: {
+          items: umbrellaProducts,
+          total: 115,
+          page: 1,
+          limit: 40,
+          totalPages: 3,
+          mode: "advanced",
+        },
       });
     }
 
@@ -170,12 +200,38 @@ try {
     items[0]?.codigo !== "GT03" ||
     items[1]?.codigo !== "GT401" ||
     canonicalRequest?.searchParams.get("q") !== "garrafa com parede dupla" ||
+    canonicalRequest?.searchParams.get("limit") !== "40" ||
     requests.some((url) => url.pathname === "/api/v1/produtos/site")
   ) {
     throw new Error(
       `O contrato da busca falhou: status=${response.status} payload=${JSON.stringify(
         payload,
       )} requests=${requests.map((url) => url.toString()).join(",")} server=${siteOutput.slice(-2000)}`,
+    );
+  }
+  requests.length = 0;
+  const relevantCatalogResponse = await fetch(
+    `http://127.0.0.1:${sitePort}/api/produtos/catalogo?kind=search&q=guarda%20chuva&page=1&limit=40`,
+  );
+  const relevantCatalogPayload = await relevantCatalogResponse.json();
+  const relevantRequest = requests.find(
+    (url) =>
+      url.pathname === "/api/v1/produtos/site/busca" &&
+      url.searchParams.get("q") === "guarda chuva",
+  );
+
+  if (
+    relevantCatalogResponse.status !== 200 ||
+    relevantCatalogPayload?.items?.length !== 3 ||
+    relevantCatalogPayload?.items?.some((item) => item.codigo === "MC405") ||
+    relevantCatalogPayload?.total !== 3 ||
+    relevantCatalogPayload?.totalPages !== 1 ||
+    relevantRequest?.searchParams.get("limit") !== "40"
+  ) {
+    throw new Error(
+      `O corte de relevancia nominal falhou: status=${relevantCatalogResponse.status} payload=${JSON.stringify(
+        relevantCatalogPayload,
+      )}`,
     );
   }
 
@@ -259,7 +315,7 @@ try {
   }
 
   console.log(
-    "Search contract smoke passed: configured_origin_only=true advanced=2 legacy_fallback=2 catalog=2 technical_failure=502 empty_catalog=502 no_store=true ranking_preserved=true",
+    "Search contract smoke passed: configured_origin_only=true advanced=2 legacy_fallback=2 catalog=2 relevant_name_prefix=3 incidental_description_removed=true technical_failure=502 empty_catalog=502 no_store=true ranking_preserved=true",
   );
 } finally {
   stopProcessTree(site);

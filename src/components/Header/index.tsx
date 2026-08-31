@@ -113,7 +113,7 @@ const defaultMenuGroups: HeaderMenuGroup[] = [
   { id: "inicio", title: "Inicio", path: "/" },
   {
     id: "brindes",
-    title: "Brindes",
+    title: "Tipos de produtos",
     path: "/brindes-para-empresas",
   },
   {

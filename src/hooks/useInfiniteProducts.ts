@@ -16,12 +16,14 @@ export function useInfiniteProducts({
   totalPages,
   total,
   endpoint,
+  pagesPerLoad = 1,
 }: {
   initialItems: Product[];
   initialPage: number;
   totalPages: number;
   total: number;
   endpoint?: string;
+  pagesPerLoad?: number;
 }) {
   const [items, setItems] = useState(initialItems);
   const [page, setPage] = useState(initialPage);
@@ -56,27 +58,43 @@ export function useInfiniteProducts({
     requestRef.current = controller;
 
     try {
-      const url = new URL(endpoint, window.location.origin);
-      url.searchParams.set("page", String(page + 1));
-      const response = await fetch(url, { signal: controller.signal });
-      if (!response.ok) throw new Error("Falha ao carregar produtos");
-      const data = (await response.json()) as InfiniteResponse;
-      const nextItems = data.items || [];
+      const lastRequestedPage = Math.min(page + Math.max(1, pagesPerLoad), pageCount);
+      const pages = Array.from(
+        { length: lastRequestedPage - page },
+        (_, index) => page + index + 1
+      );
+      const responses = await Promise.all(
+        pages.map(async (nextPage) => {
+          const url = new URL(endpoint, window.location.origin);
+          url.searchParams.set("page", String(nextPage));
+          const response = await fetch(url, { signal: controller.signal });
+          if (!response.ok) throw new Error("Falha ao carregar produtos");
+          return (await response.json()) as InfiniteResponse;
+        })
+      );
+      const nextItems = responses.flatMap((data) => data.items || []);
+      const lastResponse = responses.at(-1);
 
       setItems((current) => {
         const ids = new Set(current.map((item) => String(item.id)));
-        return [...current, ...nextItems.filter((item) => !ids.has(String(item.id)))];
+        const uniqueNextItems = nextItems.filter((item) => {
+          const id = String(item.id);
+          if (ids.has(id)) return false;
+          ids.add(id);
+          return true;
+        });
+        return [...current, ...uniqueNextItems];
       });
-      setPage(Number(data.page || page + 1));
-      setPageCount(Number(data.totalPages ?? pageCount));
-      setItemCount(Number(data.total ?? itemCount));
+      setPage(Number(lastResponse?.page || lastRequestedPage));
+      setPageCount(Number(lastResponse?.totalPages ?? pageCount));
+      setItemCount(Number(lastResponse?.total ?? itemCount));
     } catch (caught) {
       if (!(caught instanceof DOMException && caught.name === "AbortError")) setError(true);
     } finally {
       loadingRef.current = false;
       setLoading(false);
     }
-  }, [endpoint, itemCount, page, pageCount]);
+  }, [endpoint, itemCount, page, pageCount, pagesPerLoad]);
 
   useEffect(() => {
     const target = sentinelRef.current;

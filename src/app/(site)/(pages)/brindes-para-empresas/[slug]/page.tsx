@@ -91,7 +91,11 @@ const resolveCatalogo = async (slug: string, page = 1, limit = 24) => {
   }
 
   const term = titleFromSlug(slug);
-  const catalogo = await searchProdutosSiteCatalogo(term, { page, limit });
+  // A API de busca entrega ate 40 itens por pagina. Usar esse lote na
+  // primeira renderizacao evita cards surgindo pagina a pagina e permite que
+  // o corte de relevancia identifique complementos incidentais ainda no SSR.
+  const searchLimit = Math.max(limit, 40);
+  const catalogo = await searchProdutosSiteCatalogo(term, { page, limit: searchLimit });
 
   if (catalogo.total > 0) {
     return catalogo;
@@ -107,7 +111,7 @@ const resolveCatalogo = async (slug: string, page = 1, limit = 24) => {
     });
   }
 
-  return getCatalogoTipoProduto(12, { page, limit });
+  return catalogo;
 };
 
 const BrindesParaEmpresasTipoPage = async ({ params, searchParams }: PageProps) => {
@@ -152,6 +156,7 @@ const BrindesParaEmpresasTipoPage = async ({ params, searchParams }: PageProps) 
             ? `/api/produtos/catalogo?kind=type&id=${tipoId}&limit=${catalogo.limit}`
             : `/api/produtos/catalogo?kind=search&q=${encodeURIComponent(title)}&limit=${catalogo.limit}`
         }
+        pagesPerLoad={tipoId > 0 ? 1 : 3}
       />
     </main>
   );

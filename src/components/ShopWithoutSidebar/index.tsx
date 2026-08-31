@@ -5,12 +5,11 @@ import Breadcrumb from "../Common/Breadcrumb";
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
 
-import shopData from "../Shop/shopData";
 import { Product } from "@/types/product";
 import { useInfiniteProducts } from "@/hooks/useInfiniteProducts";
 
 const ShopWithoutSidebar = ({
-  products = shopData,
+  products = [],
   title = "Brindes para empresas",
   description = "",
   breadcrumbPages = ["brindes personalizados"],
@@ -19,6 +18,7 @@ const ShopWithoutSidebar = ({
   page = 1,
   totalPages,
   loadMoreUrl,
+  pagesPerLoad = 1,
 }: {
   products?: Product[];
   title?: string;
@@ -31,6 +31,7 @@ const ShopWithoutSidebar = ({
   totalPages?: number;
   basePath?: string;
   loadMoreUrl?: string;
+  pagesPerLoad?: number;
 }) => {
   const [productStyle, setProductStyle] = useState("grid");
   const serverPaginated = typeof total === "number" && typeof totalPages === "number";
@@ -40,6 +41,7 @@ const ShopWithoutSidebar = ({
     totalPages: totalPages || 1,
     total: total ?? products.length,
     endpoint: loadMoreUrl,
+    pagesPerLoad,
   });
   const visibleProducts = serverPaginated ? infinite.items : products;
   const totalProducts = serverPaginated ? infinite.total : products.length;
