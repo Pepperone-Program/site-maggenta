@@ -1,4 +1,4 @@
-import { spawn, spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { createServer } from "node:http";
 
 let apiPort = 0;
@@ -56,17 +56,9 @@ const listen = (server, port) =>
     });
   });
 
-const close = (server) => new Promise((resolve) => server.close(resolve));
-
 const stopProcessTree = (child) => {
   if (!child?.pid) return;
-  if (process.platform === "win32") {
-    spawnSync("taskkill", ["/pid", String(child.pid), "/T", "/F"], {
-      stdio: "ignore",
-    });
-  } else {
-    child.kill("SIGTERM");
-  }
+  child.kill("SIGTERM");
 };
 
 const waitForSite = async () => {
@@ -103,8 +95,8 @@ let siteOutput = "";
 try {
   apiPort = await listen(api, 0);
   site = spawn(
-    process.platform === "win32" ? "npm.cmd" : "npm",
-    ["start", "--", "-p", String(sitePort)],
+    process.execPath,
+    ["node_modules/next/dist/bin/next", "start", "-p", String(sitePort)],
     {
       cwd: process.cwd(),
       env: {
@@ -114,7 +106,6 @@ try {
         NEXT_API_WRITE_URL: `http://127.0.0.1:${apiPort}`,
         NEXT_API_TOKEN: "contract-test-token",
       },
-      shell: process.platform === "win32",
       stdio: ["ignore", "pipe", "pipe"],
     }
   );
@@ -175,7 +166,7 @@ try {
 } finally {
   stopProcessTree(site);
   api.closeAllConnections?.();
-  await close(api);
+  api.close();
 }
 
 process.exit(0);

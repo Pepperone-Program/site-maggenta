@@ -46,7 +46,8 @@ type SearchSubmitPayload = {
 
 type SearchPayload = SearchSubmitPayload;
 
-const SEARCH_CACHE_TIME = 60 * 60 * 1000;
+const SEARCH_STALE_TIME = 30 * 1000;
+const SEARCH_CACHE_TIME = 5 * 60 * 1000;
 const SEARCH_CACHE_KEY = "product-search-v2";
 const MENU_CACHE_TIME = 60 * 60 * 1000;
 const MENU_CACHE_KEY = "header-menu-v2";
@@ -61,11 +62,11 @@ const searchProducts = async (
     { signal }
   );
 
-  if (response.status === 404) {
-    return null;
+  if (!response.ok) {
+    throw new Error(`A busca respondeu HTTP ${response.status}.`);
   }
 
-  return response.ok ? response.json() : null;
+  return response.json();
 };
 
 const fetchMenuGroups = async (signal?: AbortSignal): Promise<HeaderMenuGroup[]> => {
@@ -86,6 +87,13 @@ const showSearchNotFoundMessage = () => {
   toast.error("Busca não encontrada", {
     description: "Tente outro código, nome ou categoria.",
     duration: 2500,
+  });
+};
+
+const showSearchUnavailableMessage = () => {
+  toast.error("Busca temporariamente indisponível", {
+    description: "Não foi possível consultar os produtos. Tente novamente em instantes.",
+    duration: 3500,
   });
 };
 
@@ -186,7 +194,7 @@ const Header = ({
     queryKey: [SEARCH_CACHE_KEY, debouncedSearchQuery, 10],
     queryFn: ({ signal }) => searchProducts(debouncedSearchQuery, 10, signal),
     enabled: debouncedSearchQuery.length >= 2,
-    staleTime: SEARCH_CACHE_TIME,
+    staleTime: SEARCH_STALE_TIME,
     gcTime: SEARCH_CACHE_TIME,
     retry: false,
   });
@@ -330,7 +338,7 @@ const Header = ({
             : await queryClient.fetchQuery({
                 queryKey: [SEARCH_CACHE_KEY, query, 1],
                 queryFn: ({ signal }) => searchProducts(query, 1, signal),
-                staleTime: SEARCH_CACHE_TIME,
+                staleTime: SEARCH_STALE_TIME,
                 gcTime: SEARCH_CACHE_TIME,
               });
         const destinationPath = payload?.destino_busca?.path;
@@ -348,7 +356,7 @@ const Header = ({
 
         showSearchNotFoundMessage();
       } catch {
-        showSearchNotFoundMessage();
+        showSearchUnavailableMessage();
       } finally {
         setSearching(false);
       }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getMenuGroups } from "@/lib/api";
+import { getConfiguredApiOrigin, getMenuGroups } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +10,8 @@ export async function GET() {
       { success: true, data: menu },
       {
         headers: {
-          "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=1800",
+          "Cache-Control": "no-store",
+          "X-Maggenta-Data-Source": getConfiguredApiOrigin(),
         },
       }
     );
@@ -29,6 +30,7 @@ export async function GET() {
         headers: {
           "Cache-Control": "no-store",
           "Retry-After": "5",
+          "X-Maggenta-Data-Source": getConfiguredApiOrigin(),
         },
       }
     );

@@ -1,7 +1,6 @@
 import categoryData from "@/components/Home/Categories/categoryData";
 import { Product } from "@/types/product";
 import { Category } from "@/types/category";
-import { unstable_cache } from "next/cache";
 import { fetchWithTimeout } from "@/lib/timed-fetch";
 import { isValidImageSrc, safeImageSrc } from "@/lib/images";
 import {
@@ -351,7 +350,7 @@ const API_REQUEST_ATTEMPTS = 3;
 const API_RETRY_DELAYS_MS = [250, 750];
 const API_GET_TIMEOUT_MS = 12_000;
 const API_WRITE_TIMEOUT_MS = 20_000;
-const DEFAULT_API_URL = "https://backend.maggenta.com.br";
+const DEFAULT_API_WRITE_URL = "https://backend.maggenta.com.br";
 
 class ApiRequestError extends Error {
   retryable: boolean;
@@ -393,8 +392,12 @@ const normalizeApiBaseUrl = (value: string | undefined, fallback: string) => {
 
 const apiBaseUrl = () =>
   normalizeApiBaseUrl(process.env.NEXT_API_URL, "");
+export const getConfiguredApiOrigin = () => {
+  const baseUrl = apiBaseUrl();
+  return baseUrl ? new URL(baseUrl).origin : "unconfigured";
+};
 const apiWriteBaseUrl = () =>
-  normalizeApiBaseUrl(process.env.NEXT_API_WRITE_URL, DEFAULT_API_URL);
+  normalizeApiBaseUrl(process.env.NEXT_API_WRITE_URL, DEFAULT_API_WRITE_URL);
 const landingPagesApiBaseUrl = () =>
   (
     process.env.NEXT_LANDING_PAGES_API_URL ||
@@ -563,13 +566,6 @@ const requestApiUrl = async (
   throw lastError;
 };
 
-const cachedApiGet = unstable_cache(
-  (url: string, includeAuth: boolean) =>
-    requestApiUrl(url, { method: "GET" }, includeAuth),
-  ["maggenta-api-json-v1"],
-  { revalidate: 300 }
-);
-
 const apiRequest = async (
   path: string,
   init: RequestInit = {},
@@ -590,15 +586,9 @@ const apiRequest = async (
     );
   }
 
-  const canUseValidatedCache =
-    method === "GET" && init.cache !== "no-store" && !init.headers;
-
-  const execute = (requestUrl: string) =>
-    canUseValidatedCache
-      ? cachedApiGet(requestUrl, includeAuth)
-      : requestApiUrl(requestUrl, init, includeAuth);
-
-  return execute(url);
+  // O cache pertence às páginas e rotas que conhecem o contexto da resposta.
+  // Não retenha aqui um catálogo vazio ou uma busca transitória por 5 minutos.
+  return requestApiUrl(url, init, includeAuth);
 };
 
 const authHeaders = () => {
@@ -1427,10 +1417,19 @@ export async function getProdutosSite(limit = 12): Promise<Product[]> {
       maxPages
     )) || [];
 
-  return produtos
+  const products = produtos
     .filter((product) => isEnabled(product.habilitado) && isEnabled(product.site))
     .map((product) => mapApiProdutoToProduct(product))
     .slice(0, limit);
+
+  if (!products.length) {
+    throw new ApiRequestError(
+      "A API configurada em NEXT_API_URL retornou o catálogo público vazio.",
+      true
+    );
+  }
+
+  return products;
 }
 
 export async function getLandingPages(): Promise<LandingPage[]> {
@@ -1476,6 +1475,13 @@ export async function getProdutosSitePaginated(
       ? (payload.data as PaginatedApiData<ProdutoApi>)
       : null;
   const items = data?.items || [];
+
+  if (page === 1 && !items.length) {
+    throw new ApiRequestError(
+      "A API configurada em NEXT_API_URL retornou a primeira página do catálogo vazia.",
+      true
+    );
+  }
 
   return {
     items: items
@@ -1932,13 +1938,22 @@ export async function getHomeCategories(): Promise<Category[]> {
       "/produtos/categorias",
     ], 100)) || [];
 
-  return categorias
+  const categories = categorias
     .filter((category) => isEnabled(category.habilitado))
     .map((category, index) => ({
       id: Number(category.id_categoria),
       title: String(category.categoria),
       img: safeImageSrc(category.url_capa, categoryIcon(index)),
     }));
+
+  if (!categories.length) {
+    throw new ApiRequestError(
+      "A API configurada em NEXT_API_URL retornou as categorias públicas vazias.",
+      true
+    );
+  }
+
+  return categories;
 }
 
 export async function getActiveBanners(tipo?: BannerTipo): Promise<BannerApi[]> {
@@ -1957,7 +1972,7 @@ export async function getActiveBanners(tipo?: BannerTipo): Promise<BannerApi[]> 
     .sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
 }
 
-export const getMenuGroups = unstable_cache(async (): Promise<ApiMenuGroup[]> => {
+export const getMenuGroups = async (): Promise<ApiMenuGroup[]> => {
   const menuRequestInit: RequestInit = {};
   const [categorias, tipos, publicos, datas] = await Promise.all([
     getCatalogoCategorias(menuRequestInit),
@@ -1965,6 +1980,13 @@ export const getMenuGroups = unstable_cache(async (): Promise<ApiMenuGroup[]> =>
     getPublicosAlvos(menuRequestInit),
     getDatasPromocionais(menuRequestInit),
   ]);
+
+  if (!categorias.length || !tipos.length) {
+    throw new ApiRequestError(
+      "A API configurada em NEXT_API_URL retornou o menu comercial incompleto.",
+      true
+    );
+  }
 
   return [
     { id: "inicio", title: "Inicio", path: "/" },
@@ -2019,4 +2041,4 @@ export const getMenuGroups = unstable_cache(async (): Promise<ApiMenuGroup[]> =>
       })),
     },
   ];
-}, ["menu-groups"], { revalidate: 3600 });
+};

@@ -3,6 +3,7 @@ import { productPath } from "@/lib/products";
 import {
   friendlyParam,
   friendlyPersonalizedParam,
+  getConfiguredApiOrigin,
   searchProdutosSiteWithDestination,
 } from "@/lib/api";
 import { categoryPath, subcategoryPath } from "@/lib/seo";
@@ -37,70 +38,92 @@ const destinationPath = (
 };
 
 export async function GET(request: NextRequest) {
-  const query = request.nextUrl.searchParams.get("q") || "";
-  const limit = Number(request.nextUrl.searchParams.get("limit") || 10);
-  const requestedPage = Number(request.nextUrl.searchParams.get("page") || 1);
-  const {
-    products,
-    destinoBusca,
-    exactProduct,
-    exactProductId,
-    exactProductCode,
-    total,
-    page,
-    totalPages,
-  } = await searchProdutosSiteWithDestination(
-    query,
-    Number.isFinite(limit) ? limit : 10,
-    Number.isFinite(requestedPage) ? requestedPage : 1
-  );
-  const destinoPath = destinationPath(destinoBusca);
-  const exactProductPath =
-    exactProduct || exactProductId
-      ? productPath(
-          exactProduct || {
-            id: exactProductId || undefined,
-            title: exactProductCode || "produto",
-          }
-        )
-      : null;
-  const items = products.map((product) => ({
-    id: product.id,
-    title: product.title,
-    codigo: product.codigo || String(product.id),
-    label: `${product.title} - ${product.codigo || product.id}`,
-    path: productPath(product),
-  }));
+  try {
+    const query = request.nextUrl.searchParams.get("q") || "";
+    const limit = Number(request.nextUrl.searchParams.get("limit") || 10);
+    const requestedPage = Number(request.nextUrl.searchParams.get("page") || 1);
+    const {
+      products,
+      destinoBusca,
+      exactProduct,
+      exactProductId,
+      exactProductCode,
+      total,
+      page,
+      totalPages,
+    } = await searchProdutosSiteWithDestination(
+      query,
+      Number.isFinite(limit) ? limit : 10,
+      Number.isFinite(requestedPage) ? requestedPage : 1
+    );
+    const destinoPath = destinationPath(destinoBusca);
+    const exactProductPath =
+      exactProduct || exactProductId
+        ? productPath(
+            exactProduct || {
+              id: exactProductId || undefined,
+              title: exactProductCode || "produto",
+            }
+          )
+        : null;
+    const items = products.map((product) => ({
+      id: product.id,
+      title: product.title,
+      codigo: product.codigo || String(product.id),
+      label: `${product.title} - ${product.codigo || product.id}`,
+      path: productPath(product),
+    }));
 
-  return NextResponse.json(
-    {
-      success: true,
-      message: "Produtos encontrados com sucesso",
-      destino_busca: exactProductPath
-        ? {
-            tipo: "produto",
-            id_produto: exactProduct?.id || exactProductId,
-            codigo: exactProduct?.codigo || exactProductCode,
-            path: exactProductPath,
-          }
-        : destinoBusca
-        ? {
-            ...destinoBusca,
-            path: destinoPath,
-          }
-        : null,
-      data: {
-        items,
-        total: exactProductPath ? 1 : total,
-        page,
-        limit: Number.isFinite(limit) ? limit : 10,
-        totalPages: exactProductPath ? 1 : totalPages,
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Produtos encontrados com sucesso",
+        destino_busca: exactProductPath
+          ? {
+              tipo: "produto",
+              id_produto: exactProduct?.id || exactProductId,
+              codigo: exactProduct?.codigo || exactProductCode,
+              path: exactProductPath,
+            }
+          : destinoBusca
+          ? {
+              ...destinoBusca,
+              path: destinoPath,
+            }
+          : null,
+        data: {
+          items,
+          total: exactProductPath ? 1 : total,
+          page,
+          limit: Number.isFinite(limit) ? limit : 10,
+          totalPages: exactProductPath ? 1 : totalPages,
+        },
       },
-    },
-    {
-      headers: {
-        "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=1800",
+      {
+        headers: {
+          "Cache-Control": "no-store",
+          "X-Maggenta-Data-Source": getConfiguredApiOrigin(),
+        },
+      }
+    );
+  } catch (error) {
+    console.error("[api/produtos/busca] Falha ao consultar NEXT_API_URL.", {
+      message: error instanceof Error ? error.message : "falha desconhecida",
+    });
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Busca temporariamente indisponível.",
       },
-    }
-  );
+      {
+        status: 502,
+        headers: {
+          "Cache-Control": "no-store",
+          "Retry-After": "5",
+          "X-Maggenta-Data-Source": getConfiguredApiOrigin(),
+        },
+      }
+    );
+  }
 }

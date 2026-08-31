@@ -4,6 +4,7 @@ import { createServer } from "node:http";
 let apiPort = 0;
 const sitePort = 32000 + Math.floor(Math.random() * 1000);
 const requests = [];
+let emptyCatalog = false;
 
 const products = [
   {
@@ -42,6 +43,29 @@ const api = createServer((request, response) => {
   requests.push(url);
 
   if (url.pathname === "/api/v1/produtos/site/busca") {
+    const query = url.searchParams.get("q");
+
+    if (query === "falha tecnica") {
+      return json(response, 503, {
+        success: false,
+        message: "falha controlada",
+      });
+    }
+
+    if (query !== "compatibilidade legado") {
+      return json(response, 200, {
+        success: true,
+        data: {
+          items: products,
+          total: products.length,
+          page: 1,
+          limit: 10,
+          totalPages: 1,
+          mode: "advanced",
+        },
+      });
+    }
+
     return json(response, 200, {
       success: true,
       data: {
@@ -56,11 +80,13 @@ const api = createServer((request, response) => {
   }
 
   if (url.pathname === "/api/v1/produtos/site") {
+    const items = emptyCatalog && !url.searchParams.has("busca") ? [] : products;
+
     return json(response, 200, {
       success: true,
       data: {
-        items: products,
-        total: products.length,
+        items,
+        total: items.length,
         page: 1,
         limit: 10,
         totalPages: 1,
@@ -135,17 +161,16 @@ try {
   const canonicalRequest = requests.find(
     (url) => url.pathname === "/api/v1/produtos/site/busca",
   );
-  const legacyRequest = requests.find(
-    (url) => url.pathname === "/api/v1/produtos/site",
-  );
 
   if (
     response.status !== 200 ||
+    response.headers.get("cache-control") !== "no-store" ||
+    response.headers.get("x-maggenta-data-source") !== `http://127.0.0.1:${apiPort}` ||
     items.length !== 2 ||
     items[0]?.codigo !== "GT03" ||
     items[1]?.codigo !== "GT401" ||
     canonicalRequest?.searchParams.get("q") !== "garrafa com parede dupla" ||
-    legacyRequest?.searchParams.get("busca") !== "garrafa com parede dupla"
+    requests.some((url) => url.pathname === "/api/v1/produtos/site")
   ) {
     throw new Error(
       `O contrato da busca falhou: status=${response.status} payload=${JSON.stringify(
@@ -154,8 +179,87 @@ try {
     );
   }
 
+  requests.length = 0;
+  const legacyResponse = await fetch(
+    `http://127.0.0.1:${sitePort}/api/produtos/busca?q=compatibilidade%20legado&limit=10`,
+  );
+  const legacyPayload = await legacyResponse.json();
+  const legacyItems = legacyPayload?.data?.items || [];
+  const legacyRequest = requests.find(
+    (url) => url.pathname === "/api/v1/produtos/site",
+  );
+
+  if (
+    legacyResponse.status !== 200 ||
+    legacyItems.length !== 2 ||
+    legacyRequest?.searchParams.get("busca") !== "compatibilidade legado"
+  ) {
+    throw new Error(
+      `O fallback legado falhou: status=${legacyResponse.status} payload=${JSON.stringify(
+        legacyPayload,
+      )} requests=${requests.map((url) => url.toString()).join(",")}`,
+    );
+  }
+
+  requests.length = 0;
+  const catalogResponse = await fetch(
+    `http://127.0.0.1:${sitePort}/api/produtos/catalogo?kind=products&page=1&limit=10`,
+  );
+  const catalogPayload = await catalogResponse.json();
+
+  if (
+    catalogResponse.status !== 200 ||
+    catalogResponse.headers.get("cache-control") !== "no-store" ||
+    catalogResponse.headers.get("x-maggenta-data-source") !==
+      `http://127.0.0.1:${apiPort}` ||
+    catalogPayload?.items?.length !== 2 ||
+    catalogPayload?.total !== 2
+  ) {
+    throw new Error(
+      `O catálogo não preservou os dados da API: status=${catalogResponse.status} payload=${JSON.stringify(
+        catalogPayload,
+      )}`,
+    );
+  }
+
+  const failureResponse = await fetch(
+    `http://127.0.0.1:${sitePort}/api/produtos/busca?q=falha%20tecnica&limit=10`,
+  );
+  const failurePayload = await failureResponse.json();
+
+  if (
+    failureResponse.status !== 502 ||
+    failureResponse.headers.get("cache-control") !== "no-store" ||
+    failurePayload?.success !== false
+  ) {
+    throw new Error(
+      `A falha técnica da busca não foi propagada corretamente: status=${failureResponse.status} payload=${JSON.stringify(
+        failurePayload,
+      )}`,
+    );
+  }
+
+  emptyCatalog = true;
+  const emptyCatalogResponse = await fetch(
+    `http://127.0.0.1:${sitePort}/api/produtos/catalogo?kind=products&page=1&limit=11`,
+  );
+  const emptyCatalogPayload = await emptyCatalogResponse.json();
+  emptyCatalog = false;
+
+  if (
+    emptyCatalogResponse.status !== 502 ||
+    emptyCatalogResponse.headers.get("cache-control") !== "no-store" ||
+    emptyCatalogPayload?.success !== false
+  ) {
+    throw new Error(
+      `O catálogo vazio foi tratado como sucesso: status=${emptyCatalogResponse.status} payload=${JSON.stringify(
+        emptyCatalogPayload,
+      )}`,
+    );
+  }
+
   console.log(
-    "Search contract smoke passed: configured_origin_only=true canonical_empty=true legacy_fallback=2 ranking_preserved=true",
+    "Search contract smoke passed: configured_origin_only=true advanced=2 legacy_fallback=2 catalog=2 technical_failure=502 empty_catalog=502 no_store=true ranking_preserved=true",
   );
 } finally {
   stopProcessTree(site);
