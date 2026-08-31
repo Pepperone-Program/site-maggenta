@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { cache } from "react";
 import { getLandingPageByPath } from "@/lib/api";
 import {
   brandOpenGraphImages,
   buildSeoOther,
+  isIndexableLandingPage,
+  noIndexRobots,
   siteName,
   siteUrl,
   uniqueSeoKeywords,
@@ -50,6 +53,7 @@ const safeLandingPageUrl = (value: string) => {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const landingPage = await resolveLandingPage(params);
   if (!landingPage) return { robots: { index: false, follow: false } };
+  const indexable = isIndexableLandingPage(landingPage);
 
   const description =
     landingPage.description ||
@@ -65,7 +69,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description,
     keywords,
     alternates: { canonical },
-    robots: { index: true, follow: true },
+    robots: indexable ? { index: true, follow: true } : noIndexRobots,
     openGraph: {
       title,
       description,
@@ -99,9 +103,36 @@ export default async function LandingPage({ params }: PageProps) {
 
   const targetUrl = safeLandingPageUrl(landingPage.url);
   if (!targetUrl) notFound();
+  const indexable = isIndexableLandingPage(landingPage);
 
   return (
-    <main style={{ width: "100%", height: "100dvh", overflow: "hidden" }}>
+    <main style={{ width: "100%", minHeight: "100dvh", background: "#ffffff" }}>
+      {indexable && (
+        <header
+          style={{
+            maxWidth: 1180,
+            margin: "0 auto",
+            padding: "32px 20px 28px",
+            fontFamily: "Arial, sans-serif",
+          }}
+        >
+          <p style={{ margin: 0, color: "#9d174d", fontWeight: 700 }}>Campanha Maggenta</p>
+          <h1 style={{ margin: "10px 0 12px", color: "#1f2937", fontSize: "clamp(30px, 5vw, 48px)" }}>
+            {landingPage.title}
+          </h1>
+          <p style={{ maxWidth: 820, margin: 0, color: "#4b5563", fontSize: 18, lineHeight: 1.65 }}>
+            {landingPage.description}
+          </p>
+          <nav aria-label="Ações da campanha" style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 22 }}>
+            <Link href="/brindes-personalizados" style={{ color: "#9d174d", fontWeight: 700 }}>
+              Ver catálogo de brindes
+            </Link>
+            <Link href="/orcamentos" style={{ color: "#9d174d", fontWeight: 700 }}>
+              Solicitar orçamento
+            </Link>
+          </nav>
+        </header>
+      )}
       <iframe
         src={targetUrl}
         title={landingPage.title}
@@ -112,7 +143,7 @@ export default async function LandingPage({ params }: PageProps) {
         style={{
           display: "block",
           width: "100%",
-          height: "100%",
+          height: "100dvh",
           border: 0,
           background: "#ffffff",
         }}

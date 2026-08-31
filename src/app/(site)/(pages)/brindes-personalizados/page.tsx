@@ -8,11 +8,11 @@ import {
   getDatasPromocionais,
   getPublicosAlvos,
 } from "@/lib/api";
-import { buildSeoOther, categoryPath, contextualKeywords, siteUrl } from "@/lib/seo";
+import { buildSeoOther, catalogRobots, categoryPath, contextualKeywords, siteUrl } from "@/lib/seo";
 
 export const revalidate = 120;
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Brindes personalizados",
   alternates: {
     canonical: "/brindes-personalizados",
@@ -36,6 +36,13 @@ export const metadata: Metadata = {
 type CatalogPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+export async function generateMetadata({
+  searchParams,
+}: CatalogPageProps): Promise<Metadata> {
+  const params = (await searchParams) || {};
+  return { ...baseMetadata, robots: catalogRobots(params) };
+}
 
 const firstParam = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;

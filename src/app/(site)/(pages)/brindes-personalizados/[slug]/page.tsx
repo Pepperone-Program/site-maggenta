@@ -1,15 +1,21 @@
 import React, { cache } from "react";
 import { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { unstable_cache } from "next/cache";
+import { notFound, permanentRedirect } from "next/navigation";
 import ShopDetails from "@/components/ShopDetails";
 import { productPath } from "@/lib/products";
 import { getProdutoBySlug, getRelatedProducts } from "@/lib/api";
-import { buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
+import { buildSeoOther, categoryPath, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
 
 export const revalidate = 300;
 export const dynamicParams = true;
 
-const getCachedProdutoBySlug = cache(getProdutoBySlug);
+const getValidatedProdutoBySlug = unstable_cache(
+  getProdutoBySlug,
+  ["validated-product-by-slug-v1"],
+  { revalidate: 300 }
+);
+const getCachedProdutoBySlug = cache(getValidatedProdutoBySlug);
 
 type ProductPageProps = {
   params: Promise<{
@@ -24,13 +30,7 @@ export async function generateMetadata({
   const product = await getCachedProdutoBySlug(slug);
 
   if (!product) {
-    return {
-      title: "Produto nao encontrado",
-      robots: {
-        index: false,
-        follow: true,
-      },
-    };
+    notFound();
   }
 
   const canonical = new URL(productPath(product), siteUrl).toString();
@@ -102,11 +102,6 @@ export async function generateMetadata({
         canonical,
         subject: `${product.title}, ${product.category}, ${productCode}`,
       }),
-      "og:image": image,
-      "og:image:secure_url": image,
-      "og:image:width": "1200",
-      "og:image:height": "1200",
-      "og:image:type": image.includes(".png") ? "image/png" : "image/jpeg",
       "product:category": product.category,
       "product:retailer_item_id": productCode,
     },
@@ -118,11 +113,11 @@ const ProductPage = async ({ params }: ProductPageProps) => {
   const product = await getCachedProdutoBySlug(slug);
 
   if (!product) {
-    redirect("/");
+    notFound();
   }
 
   if (slug !== product.slug) {
-    redirect(productPath(product));
+    permanentRedirect(productPath(product));
   }
 
   const relatedProducts = await getRelatedProducts(product, 5);
@@ -143,19 +138,10 @@ const ProductPage = async ({ params }: ProductPageProps) => {
       name: "Maggenta",
     },
     category: product.category,
-    offers: {
-      "@type": "Offer",
-      url: canonical,
-      priceCurrency: "BRL",
-      price: product.discountedPrice > 0 ? product.discountedPrice.toFixed(2) : "0.00",
-      availability: "https://schema.org/InStock",
-      itemCondition: "https://schema.org/NewCondition",
-      seller: {
-        "@type": "Organization",
-        name: "Maggenta",
-      },
-    },
   };
+  const categoryCanonical = product.categoryId
+    ? new URL(categoryPath(product.categoryId, product.category), siteUrl).toString()
+    : null;
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -175,6 +161,12 @@ const ProductPage = async ({ params }: ProductPageProps) => {
       {
         "@type": "ListItem",
         position: 3,
+        name: product.category,
+        item: categoryCanonical || new URL("/brindes-personalizados", siteUrl).toString(),
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
         name: product.title,
         item: canonical,
       },

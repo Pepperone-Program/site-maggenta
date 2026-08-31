@@ -13,9 +13,10 @@ const launchBadgeStyle = {
 type SingleGridItemProps = {
   item: Product;
   badgeLabel?: string;
+  priority?: boolean;
 };
 
-const SingleGridItem = ({ item, badgeLabel }: SingleGridItemProps) => {
+const SingleGridItem = ({ item, badgeLabel, priority = false }: SingleGridItemProps) => {
   const href = productPath(item);
   const normalizedCode = String(item.codigo || "").trim();
   const primaryImage = item.imgs.previews[0];
@@ -44,7 +45,8 @@ const SingleGridItem = ({ item, badgeLabel }: SingleGridItemProps) => {
             fill
             sizes="(min-width: 1536px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 50vw"
             className="object-contain transition-opacity duration-500 group-hover:opacity-0"
-            loading="lazy"
+            priority={priority}
+            loading={priority ? "eager" : "lazy"}
           />
           <ImageWithFallback
             src={hoverImage}

@@ -9,7 +9,6 @@ import {
   googleAdsId,
   googleAnalyticsId,
   rdStationAccountId,
-  universalAnalyticsId,
 } from "@/lib/google-tags";
 
 const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
@@ -19,8 +18,6 @@ const integrazapSrc =
 type MarketingWindow = Window & {
   dataLayer?: unknown[];
   gtag?: (...args: unknown[]) => void;
-  ga?: (...args: unknown[]) => void;
-  uetq?: unknown[];
 };
 
 const useMarketingPageViews = () => {
@@ -38,15 +35,12 @@ const useMarketingPageViews = () => {
     const query = searchParams.toString();
     const pagePath = query ? `${pathname}?${query}` : pathname;
 
-    marketingWindow.gtag?.("config", googleAnalyticsId, { page_path: pagePath });
-    marketingWindow.gtag?.("config", universalAnalyticsId, { page_path: pagePath });
-    marketingWindow.gtag?.("config", googleAdsId, { page_path: pagePath });
-
-    marketingWindow.ga?.("set", "page", pagePath);
-    marketingWindow.ga?.("send", "pageview");
-
-    marketingWindow.uetq = marketingWindow.uetq || [];
-    marketingWindow.uetq.push("event", "page_view", { page_path: pagePath });
+    marketingWindow.gtag?.("event", "page_view", {
+      page_path: pagePath,
+      page_location: window.location.href,
+      page_title: document.title,
+      send_to: googleAnalyticsId,
+    });
   }, [pathname, searchParams]);
 };
 
@@ -65,8 +59,8 @@ const MarketingPixels = () => {
     <>
       <Script
         id="google-gtag"
-        src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsId}`}
-        strategy="afterInteractive"
+        src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`}
+        strategy="lazyOnload"
       />
       <Script
         id="google-gtag-init"
@@ -77,29 +71,14 @@ const MarketingPixels = () => {
             function gtag(){dataLayer.push(arguments);}
             window.gtag = window.gtag || gtag;
             gtag('js', new Date());
-            gtag('config', '${googleAnalyticsId}');
-            gtag('config', '${universalAnalyticsId}');
-            gtag('config', '${googleAdsId}');
-          `,
-        }}
-      />
-      <Script
-        id="universal-analytics"
-        strategy="lazyOnload"
-        dangerouslySetInnerHTML={{
-          __html: `
-            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-            })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-            ga('create', '${universalAnalyticsId}', 'auto');
-            ga('send', 'pageview');
+            gtag('config', '${googleAnalyticsId}', { send_page_view: true });
+            gtag('config', '${googleAdsId}', { send_page_view: false });
           `,
         }}
       />
       <Script
         id="bing-uet"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
         dangerouslySetInnerHTML={{
           __html: `
             (function(w,d,t,r,u){var f,n,i;w[u]=w[u]||[],f=function(){
@@ -136,7 +115,7 @@ const MarketingPixels = () => {
         <>
           <Script
             id="meta-pixel-init"
-            strategy="afterInteractive"
+            strategy="lazyOnload"
             dangerouslySetInnerHTML={{
               __html: `
                 !function(f,b,e,v,n,t,s)

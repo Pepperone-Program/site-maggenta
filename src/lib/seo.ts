@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { friendlyPersonalizedParam } from "@/lib/slugs";
+import type { LandingPage } from "@/lib/api";
 
 const normalizeSiteUrl = (value?: string) =>
   (value || "https://www.maggenta.com.br").replace(/\/$/, "");
@@ -54,6 +55,48 @@ export const prioritySeoKeywords = [
   "brindes premium personalizados",
   "loja de brindes personalizados",
 ];
+
+export const noIndexRobots: NonNullable<Metadata["robots"]> = {
+  index: false,
+  follow: true,
+  googleBot: {
+    index: false,
+    follow: true,
+  },
+};
+
+type SearchParamValue = string | string[] | undefined;
+
+const firstParam = (value: SearchParamValue) =>
+  Array.isArray(value) ? value[0] : value;
+
+export const isCleanCatalogQuery = (
+  params: Record<string, SearchParamValue> = {}
+) =>
+  Object.entries(params).every(([key, rawValue]) => {
+    const value = firstParam(rawValue)?.trim();
+
+    if (!value) return true;
+    if (key === "page") return value === "1";
+    if (key === "limit") return value === "24";
+    if (key === "empresaId") return value === "1";
+
+    return false;
+  });
+
+export const catalogRobots = (
+  params: Record<string, SearchParamValue> = {}
+): NonNullable<Metadata["robots"]> =>
+  isCleanCatalogQuery(params)
+    ? { index: true, follow: true }
+    : noIndexRobots;
+
+export const isIndexableLandingPage = (landingPage: LandingPage) => {
+  const description = landingPage.description?.replace(/\s+/g, " ").trim() || "";
+  const title = landingPage.title?.trim() || "";
+
+  return title.length >= 8 && description.length >= 80;
+};
 
 export const marketKeywords = uniqueSeoKeywords([
   ...prioritySeoKeywords,
@@ -125,17 +168,5 @@ export const buildSeoOther = ({
   subject: string;
 }): NonNullable<Metadata["other"]> => ({
   author: seoAuthor,
-  "og:url": canonical,
-  "og:title": title,
-  "og:description": description,
-  "og:type": "website",
-  "og:site_name": siteName,
-  "DC.Identifier": canonical,
-  "DC.title": title,
-  "DC.creator": seoAuthor,
-  "DC.subject": subject,
-  "DC.description": description,
-  "DC.publisher": siteUrl,
-  "ai-content": "index, follow",
   llms: `${siteUrl}/llms.txt`,
 });

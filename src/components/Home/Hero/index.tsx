@@ -8,6 +8,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import type { BannerApi } from "@/lib/api";
+import ImageWithFallback from "@/components/Common/ImageWithFallback";
 
 const slides = [
   {
@@ -86,9 +87,13 @@ const Hero = ({ banners = [] }: HeroProps) => {
             }
           >
             {banners.length ? (
-              <img
+              <ImageWithFallback
                 src={slide.image}
                 alt={slide.title}
+                width={1920}
+                height={720}
+                sizes="100vw"
+                priority={index === 0}
                 loading={index === 0 ? "eager" : "lazy"}
                 className="block h-auto w-full"
               />

@@ -1,6 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
-import { permanentRedirect } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import ShopWithSidebar from "@/components/ShopWithSidebar";
 import {
   getCatalogoCategoria,
@@ -8,7 +8,7 @@ import {
   getDatasPromocionais,
   getPublicosAlvos,
 } from "@/lib/api";
-import { brandOpenGraphImages, buildSeoOther, categoryPath, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
+import { brandOpenGraphImages, buildSeoOther, catalogRobots, categoryPath, contextualKeywords, noIndexRobots, siteName, siteUrl } from "@/lib/seo";
 
 export const revalidate = 120;
 
@@ -132,12 +132,22 @@ const categorySeoDescription = (categoryName: string) => {
   return `Encontre ${categoryName.toLocaleLowerCase("pt-BR")} personalizados para empresas, eventos e campanhas. Compare opções e solicite um orçamento com a Maggenta.`;
 };
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const routeParams = (await params) || {};
+  const query = (await searchParams) || {};
   const slug = routeParams.slug || "";
-  const categoriaId = toNumber(slug) || 1;
+  const categoriaId = toNumber(slug);
+
+  if (!categoriaId) {
+    notFound();
+  }
+
   const catalogo = await getCatalogoCategoria(categoriaId, { page: 1, limit: 1 });
-  const categoryName = catalogo.categoria?.categoria || titleFromSlug(slug) || "Categoria";
+  if (!catalogo.categoria) {
+    notFound();
+  }
+
+  const categoryName = catalogo.categoria.categoria;
   const title = categorySeoTitle(categoryName);
   const description = categorySeoDescription(categoryName);
   const canonical = new URL(categoryPath(categoriaId, categoryName), siteUrl).toString();
@@ -154,10 +164,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     alternates: {
       canonical,
     },
-    robots: {
-      index: true,
-      follow: true,
-    },
+    robots: catalogo.total > 0 ? catalogRobots(query) : noIndexRobots,
     openGraph: {
       title,
       description,
@@ -179,7 +186,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 const CategoriasPage = async ({ params, searchParams }: PageProps) => {
   const routeParams = (await params) || {};
   const query = (await searchParams) || {};
-  const categoriaId = toNumber(routeParams.slug) || 1;
+  const categoriaId = toNumber(routeParams.slug);
+  if (!categoriaId) notFound();
   const selectedDatas = firstParam(query.datas_promocionais) || firstParam(query.data_promocional);
   const [catalogo, categorias, publicosAlvos, datasPromocionais] = await Promise.all([
     getCatalogoCategoria(categoriaId, {
@@ -197,6 +205,7 @@ const CategoriasPage = async ({ params, searchParams }: PageProps) => {
     getPublicosAlvos(),
     getDatasPromocionais(),
   ]);
+  if (!catalogo.categoria) notFound();
   const canonicalPath = categoryPath(
     catalogo.categoria?.id_categoria || categoriaId,
     catalogo.categoria?.categoria || titleFromSlug(routeParams.slug || "") || "Categoria"

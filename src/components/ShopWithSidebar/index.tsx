@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import RangeSlider from "react-range-slider-input";
 import "react-range-slider-input/dist/style.css";
@@ -666,9 +667,9 @@ const ShopWithSidebar = ({
                       : "flex min-h-[720px] flex-col gap-7.5 transition-opacity duration-200"
                   }`}
                 >
-                  {items.map((item) =>
+                  {items.map((item, index) =>
                     productStyle === "grid" ? (
-                      <SingleGridItem item={item} key={item.id} />
+                      <SingleGridItem item={item} key={item.id} priority={index === 0} />
                     ) : (
                       <SingleListItem item={item} key={item.id} />
                     )
@@ -694,6 +695,18 @@ const ShopWithSidebar = ({
                   <span className="text-sm text-dark-4">Todos os produtos foram carregados.</span>
                 )}
               </div>
+              <nav className="mt-4 flex items-center justify-center gap-3" aria-label="Paginação do catálogo">
+                {infinite.page > 1 && (
+                  <Link className="rounded-full border border-gray-3 px-4 py-2 text-sm text-dark hover:border-blue hover:text-blue" href={buildCatalogHref({ page: infinite.page - 1 })}>
+                    Página anterior
+                  </Link>
+                )}
+                {infinite.page < infinite.totalPages && (
+                  <Link className="rounded-full border border-gray-3 px-4 py-2 text-sm text-dark hover:border-blue hover:text-blue" href={buildCatalogHref({ page: infinite.page + 1 })}>
+                    Próxima página
+                  </Link>
+                )}
+              </nav>
 
               {categoryDescription && (
                 <section className="mx-auto mt-16 max-w-[1500px] rounded-[28px] border border-white bg-white px-5 py-8 text-center shadow-2 sm:px-8 lg:px-12">

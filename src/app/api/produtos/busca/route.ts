@@ -34,7 +34,7 @@ const destinationPath = (
     return subcategoryPath(destino.id_subcategoria, title);
   }
 
-  return destino.url_sugerida || null;
+  return null;
 };
 
 export async function GET(request: NextRequest) {

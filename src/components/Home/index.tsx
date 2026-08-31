@@ -1,5 +1,6 @@
 import React, { Suspense } from "react";
 import dynamic from "next/dynamic";
+import { unstable_cache } from "next/cache";
 import Hero from "./Hero";
 import Categories from "./Categories";
 import NewArrival from "./NewArrivals";
@@ -20,13 +21,20 @@ const homeSectionCopy = [
   { eyebrow: "Para empresas", title: "Presentes corporativos com presença" },
 ];
 
+const getCachedHomeData = unstable_cache(
+  async () =>
+    Promise.all([
+      getProductSections(),
+      getHomeCategories(),
+      getActiveBanners("mega_banner"),
+      getActiveBanners("home_mega"),
+    ]),
+  ["validated-home-data-v1"],
+  { revalidate: 120 }
+);
+
 const Home = async () => {
-  const [productSections, categories, megaBanners, homeMegaBanners] = await Promise.all([
-    getProductSections(),
-    getHomeCategories(),
-    getActiveBanners("mega_banner"),
-    getActiveBanners("home_mega"),
-  ]);
+  const [productSections, categories, megaBanners, homeMegaBanners] = await getCachedHomeData();
   const visibleSections = productSections.filter((section) => section.id !== "promocao");
   const curatedSections = visibleSections.map((section, index) => ({
     ...section,

@@ -51,7 +51,7 @@ const websiteSchema = {
   url: siteUrl,
   potentialAction: {
     "@type": "SearchAction",
-    target: `${siteUrl}/brindes-personalizados?busca={search_term_string}`,
+    target: `${siteUrl}/busca?q={search_term_string}`,
     "query-input": "required name=search_term_string",
   },
 };

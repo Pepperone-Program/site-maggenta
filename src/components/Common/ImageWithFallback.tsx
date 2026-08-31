@@ -1,4 +1,7 @@
-import React from "react";
+"use client";
+
+import Image from "next/image";
+import React, { useMemo, useState } from "react";
 import { safeImageSrc } from "@/lib/images";
 
 type ImageWithFallbackProps = {
@@ -22,39 +25,58 @@ type ImageWithFallbackProps = {
 
 const fallbackImage = "/images/logo/NOVO_LOGO_MAGG_HORIZONTAL_COR.png";
 
-const ImageWithFallback = ({ src, fill, style, ...props }: ImageWithFallbackProps) => {
-  if (!src) {
-    return null;
+const canUseImageOptimizer = (src: string) => {
+  if (src.startsWith("/")) return true;
+
+  try {
+    const hostname = new URL(src).hostname.toLowerCase();
+    return (
+      hostname === "bucket.maggenta.com.br" ||
+      hostname === "cdn.xbzbrindes.com.br" ||
+      hostname.endsWith(".supabase.co")
+    );
+  } catch {
+    return false;
+  }
+};
+
+const ResilientImage = ({ src, fill = false, priority = false, ...props }: ImageWithFallbackProps) => {
+  const [currentSource, setCurrentSource] = useState(src);
+  const commonProps = {
+    src: currentSource,
+    sizes: props.sizes,
+    priority,
+    loading: priority ? undefined : props.loading,
+    placeholder: props.placeholder,
+    blurDataURL: props.blurDataURL,
+    className: props.className,
+    style: props.style,
+    unoptimized: props.unoptimized ?? !canUseImageOptimizer(currentSource),
+    onError: () => {
+      if (currentSource !== fallbackImage) setCurrentSource(fallbackImage);
+    },
+    onPointerEnter: props.onPointerEnter,
+    onPointerMove: props.onPointerMove,
+    onPointerLeave: props.onPointerLeave,
+  };
+
+  if (fill) {
+    return <Image {...commonProps} alt={props.alt} fill />;
   }
 
-  const imageStyle: React.CSSProperties = fill
-    ? {
-        position: "absolute",
-        inset: 0,
-        width: "100%",
-        height: "100%",
-        objectFit: "contain",
-        ...style,
-      }
-    : {
-        ...style,
-      };
-
   return (
-    <img
-      src={safeImageSrc(src, fallbackImage)}
+    <Image
+      {...commonProps}
       alt={props.alt}
-      width={props.width}
-      height={props.height}
-      loading={props.priority ? "eager" : props.loading}
-      decoding="async"
-      className={props.className}
-      style={imageStyle}
-      onPointerEnter={props.onPointerEnter}
-      onPointerMove={props.onPointerMove}
-      onPointerLeave={props.onPointerLeave}
+      width={Math.max(1, props.width || 1)}
+      height={Math.max(1, props.height || 1)}
     />
   );
+};
+
+const ImageWithFallback = ({ src, ...props }: ImageWithFallbackProps) => {
+  const safeSource = useMemo(() => safeImageSrc(src, fallbackImage), [src]);
+  return <ResilientImage key={safeSource} src={safeSource} {...props} />;
 };
 
 export default ImageWithFallback;

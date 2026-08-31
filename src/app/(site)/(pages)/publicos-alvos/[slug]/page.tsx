@@ -1,5 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
+import { notFound, permanentRedirect } from "next/navigation";
 import ShopWithSidebar from "@/components/ShopWithSidebar";
 import {
   getCatalogoCategorias,
@@ -8,7 +9,7 @@ import {
   getPublicosAlvos,
   friendlyParam,
 } from "@/lib/api";
-import { brandOpenGraphImages, buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
+import { brandOpenGraphImages, buildSeoOther, catalogRobots, contextualKeywords, noIndexRobots, siteName, siteUrl } from "@/lib/seo";
 
 export const revalidate = 120;
 
@@ -17,12 +18,19 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const routeParams = (await params) || {};
+  const query = (await searchParams) || {};
   const slug = routeParams.slug || "";
-  const publicoAlvoId = toNumber(slug) || 1;
+  const publicoAlvoId = toNumber(slug);
+  if (!publicoAlvoId) {
+    notFound();
+  }
   const catalogo = await getCatalogoPublicoAlvo(publicoAlvoId, { page: 1, limit: 1 });
-  const publicoName = catalogo.categoria?.categoria || "Público Alvo";
+  if (!catalogo.categoria) {
+    notFound();
+  }
+  const publicoName = catalogo.categoria.categoria;
   const title = `Brindes para ${publicoName} Personalizados e Corporativos`;
   const description = `Encontre brindes personalizados para ${publicoName.toLocaleLowerCase("pt-BR")}, ideais para relacionamento, eventos e campanhas corporativas. Solicite um orçamento.`;
   const canonical = new URL(
@@ -41,10 +49,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     alternates: {
       canonical,
     },
-    robots: {
-      index: true,
-      follow: true,
-    },
+    robots: catalogo.total > 0 ? catalogRobots(query) : noIndexRobots,
     openGraph: {
       title,
       description,
@@ -74,7 +79,8 @@ const toNumber = (value: string | string[] | undefined) => {
 const PublicoAlvoSlugPage = async ({ params, searchParams }: PageProps) => {
   const routeParams = (await params) || {};
   const query = (await searchParams) || {};
-  const publicoAlvoId = toNumber(routeParams.slug) || 1;
+  const publicoAlvoId = toNumber(routeParams.slug);
+  if (!publicoAlvoId) notFound();
   const [catalogo, categorias, publicosAlvos, datasPromocionais] = await Promise.all([
     getCatalogoPublicoAlvo(publicoAlvoId, {
       empresaId: 1,
@@ -90,6 +96,21 @@ const PublicoAlvoSlugPage = async ({ params, searchParams }: PageProps) => {
     getPublicosAlvos(),
     getDatasPromocionais(),
   ]);
+  if (!catalogo.categoria) notFound();
+
+  const canonicalPath = `/publicos-alvos/${encodeURIComponent(
+    friendlyParam(publicoAlvoId, catalogo.categoria.categoria)
+  )}`;
+  const currentPath = `/publicos-alvos/${routeParams.slug || ""}`;
+  if (currentPath !== canonicalPath) {
+    const redirectParams = new URLSearchParams();
+    Object.entries(query).forEach(([key, value]) => {
+      const param = firstParam(value);
+      if (param) redirectParams.set(key, param);
+    });
+    const redirectQuery = redirectParams.toString();
+    permanentRedirect(`${canonicalPath}${redirectQuery ? `?${redirectQuery}` : ""}`);
+  }
 
   const publicoAlvo = publicosAlvos.find((p) => p.id === publicoAlvoId);
 
@@ -111,7 +132,7 @@ const PublicoAlvoSlugPage = async ({ params, searchParams }: PageProps) => {
         publicOptions={publicosAlvos}
         dateOptions={datasPromocionais}
         pageTitle={`Brindes para ${publicoAlvo?.title || "Publico Alvo"}`}
-        basePath={`/publicos-alvos/${routeParams.slug || publicoAlvoId}`}
+        basePath={canonicalPath}
       />
     </main>
   );

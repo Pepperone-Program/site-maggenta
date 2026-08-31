@@ -7,10 +7,6 @@ export const googleAnalyticsId = publicEnv(
   process.env.NEXT_PUBLIC_GA4_ID,
   "G-EVYDJZ7M1P"
 );
-export const universalAnalyticsId = publicEnv(
-  process.env.NEXT_PUBLIC_UA_ID,
-  "UA-37937142-1"
-);
 export const googleAdsId = publicEnv(
   process.env.NEXT_PUBLIC_GOOGLE_ADS_ID,
   "AW-928315079"

@@ -1,12 +1,12 @@
 import React from "react";
 import { Metadata } from "next";
 import ShopWithoutSidebar from "@/components/ShopWithoutSidebar";
-import { brandOpenGraphImages, buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
+import { brandOpenGraphImages, buildSeoOther, catalogRobots, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
 import { getProdutosSitePaginated } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Lançamentos de Brindes Personalizados",
   description:
     "Veja os 24 primeiros lançamentos do catálogo Maggenta, com produtos novos e destaque para campanhas, eventos e ações promocionais.",
@@ -37,8 +37,28 @@ export const metadata: Metadata = {
   }),
 };
 
-export default async function LancamentosPage() {
-  const catalogo = await getProdutosSitePaginated({ page: 1, limit: 24 });
+type PageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+const firstParam = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] : value;
+
+const positiveNumber = (value: string | string[] | undefined, fallback: number) => {
+  const parsed = Number(firstParam(value));
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
+};
+
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const params = (await searchParams) || {};
+  return { ...baseMetadata, robots: catalogRobots(params) };
+}
+
+export default async function LancamentosPage({ searchParams }: PageProps) {
+  const params = (await searchParams) || {};
+  const page = positiveNumber(params.page, 1);
+  const limit = Math.min(48, positiveNumber(params.limit, 24));
+  const catalogo = await getProdutosSitePaginated({ page, limit });
 
   return (
     <main>
@@ -52,6 +72,7 @@ export default async function LancamentosPage() {
         page={catalogo.page}
         limit={catalogo.limit}
         totalPages={catalogo.totalPages}
+        basePath="/lancamentos"
         loadMoreUrl={`/api/produtos/catalogo?kind=products&limit=${catalogo.limit}`}
       />
     </main>

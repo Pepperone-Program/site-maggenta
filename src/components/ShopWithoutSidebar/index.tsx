@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import Link from "next/link";
 import Breadcrumb from "../Common/Breadcrumb";
 
 import SingleGridItem from "../Shop/SingleGridItem";
@@ -16,7 +17,9 @@ const ShopWithoutSidebar = ({
   productBadgeLabel,
   total,
   page = 1,
+  limit = 24,
   totalPages,
+  basePath = "/brindes-personalizados",
   loadMoreUrl,
   pagesPerLoad = 1,
 }: {
@@ -45,6 +48,15 @@ const ShopWithoutSidebar = ({
   });
   const visibleProducts = serverPaginated ? infinite.items : products;
   const totalProducts = serverPaginated ? infinite.total : products.length;
+  const buildPageHref = (targetPage: number) => {
+    const [pathname, query = ""] = basePath.split("?");
+    const params = new URLSearchParams(query);
+    if (targetPage > 1) params.set("page", String(targetPage));
+    else params.delete("page");
+    if (limit !== 24) params.set("limit", String(limit));
+    const serialized = params.toString();
+    return serialized ? `${pathname}?${serialized}` : pathname;
+  };
 
   const options = [
     { label: "Mais recentes", value: "0" },
@@ -171,6 +183,7 @@ const ShopWithoutSidebar = ({
                       item={item}
                       key={`${item.id}-${index}`}
                       badgeLabel={productBadgeLabel}
+                      priority={index === 0}
                     />
                   ) : (
                     <SingleListItem
@@ -184,17 +197,31 @@ const ShopWithoutSidebar = ({
               {/* <!-- Products Grid Tab Content End --> */}
 
               {serverPaginated && (
-                <div ref={infinite.sentinelRef} className="mt-12 flex min-h-16 items-center justify-center" aria-live="polite">
-                  {infinite.loading && <span className="text-sm text-dark-4">Carregando mais produtos...</span>}
-                  {infinite.error && (
-                    <button type="button" onClick={infinite.loadNext} className="rounded-full bg-blue px-5 py-2.5 text-sm text-white">
-                      Tentar carregar novamente
-                    </button>
-                  )}
-                  {!infinite.hasMore && visibleProducts.length > 0 && (
-                    <span className="text-sm text-dark-4">Todos os produtos foram carregados.</span>
-                  )}
-                </div>
+                <>
+                  <div ref={infinite.sentinelRef} className="mt-12 flex min-h-16 items-center justify-center" aria-live="polite">
+                    {infinite.loading && <span className="text-sm text-dark-4">Carregando mais produtos...</span>}
+                    {infinite.error && (
+                      <button type="button" onClick={infinite.loadNext} className="rounded-full bg-blue px-5 py-2.5 text-sm text-white">
+                        Tentar carregar novamente
+                      </button>
+                    )}
+                    {!infinite.hasMore && visibleProducts.length > 0 && (
+                      <span className="text-sm text-dark-4">Todos os produtos foram carregados.</span>
+                    )}
+                  </div>
+                  <nav className="mt-4 flex items-center justify-center gap-3" aria-label="Paginação do catálogo">
+                    {infinite.page > 1 && (
+                      <Link className="rounded-full border border-gray-3 px-4 py-2 text-sm text-dark hover:border-blue hover:text-blue" href={buildPageHref(infinite.page - 1)}>
+                        Página anterior
+                      </Link>
+                    )}
+                    {infinite.page < infinite.totalPages && (
+                      <Link className="rounded-full border border-gray-3 px-4 py-2 text-sm text-dark hover:border-blue hover:text-blue" href={buildPageHref(infinite.page + 1)}>
+                        Próxima página
+                      </Link>
+                    )}
+                  </nav>
+                </>
               )}
               {description && (
                 <div className="mx-auto mt-16 max-w-[980px] rounded-md border border-gray-3 bg-white px-5 py-8 text-justify leading-8 text-dark-4 shadow-1 sm:px-8">

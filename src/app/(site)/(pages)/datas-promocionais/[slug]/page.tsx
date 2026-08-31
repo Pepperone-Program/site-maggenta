@@ -1,5 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
+import { notFound, permanentRedirect } from "next/navigation";
 import ShopWithSidebar from "@/components/ShopWithSidebar";
 import {
   getCatalogoCategorias,
@@ -8,7 +9,7 @@ import {
   getPublicosAlvos,
   friendlyParam,
 } from "@/lib/api";
-import { brandOpenGraphImages, buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
+import { brandOpenGraphImages, buildSeoOther, catalogRobots, contextualKeywords, noIndexRobots, siteName, siteUrl } from "@/lib/seo";
 
 export const revalidate = 120;
 
@@ -17,12 +18,19 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const routeParams = (await params) || {};
+  const query = (await searchParams) || {};
   const slug = routeParams.slug || "";
-  const dataPromocionalId = toNumber(slug) || 1;
+  const dataPromocionalId = toNumber(slug);
+  if (!dataPromocionalId) {
+    notFound();
+  }
   const catalogo = await getCatalogoDataPromocional(dataPromocionalId, { page: 1, limit: 1 });
-  const dataName = catalogo.categoria?.categoria || "Data Promocional";
+  if (!catalogo.categoria) {
+    notFound();
+  }
+  const dataName = catalogo.categoria.categoria;
   const title = `Brindes para ${dataName} Personalizados e Promocionais`;
   const description = `Planeje ações para ${dataName} com brindes personalizados para clientes, equipes e eventos. Conheça o catálogo e solicite seu orçamento.`;
   const canonical = new URL(
@@ -41,10 +49,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     alternates: {
       canonical,
     },
-    robots: {
-      index: true,
-      follow: true,
-    },
+    robots: catalogo.total > 0 ? catalogRobots(query) : noIndexRobots,
     openGraph: {
       title,
       description,
@@ -74,7 +79,8 @@ const toNumber = (value: string | string[] | undefined) => {
 const DataPromocionalSlugPage = async ({ params, searchParams }: PageProps) => {
   const routeParams = (await params) || {};
   const query = (await searchParams) || {};
-  const dataPromocionalId = toNumber(routeParams.slug) || 1;
+  const dataPromocionalId = toNumber(routeParams.slug);
+  if (!dataPromocionalId) notFound();
   const [catalogo, categorias, publicosAlvos, datasPromocionais] = await Promise.all([
     getCatalogoDataPromocional(dataPromocionalId, {
       empresaId: 1,
@@ -90,6 +96,21 @@ const DataPromocionalSlugPage = async ({ params, searchParams }: PageProps) => {
     getPublicosAlvos(),
     getDatasPromocionais(),
   ]);
+  if (!catalogo.categoria) notFound();
+
+  const canonicalPath = `/datas-promocionais/${encodeURIComponent(
+    friendlyParam(dataPromocionalId, catalogo.categoria.categoria)
+  )}`;
+  const currentPath = `/datas-promocionais/${routeParams.slug || ""}`;
+  if (currentPath !== canonicalPath) {
+    const redirectParams = new URLSearchParams();
+    Object.entries(query).forEach(([key, value]) => {
+      const param = firstParam(value);
+      if (param) redirectParams.set(key, param);
+    });
+    const redirectQuery = redirectParams.toString();
+    permanentRedirect(`${canonicalPath}${redirectQuery ? `?${redirectQuery}` : ""}`);
+  }
 
   const dataPromocional = datasPromocionais.find((d) => d.id === dataPromocionalId);
 
@@ -111,7 +132,7 @@ const DataPromocionalSlugPage = async ({ params, searchParams }: PageProps) => {
         publicOptions={publicosAlvos}
         dateOptions={datasPromocionais}
         pageTitle={`Brindes para ${dataPromocional?.title || "Data Promocional"}`}
-        basePath={`/datas-promocionais/${routeParams.slug || dataPromocionalId}`}
+        basePath={canonicalPath}
       />
     </main>
   );

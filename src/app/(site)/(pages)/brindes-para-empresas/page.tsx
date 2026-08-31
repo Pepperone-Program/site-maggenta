@@ -3,11 +3,11 @@ import { Metadata } from "next";
 import { permanentRedirect } from "next/navigation";
 import ShopWithoutSidebar from "@/components/ShopWithoutSidebar";
 import { friendlyPersonalizedParam, getProdutosSitePaginated } from "@/lib/api";
-import { buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
+import { buildSeoOther, catalogRobots, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
 
 export const revalidate = 120;
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Brindes para Empresas: Catálogo Completo",
   description:
     "Confira o catálogo de brindes para empresas, eventos e campanhas promocionais. Encontre opções personalizáveis e solicite seu orçamento.",
@@ -32,6 +32,11 @@ export const metadata: Metadata = {
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const params = (await searchParams) || {};
+  return { ...baseMetadata, robots: catalogRobots(params) };
+}
 
 const firstParam = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;

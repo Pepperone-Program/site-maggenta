@@ -9,7 +9,7 @@ import "swiper/css";
 import SingleItem from "./SingleItem";
 
 const Testimonials = () => {
-  const testimonials = [...testimonialsData, ...testimonialsData];
+  const testimonials = testimonialsData;
   const renderCarousel = (reverseDirection = false) => (
     <Swiper
       loop

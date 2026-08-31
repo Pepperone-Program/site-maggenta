@@ -98,5 +98,15 @@ export function useInfiniteProducts({
     return () => observer.disconnect();
   }, [endpoint, loadNext, page, pageCount]);
 
-  return { items, total: itemCount, loading, error, hasMore: page < pageCount, loadNext, sentinelRef };
+  return {
+    items,
+    total: itemCount,
+    page,
+    totalPages: pageCount,
+    loading,
+    error,
+    hasMore: page < pageCount,
+    loadNext,
+    sentinelRef,
+  };
 }

@@ -1,4 +1,4 @@
-import { googleAdsConversionLabel, googleAdsId } from "@/lib/google-tags";
+import { googleAdsConversionLabel, googleAdsId, googleAnalyticsId } from "@/lib/google-tags";
 
 type ConversionWindow = Window & {
   gtag?: (...args: unknown[]) => void;
@@ -57,6 +57,26 @@ export const sendQuoteConversion = (data: QuoteConversionData) => {
     currency: "BRL",
     ...(transactionId ? { transaction_id: transactionId } : {}),
   });
+
+  const leadKey = transactionId ? `maggenta:ga4-lead:${transactionId}` : "";
+  let shouldSendLead = true;
+  if (leadKey) {
+    try {
+      shouldSendLead = sessionStorage.getItem(leadKey) !== "sent";
+      if (shouldSendLead) sessionStorage.setItem(leadKey, "sent");
+    } catch {
+      // A medição não pode impedir o fluxo de orçamento.
+    }
+  }
+
+  if (shouldSendLead) {
+    conversionWindow.gtag("event", "generate_lead", {
+      send_to: googleAnalyticsId,
+      value: Number.isFinite(conversionValue) && conversionValue > 0 ? conversionValue : 1,
+      currency: "BRL",
+      ...(transactionId ? { transaction_id: transactionId } : {}),
+    });
+  }
 
   return true;
 };

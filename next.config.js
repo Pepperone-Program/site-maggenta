@@ -47,6 +47,8 @@ const apiRemotePattern = (() => {
 const nextConfig = {
   compress: true,
   poweredByHeader: false,
+  // Metadata must resolve before headers so notFound() can return a real HTTP 404.
+  htmlLimitedBots: /.*/,
   async redirects() {
     return [
       {
@@ -74,7 +76,7 @@ const nextConfig = {
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
+            value: "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400",
           },
         ],
       },
@@ -100,7 +102,7 @@ const nextConfig = {
   },
   images: {
     formats: ["image/avif", "image/webp"],
-    minimumCacheTTL: 31536000,
+    minimumCacheTTL: 86400,
     remotePatterns: [
       ...(apiRemotePattern ? [apiRemotePattern] : []),
       {

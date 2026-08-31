@@ -1,16 +1,13 @@
 import React from "react";
 import { Metadata } from "next";
-import { permanentRedirect } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import ShopWithoutSidebar from "@/components/ShopWithoutSidebar";
 import {
-  getCatalogoSubcategoria,
   getCatalogoTipoProduto,
   friendlyPersonalizedParam,
   personalizedTitle,
-  searchProdutosSiteCatalogo,
-  searchProdutosSiteWithDestination,
 } from "@/lib/api";
-import { brandOpenGraphImages, buildSeoOther, contextualKeywords, siteName, siteUrl } from "@/lib/seo";
+import { brandOpenGraphImages, buildSeoOther, catalogRobots, contextualKeywords, noIndexRobots, siteName, siteUrl } from "@/lib/seo";
 
 export const revalidate = 120;
 
@@ -19,15 +16,22 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const routeParams = (await params) || {};
+  const query = (await searchParams) || {};
   const slug = routeParams.slug || "";
-  const catalogo = await resolveCatalogo(slug);
-  const tipoName = catalogo.tipo_produto?.tipo_produto || "Brindes para empresas";
+  const tipoId = toNumber(slug);
+  if (!tipoId) {
+    notFound();
+  }
+  const catalogo = await getCatalogoTipoProduto(tipoId, { page: 1, limit: 1 });
+  if (!catalogo.tipo_produto) {
+    notFound();
+  }
+  const tipoName = catalogo.tipo_produto.tipo_produto;
   const displayName = personalizedTitle(tipoName);
   const title = `${displayName} para Empresas e Eventos`;
   const description = `Personalize ${displayName.toLocaleLowerCase("pt-BR")} para eventos, campanhas e ações corporativas. Consulte opções e solicite um orçamento com a Maggenta.`;
-  const tipoId = catalogo.tipo_produto?.id_tipo_produto || toNumber(slug) || 0;
   const canonical = new URL(
     `/brindes-para-empresas/${encodeURIComponent(friendlyPersonalizedParam(tipoId, tipoName))}`,
     siteUrl
@@ -44,10 +48,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     alternates: {
       canonical,
     },
-    robots: {
-      index: true,
-      follow: true,
-    },
+    robots: catalogo.total > 0 ? catalogRobots(query) : noIndexRobots,
     openGraph: {
       title,
       description,
@@ -71,53 +72,19 @@ const toNumber = (value: string | undefined) => {
   return Number.isFinite(parsed) ? parsed : undefined;
 };
 
-const titleFromSlug = (slug: string) =>
-  slug
-    .replace(/^\d+-?/, "")
-    .replace(/-personalizad[ao]s?$/i, "")
-    .split("-")
-    .filter(Boolean)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-
 const firstParam = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
-
-const resolveCatalogo = async (slug: string, page = 1, limit = 24) => {
-  const tipoId = toNumber(slug);
-
-  if (tipoId) {
-    return getCatalogoTipoProduto(tipoId, { page, limit });
-  }
-
-  const term = titleFromSlug(slug);
-  const catalogo = await searchProdutosSiteCatalogo(term, { page, limit });
-
-  if (catalogo.total > 0) {
-    return catalogo;
-  }
-
-  const { destinoBusca } = await searchProdutosSiteWithDestination(term, 1);
-
-  if (destinoBusca?.tipo === "subcategoria" && destinoBusca.id_subcategoria) {
-    return getCatalogoSubcategoria(destinoBusca.id_subcategoria, {
-      idCategoria: destinoBusca.id_categoria || undefined,
-      page,
-      limit,
-    });
-  }
-
-  return catalogo;
-};
 
 const BrindesParaEmpresasTipoPage = async ({ params, searchParams }: PageProps) => {
   const routeParams = (await params) || {};
   const query = (await searchParams) || {};
   const page = toNumber(firstParam(query.page)) || 1;
   const limit = toNumber(firstParam(query.limit)) || 24;
-  const catalogo = await resolveCatalogo(routeParams.slug || "", page, limit);
-  const title = catalogo.tipo_produto?.tipo_produto || "Brindes para empresas";
-  const tipoId = catalogo.tipo_produto?.id_tipo_produto || toNumber(routeParams.slug) || 0;
+  const tipoId = toNumber(routeParams.slug);
+  if (!tipoId) notFound();
+  const catalogo = await getCatalogoTipoProduto(tipoId, { page, limit });
+  if (!catalogo.tipo_produto) notFound();
+  const title = catalogo.tipo_produto.tipo_produto;
   const canonicalPath = `/brindes-para-empresas/${encodeURIComponent(
     friendlyPersonalizedParam(tipoId, title)
   )}`;
@@ -148,11 +115,9 @@ const BrindesParaEmpresasTipoPage = async ({ params, searchParams }: PageProps) 
         totalPages={catalogo.totalPages}
         basePath={canonicalPath}
         loadMoreUrl={
-          tipoId > 0
-            ? `/api/produtos/catalogo?kind=type&id=${tipoId}&limit=${catalogo.limit}`
-            : `/api/produtos/catalogo?kind=search&q=${encodeURIComponent(title)}&limit=${catalogo.limit}`
+          `/api/produtos/catalogo?kind=type&id=${tipoId}&limit=${catalogo.limit}`
         }
-        pagesPerLoad={tipoId > 0 ? 1 : 3}
+        pagesPerLoad={1}
       />
     </main>
   );

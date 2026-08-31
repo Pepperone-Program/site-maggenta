@@ -1,6 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
-import { permanentRedirect } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import ShopWithSidebar from "@/components/ShopWithSidebar";
 import {
   getCatalogoCategoria,
@@ -9,7 +9,7 @@ import {
   getDatasPromocionais,
   getPublicosAlvos,
 } from "@/lib/api";
-import { brandOpenGraphImages, buildSeoOther, contextualKeywords, siteName, siteUrl, subcategoryPath } from "@/lib/seo";
+import { brandOpenGraphImages, buildSeoOther, catalogRobots, contextualKeywords, noIndexRobots, siteName, siteUrl, subcategoryPath } from "@/lib/seo";
 
 export const revalidate = 120;
 
@@ -35,11 +35,23 @@ const titleFromSlug = (slug = "") =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const routeParams = (await params) || {};
+  const query = (await searchParams) || {};
   const slug = routeParams.slug || "";
-  const subcategoriaId = toNumber(slug) || 0;
-  const subcategoriaName = titleFromSlug(slug) || "Subcategoria";
+  const subcategoriaId = toNumber(slug);
+  if (!subcategoriaId) {
+    notFound();
+  }
+  const catalogo = await getCatalogoSubcategoriaProdutos(
+    subcategoriaId,
+    titleFromSlug(slug) || "Subcategoria",
+    { page: 1, limit: 1 }
+  );
+  if (!catalogo.categoria) {
+    notFound();
+  }
+  const subcategoriaName = catalogo.categoria.categoria;
   const title = `${subcategoriaName} Personalizados para Empresas`;
   const description = `Conheça opções de ${subcategoriaName.toLocaleLowerCase("pt-BR")} personalizados para empresas, eventos e campanhas. Peça seu orçamento com a Maggenta.`;
   const canonical = new URL(
@@ -58,10 +70,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     alternates: {
       canonical,
     },
-    robots: {
-      index: true,
-      follow: true,
-    },
+    robots: catalogo.total > 0 ? catalogRobots(query) : noIndexRobots,
     openGraph: {
       title,
       description,
@@ -84,7 +93,8 @@ const SubcategoriaPage = async ({ params, searchParams }: PageProps) => {
   const routeParams = (await params) || {};
   const query = (await searchParams) || {};
   const slug = routeParams.slug || "";
-  const subcategoriaId = toNumber(slug) || 0;
+  const subcategoriaId = toNumber(slug);
+  if (!subcategoriaId) notFound();
   const subcategoriaName = titleFromSlug(slug) || "Subcategoria";
   const page = toNumber(firstParam(query.page)) || 1;
   const limit = toNumber(firstParam(query.limit)) || 24;
@@ -99,6 +109,7 @@ const SubcategoriaPage = async ({ params, searchParams }: PageProps) => {
     getPublicosAlvos(),
     getDatasPromocionais(),
   ]);
+  if (!catalogo.categoria) notFound();
   const parentCategoriaId = categoriaIdFromQuery || 0;
   const parentCatalogo = parentCategoriaId
     ? await getCatalogoCategoria(parentCategoriaId, { page: 1, limit: 24 })
@@ -116,7 +127,8 @@ const SubcategoriaPage = async ({ params, searchParams }: PageProps) => {
         },
       }
     : catalogo;
-  const canonicalPath = subcategoryPath(subcategoriaId || 0, subcategoriaName);
+  const canonicalName = catalogo.categoria.categoria;
+  const canonicalPath = subcategoryPath(subcategoriaId, canonicalName);
   const currentPath = `/subcategorias/${slug}`;
 
   if (currentPath !== canonicalPath) {
@@ -145,7 +157,7 @@ const SubcategoriaPage = async ({ params, searchParams }: PageProps) => {
         categoryOptions={categorias}
         publicOptions={publicosAlvos}
         dateOptions={datasPromocionais}
-        pageTitle={`${subcategoriaName} personalizado`}
+        pageTitle={`${canonicalName} personalizado`}
         basePath={canonicalPath}
         subcategoriesContextCategoryId={parentCategoriaId || undefined}
       />

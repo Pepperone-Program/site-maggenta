@@ -9,10 +9,11 @@ import {
   getDatasPromocionais,
   getPublicosAlvos,
 } from "@/lib/api";
+import { catalogRobots } from "@/lib/seo";
 
 export const revalidate = 120;
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Brindes por Público Alvo",
   alternates: {
     canonical: "/publicos-alvos",
@@ -24,6 +25,13 @@ export const metadata: Metadata = {
 type PublicosAlvosPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+export async function generateMetadata({
+  searchParams,
+}: PublicosAlvosPageProps): Promise<Metadata> {
+  const params = (await searchParams) || {};
+  return { ...baseMetadata, robots: catalogRobots(params) };
+}
 
 const firstParam = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;

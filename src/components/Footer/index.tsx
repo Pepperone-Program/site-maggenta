@@ -15,11 +15,12 @@ const Footer = () => {
       <div className="mx-auto grid w-full max-w-[1800px] gap-10 px-2 py-14 sm:px-3 md:grid-cols-2 lg:grid-cols-[1.3fr_0.8fr_0.8fr_1fr]">
         <div>
           <Link href="/" aria-label="Maggenta">
-            <img
+            <Image
               src="/images/logo/NOVO_LOGO_MAGG_HORIZONTAL_COR.png"
               alt="Maggenta"
               width={160}
               height={40}
+              sizes="160px"
               className="h-auto w-[160px]"
             />
           </Link>

@@ -37,6 +37,8 @@ export type ProdutoApi = {
   imagem?: string | null;
   imagem_url?: string | null;
   data_inclusao?: string | null;
+  data_modificacao?: string | null;
+  updated_at?: string | null;
   obs?: string | null;
   site?: ApiFlag;
   lancamento?: ApiFlag;
@@ -930,6 +932,21 @@ export const mapApiProdutoToProduct = (
     },
     badge,
     dataInclusao: product.data_inclusao || undefined,
+    updatedAt: product.data_modificacao || product.updated_at || undefined,
+    seoTaxonomy: {
+      subcategories: (product.subcategorias || [])
+        .map((item) => ({ id: Number(item.id_subcategoria), title: item.subcategoria }))
+        .filter((item) => Number.isFinite(item.id) && Boolean(item.title)),
+      audiences: (product.publicos_alvos || [])
+        .map((item) => ({ id: Number(item.id_publico_alvo), title: item.publico_alvo }))
+        .filter((item) => Number.isFinite(item.id) && Boolean(item.title)),
+      promotionalDates: (product.datas_promocionais || [])
+        .map((item) => ({
+          id: Number(item.id_data_promocional),
+          title: item.data_promocional,
+        }))
+        .filter((item) => Number.isFinite(item.id) && Boolean(item.title)),
+    },
     lancamento: isYes(product.lancamento),
     promocao: isYes(product.promocao),
     premium: isYes(product.premium),
@@ -962,6 +979,29 @@ const emptyCatalogoFiltros: CatalogoFiltros = {
     max: 0,
   },
 };
+
+const emptyCatalogoProdutos = (page: number, limit: number): CatalogoProdutos => ({
+  categoria: null,
+  filtros: emptyCatalogoFiltros,
+  items: [],
+  total: 0,
+  page,
+  limit,
+  totalPages: 0,
+});
+
+const emptyCatalogoTipoProduto = (
+  page: number,
+  limit: number
+): CatalogoTipoProduto => ({
+  tipo_produto: null,
+  filtros: emptyCatalogoFiltros,
+  items: [],
+  total: 0,
+  page,
+  limit,
+  totalPages: 0,
+});
 
 const sanitizeCatalogPage = (value?: number) =>
   Number.isFinite(value) && Number(value) > 0 ? Math.floor(Number(value)) : 1;
@@ -1029,25 +1069,7 @@ export async function getCatalogoCategoria(
       : null;
 
   if (!data) {
-    const fallback = await getProdutos(limit);
-
-    return {
-      categoria: {
-        id_empresa: 1,
-        id_categoria: idCategoria,
-        categoria: "Brindes",
-        descricao: null,
-        icon: null,
-        habilitado: "S",
-        url_capa: null,
-      },
-      filtros: emptyCatalogoFiltros,
-      items: fallback,
-      total: fallback.length,
-      page,
-      limit,
-      totalPages: 1,
-    };
+    return emptyCatalogoProdutos(page, limit);
   }
 
   const categoryName = data.categoria?.categoria;
@@ -1156,7 +1178,11 @@ export async function getCatalogoPublicoAlvo(
     payload && typeof payload === "object" && "data" in payload
       ? (payload.data as CatalogoPublicoAlvoResponse)
       : null;
-  const titulo = data?.publico_alvo?.publico_alvo || "Publico-alvo";
+  if (!data?.publico_alvo) {
+    return emptyCatalogoProdutos(page, limit);
+  }
+
+  const titulo = data.publico_alvo.publico_alvo;
   const mapped = mapCatalogDataToProdutos({
     data,
     page,
@@ -1170,25 +1196,7 @@ export async function getCatalogoPublicoAlvo(
     return mapped;
   }
 
-  const fallback = await getProdutos(limit);
-
-  return {
-    categoria: {
-      id_empresa: 1,
-      id_categoria: idPublicoAlvo,
-      categoria: titulo,
-      descricao: null,
-      icon: null,
-      habilitado: "S",
-      url_capa: null,
-    },
-    filtros: emptyCatalogoFiltros,
-    items: fallback,
-    total: fallback.length,
-    page,
-    limit,
-    totalPages: 1,
-  };
+  return emptyCatalogoProdutos(page, limit);
 }
 
 export async function getCatalogoDataPromocional(
@@ -1216,7 +1224,11 @@ export async function getCatalogoDataPromocional(
     payload && typeof payload === "object" && "data" in payload
       ? (payload.data as CatalogoDataPromocionalResponse)
       : null;
-  const titulo = data?.data_promocional?.data_promocional || "Data promocional";
+  if (!data?.data_promocional) {
+    return emptyCatalogoProdutos(page, limit);
+  }
+
+  const titulo = data.data_promocional.data_promocional;
   const mapped = mapCatalogDataToProdutos({
     data,
     page,
@@ -1230,25 +1242,7 @@ export async function getCatalogoDataPromocional(
     return mapped;
   }
 
-  const fallback = await getProdutos(limit);
-
-  return {
-    categoria: {
-      id_empresa: 1,
-      id_categoria: idDataPromocional,
-      categoria: titulo,
-      descricao: null,
-      icon: null,
-      habilitado: "S",
-      url_capa: null,
-    },
-    filtros: emptyCatalogoFiltros,
-    items: fallback,
-    total: fallback.length,
-    page,
-    limit,
-    totalPages: 1,
-  };
+  return emptyCatalogoProdutos(page, limit);
 }
 
 export async function getCatalogoTipoProduto(
@@ -1278,24 +1272,8 @@ export async function getCatalogoTipoProduto(
         })
       : null;
 
-  if (!firstData) {
-    const fallback = await getProdutos(limit);
-
-    return {
-      tipo_produto: {
-        id_empresa: 1,
-        id_tipo_produto: idTipoProduto,
-        tipo_produto: "Brindes para empresas",
-        descricao: null,
-        habilitado: "S",
-      },
-      filtros: emptyCatalogoFiltros,
-      items: fallback,
-      total: fallback.length,
-      page: 1,
-      limit,
-      totalPages: 1,
-    };
+  if (!firstData?.tipo_produto) {
+    return emptyCatalogoTipoProduto(page, limit);
   }
 
   const tipoNome = firstData.tipo_produto?.tipo_produto;
@@ -1571,6 +1549,9 @@ export async function getCatalogoSubcategoria(
       limit,
       subcategorias: String(idSubcategoria),
     });
+    if (!catalogo.categoria) {
+      return emptyCatalogoTipoProduto(page, limit);
+    }
     const subcategoriaNome =
       catalogo.filtros.subcategorias.find((item) => item.id_subcategoria === idSubcategoria)
         ?.subcategoria || catalogo.items[0]?.category || "Subcategoria";
@@ -1613,7 +1594,7 @@ export async function getCatalogoSubcategoria(
         })
       : null;
 
-  if (firstData) {
+  if (firstData?.subcategoria) {
     const subcategoriaNome = firstData.subcategoria?.subcategoria || "Subcategoria";
     const items = firstData.items || [];
 
@@ -1640,23 +1621,7 @@ export async function getCatalogoSubcategoria(
     };
   }
 
-  const fallback = await getProdutos(limit);
-
-  return {
-    tipo_produto: {
-      id_empresa: 1,
-      id_tipo_produto: idSubcategoria,
-      tipo_produto: "Brindes para empresas",
-      descricao: null,
-      habilitado: "S",
-    },
-    filtros: emptyCatalogoFiltros,
-    items: fallback,
-    total: fallback.length,
-    page: 1,
-    limit,
-    totalPages: 1,
-  };
+  return emptyCatalogoTipoProduto(page, limit);
 }
 
 export async function searchProdutosSiteWithDestination(

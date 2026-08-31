@@ -25,6 +25,12 @@ export type Product = {
   id: number;
   badge?: string;
   dataInclusao?: string;
+  updatedAt?: string;
+  seoTaxonomy?: {
+    subcategories: Array<{ id: number; title: string }>;
+    audiences: Array<{ id: number; title: string }>;
+    promotionalDates: Array<{ id: number; title: string }>;
+  };
   lancamento?: boolean;
   promocao?: boolean;
   premium?: boolean;
