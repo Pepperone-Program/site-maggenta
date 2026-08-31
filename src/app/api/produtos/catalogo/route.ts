@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const params = request.nextUrl.searchParams;
     const kind = params.get("kind") || "category";
     const page = number(params.get("page"), 1);
-    const limit = Math.min(number(params.get("limit"), 24), 48);
+    const limit = Math.min(number(params.get("limit"), 36), 48);
     let catalog;
 
     if (kind === "products") {

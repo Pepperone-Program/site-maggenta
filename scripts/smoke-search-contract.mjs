@@ -82,6 +82,20 @@ const api = createServer((request, response) => {
       });
     }
 
+    if (query === "catalogo amplo") {
+      return json(response, 200, {
+        success: true,
+        data: {
+          items: umbrellaProducts,
+          total: 2040,
+          page: 1,
+          limit: 24,
+          totalPages: 85,
+          mode: "advanced",
+        },
+      });
+    }
+
     if (query !== "compatibilidade legado") {
       return json(response, 200, {
         success: true,
@@ -200,13 +214,31 @@ try {
     items[0]?.codigo !== "GT03" ||
     items[1]?.codigo !== "GT401" ||
     canonicalRequest?.searchParams.get("q") !== "garrafa com parede dupla" ||
-    canonicalRequest?.searchParams.get("limit") !== "40" ||
+    canonicalRequest?.searchParams.get("limit") !== "10" ||
     requests.some((url) => url.pathname === "/api/v1/produtos/site")
   ) {
     throw new Error(
       `O contrato da busca falhou: status=${response.status} payload=${JSON.stringify(
         payload,
       )} requests=${requests.map((url) => url.toString()).join(",")} server=${siteOutput.slice(-2000)}`,
+    );
+  }
+  requests.length = 0;
+  const wideCatalogResponse = await fetch(
+    `http://127.0.0.1:${sitePort}/api/produtos/catalogo?kind=search&q=catalogo%20amplo&page=1&limit=24`,
+  );
+  const wideCatalogPayload = await wideCatalogResponse.json();
+
+  if (
+    wideCatalogResponse.status !== 200 ||
+    wideCatalogPayload?.items?.length !== umbrellaProducts.length ||
+    wideCatalogPayload?.total !== 2040 ||
+    wideCatalogPayload?.totalPages !== 85
+  ) {
+    throw new Error(
+      `O frontend limitou o total devolvido pelo backend: status=${wideCatalogResponse.status} payload=${JSON.stringify(
+        wideCatalogPayload,
+      )}`,
     );
   }
   requests.length = 0;
@@ -222,14 +254,14 @@ try {
 
   if (
     relevantCatalogResponse.status !== 200 ||
-    relevantCatalogPayload?.items?.length !== 3 ||
-    relevantCatalogPayload?.items?.some((item) => item.codigo === "MC405") ||
-    relevantCatalogPayload?.total !== 3 ||
-    relevantCatalogPayload?.totalPages !== 1 ||
+    relevantCatalogPayload?.items?.length !== 4 ||
+    relevantCatalogPayload?.items?.[3]?.codigo !== "MC405" ||
+    relevantCatalogPayload?.total !== 115 ||
+    relevantCatalogPayload?.totalPages !== 3 ||
     relevantRequest?.searchParams.get("limit") !== "40"
   ) {
     throw new Error(
-      `O corte de relevancia nominal falhou: status=${relevantCatalogResponse.status} payload=${JSON.stringify(
+      `O espelhamento integral da busca falhou: status=${relevantCatalogResponse.status} payload=${JSON.stringify(
         relevantCatalogPayload,
       )}`,
     );
@@ -315,7 +347,7 @@ try {
   }
 
   console.log(
-    "Search contract smoke passed: configured_origin_only=true advanced=2 legacy_fallback=2 catalog=2 relevant_name_prefix=3 incidental_description_removed=true technical_failure=502 empty_catalog=502 no_store=true ranking_preserved=true",
+    "Search contract smoke passed: configured_origin_only=true advanced=2 legacy_fallback=2 catalog=2 backend_items_preserved=4 backend_total_preserved=115 total_above_250_preserved=2040 technical_failure=502 empty_catalog=502 no_store=true ranking_preserved=true",
   );
 } finally {
   stopProcessTree(site);

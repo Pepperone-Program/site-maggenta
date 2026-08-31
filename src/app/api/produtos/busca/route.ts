@@ -40,7 +40,7 @@ const destinationPath = (
 export async function GET(request: NextRequest) {
   try {
     const query = request.nextUrl.searchParams.get("q") || "";
-    const limit = Number(request.nextUrl.searchParams.get("limit") || 10);
+    const limit = Number(request.nextUrl.searchParams.get("limit") || 100);
     const requestedPage = Number(request.nextUrl.searchParams.get("page") || 1);
     const {
       products,

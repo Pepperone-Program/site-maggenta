@@ -49,6 +49,8 @@ type SearchPayload = SearchSubmitPayload;
 const SEARCH_STALE_TIME = 30 * 1000;
 const SEARCH_CACHE_TIME = 5 * 60 * 1000;
 const SEARCH_CACHE_KEY = "product-search-v2";
+const SEARCH_API_PAGE_SIZE = 24;
+const SEARCH_SUGGESTION_LIMIT = 10;
 const MENU_CACHE_TIME = 60 * 60 * 1000;
 const MENU_CACHE_KEY = "header-menu-v2";
 
@@ -191,8 +193,9 @@ const Header = ({
   });
   const menuGroups: HeaderMenuGroup[] = menuQuery.data ?? initialMenuGroups;
   const suggestionsQuery = useQuery({
-    queryKey: [SEARCH_CACHE_KEY, debouncedSearchQuery, 10],
-    queryFn: ({ signal }) => searchProducts(debouncedSearchQuery, 10, signal),
+    queryKey: [SEARCH_CACHE_KEY, debouncedSearchQuery, SEARCH_API_PAGE_SIZE],
+    queryFn: ({ signal }) =>
+      searchProducts(debouncedSearchQuery, SEARCH_API_PAGE_SIZE, signal),
     enabled: debouncedSearchQuery.length >= 2,
     staleTime: SEARCH_STALE_TIME,
     gcTime: SEARCH_CACHE_TIME,
@@ -201,7 +204,7 @@ const Header = ({
   const searchSuggestions =
     debouncedSearchQuery === normalizedSearchQuery && searchFocused
       ? Array.isArray(suggestionsQuery.data?.data?.items)
-        ? suggestionsQuery.data.data.items
+        ? suggestionsQuery.data.data.items.slice(0, SEARCH_SUGGESTION_LIMIT)
         : []
       : [];
 
@@ -330,14 +333,15 @@ const Header = ({
         const cachedSuggestions = queryClient.getQueryData<SearchPayload | null>([
           SEARCH_CACHE_KEY,
           query,
-          10,
+          SEARCH_API_PAGE_SIZE,
         ]);
         const payload =
           cachedSuggestions !== undefined
             ? cachedSuggestions
             : await queryClient.fetchQuery({
-                queryKey: [SEARCH_CACHE_KEY, query, 1],
-                queryFn: ({ signal }) => searchProducts(query, 1, signal),
+                queryKey: [SEARCH_CACHE_KEY, query, SEARCH_API_PAGE_SIZE],
+                queryFn: ({ signal }) =>
+                  searchProducts(query, SEARCH_API_PAGE_SIZE, signal),
                 staleTime: SEARCH_STALE_TIME,
                 gcTime: SEARCH_CACHE_TIME,
               });

@@ -91,11 +91,7 @@ const resolveCatalogo = async (slug: string, page = 1, limit = 24) => {
   }
 
   const term = titleFromSlug(slug);
-  // A API de busca entrega ate 40 itens por pagina. Usar esse lote na
-  // primeira renderizacao evita cards surgindo pagina a pagina e permite que
-  // o corte de relevancia identifique complementos incidentais ainda no SSR.
-  const searchLimit = Math.max(limit, 40);
-  const catalogo = await searchProdutosSiteCatalogo(term, { page, limit: searchLimit });
+  const catalogo = await searchProdutosSiteCatalogo(term, { page, limit });
 
   if (catalogo.total > 0) {
     return catalogo;

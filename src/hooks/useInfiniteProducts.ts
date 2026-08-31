@@ -75,16 +75,7 @@ export function useInfiniteProducts({
       const nextItems = responses.flatMap((data) => data.items || []);
       const lastResponse = responses.at(-1);
 
-      setItems((current) => {
-        const ids = new Set(current.map((item) => String(item.id)));
-        const uniqueNextItems = nextItems.filter((item) => {
-          const id = String(item.id);
-          if (ids.has(id)) return false;
-          ids.add(id);
-          return true;
-        });
-        return [...current, ...uniqueNextItems];
-      });
+      setItems((current) => [...current, ...nextItems]);
       setPage(Number(lastResponse?.page || lastRequestedPage));
       setPageCount(Number(lastResponse?.totalPages ?? pageCount));
       setItemCount(Number(lastResponse?.total ?? itemCount));

@@ -165,11 +165,19 @@ const ShopWithoutSidebar = ({
                     : "flex min-h-[720px] flex-col gap-7.5 transition-opacity duration-200"
                 }`}
               >
-                {visibleProducts.map((item) =>
+                {visibleProducts.map((item, index) =>
                   productStyle === "grid" ? (
-                    <SingleGridItem item={item} key={item.id} badgeLabel={productBadgeLabel} />
+                    <SingleGridItem
+                      item={item}
+                      key={`${item.id}-${index}`}
+                      badgeLabel={productBadgeLabel}
+                    />
                   ) : (
-                    <SingleListItem item={item} key={item.id} badgeLabel={productBadgeLabel} />
+                    <SingleListItem
+                      item={item}
+                      key={`${item.id}-${index}`}
+                      badgeLabel={productBadgeLabel}
+                    />
                   )
                 )}
               </div>

@@ -1669,11 +1669,6 @@ export async function searchProdutosSiteWithDestination(
   const search = query.trim().toLocaleLowerCase("pt-BR");
   const safePage = sanitizeCatalogPage(page);
   const safeLimit = sanitizeWideCatalogLimit(limit);
-  // O backend atualmente reutiliza a busca por termo/pagina sem considerar
-  // `limit`. Se o autocomplete (4-10 itens) for o primeiro consumidor, ele
-  // pode reduzir tambem a pagina de resultados. Consultamos sempre o maior
-  // lote aceito pela rota e recortamos apenas a resposta do consumidor.
-  const apiSearchLimit = 40;
 
   if (!search) {
     return { products: [], destinoBusca: null, total: 0, page: 1, limit: safeLimit, totalPages: 0 };
@@ -1725,7 +1720,7 @@ export async function searchProdutosSiteWithDestination(
   const payload = await apiRequest(
     `/produtos/site/busca?q=${encodeURIComponent(
       search
-    )}&empresaId=1&page=${safePage}&limit=${apiSearchLimit}`
+    )}&empresaId=1&page=${safePage}&limit=${safeLimit}`
   );
   let data = parseSearchData(payload);
 
@@ -1737,7 +1732,7 @@ export async function searchProdutosSiteWithDestination(
       busca: search,
       empresaId: "1",
       page: String(safePage),
-      limit: String(apiSearchLimit),
+      limit: String(safeLimit),
     });
     const legacyData = parseSearchData(
       await apiRequest(`/produtos/site?${legacyParams.toString()}`)
@@ -1770,48 +1765,17 @@ export async function searchProdutosSiteWithDestination(
     }
   }
 
-  // A busca avancada pode incluir, no fim de `items`, produtos que apenas
-  // mencionam os termos na descricao. Quando a API entrega uma sequencia
-  // inicial clara de nomes que contem todos os termos relevantes, encerramos
-  // a lista no primeiro resultado fora dessa sequencia. Assim mantemos apenas
-  // dados e ranking da API, sem transformar mencoes incidentais em produtos
-  // equivalentes. Consultas sem uma sequencia nominal clara ficam intactas.
-  const searchNameTokens = search
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s]/g, " ")
-    .split(/\s+/)
-    .filter(
-      (token) =>
-        token.length > 1 &&
-        !["com", "para", "por", "de", "da", "do", "das", "dos", "e"].includes(token)
-    );
-  const matchesSearchName = (product: ProdutoApi) => {
-    const name = String(product.produto || "")
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, " ");
-    return searchNameTokens.length > 0 && searchNameTokens.every((token) => name.includes(token));
-  };
-  const firstNameMismatch = produtos.findIndex((product) => !matchesSearchName(product));
-  const hasReliableNamePrefix = safePage === 1 && firstNameMismatch >= 2;
-  const rankedProdutos = hasReliableNamePrefix ? produtos.slice(0, firstNameMismatch) : produtos;
-  const rankedProducts = rankedProdutos.map((product) => mapApiProdutoToProduct(product));
-  const products = rankedProducts.slice(0, safeLimit);
-  const rankedTotal = hasReliableNamePrefix
-    ? rankedProducts.length
-    : Number(data?.total || rankedProducts.length || 0);
+  // O backend e a fonte de verdade da relevancia: preserve todos os itens,
+  // exatamente na ordem e na paginacao retornadas pela busca inteligente.
+  const products = produtos.map((product) => mapApiProdutoToProduct(product));
 
   return {
     products,
     destinoBusca: data?.destino_busca || null,
-    total: rankedTotal,
+    total: Number(data?.total || products.length || 0),
     page: Number(data?.page || safePage),
-    limit: safeLimit,
-    totalPages: hasReliableNamePrefix
-      ? 1
-      : Math.max(Number(data?.totalPages || (products.length ? 1 : 0)), 0),
+    limit: Number(data?.limit || safeLimit),
+    totalPages: Math.max(Number(data?.totalPages || (products.length ? 1 : 0)), 0),
   };
 }
 
