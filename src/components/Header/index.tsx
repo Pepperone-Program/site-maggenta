@@ -10,7 +10,6 @@ import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import { selectTotalPrice } from "@/redux/features/cart-slice";
 import { formatDisplayPrice } from "@/lib/products";
 import { fetchWithTimeout } from "@/lib/timed-fetch";
-import { personalizedSuffix } from "@/lib/slugs";
 import { useAppSelector } from "@/redux/store";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -136,24 +135,8 @@ const menuColumns = <T,>(items: T[], rowsPerColumn = 12) =>
     items.slice(index * rowsPerColumn, index * rowsPerColumn + rowsPerColumn)
   );
 
-const normalizeSearchText = (value: string) =>
-  value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, " ")
-    .replace(/-/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-const searchPathFromQuery = (query: string) => {
-  const slug = normalizeSearchText(query).replace(/\s+/g, "-");
-  const suffix = personalizedSuffix(query);
-
-  return slug
-    ? `/brindes-para-empresas/${encodeURIComponent(`${slug}-${suffix}`)}`
-    : "/";
-};
+const searchPathFromQuery = (query: string) =>
+  `/busca?q=${encodeURIComponent(query.trim())}`;
 
 const Header = ({
   initialMenuGroups = defaultMenuGroups,

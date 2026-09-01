@@ -28,6 +28,7 @@ const files = {
   conversion: await read("src/lib/google-ads-conversion.ts"),
   proxy: await read("src/proxy.ts"),
   gridItem: await read("src/components/Shop/SingleGridItem.tsx"),
+  header: await read("src/components/Header/index.tsx"),
 };
 
 check(files.notFound.includes("Esta página não foi encontrada"), "A página 404 útil não foi implementada.");
@@ -56,6 +57,8 @@ for (const [name, source] of Object.entries({
 check(files.search.includes("robots: noIndexRobots"), "A busca interna não está marcada como noindex.");
 check(files.search.includes("officialDestinationPath"), "A busca não restringe redirecionamentos a destinos oficiais.");
 check(!files.search.includes("personalizedSuffix"), "A busca ainda fabrica páginas semânticas por termo livre.");
+check(files.header.includes('`/busca?q=${encodeURIComponent(query.trim())}`'), "O formulário do cabeçalho não envia termos livres para /busca.");
+check(!files.header.includes('`/brindes-para-empresas/${encodeURIComponent(`${slug}-${suffix}`)}`'), "O cabeçalho ainda transforma buscas comuns em landing pages inexistentes.");
 check(files.seo.includes("isCleanCatalogQuery"), "A política central de parâmetros indexáveis não existe.");
 
 check(files.sitemap.includes("isIndexableLandingPage"), "O sitemap não valida conteúdo nativo das campanhas.");
