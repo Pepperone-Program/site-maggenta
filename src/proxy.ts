@@ -7,11 +7,11 @@ const canonicalHost = canonicalUrl.hostname;
 const apiOrigin = (process.env.NEXT_API_URL || "").replace(/\/$/, "");
 const legacyAssetPrefixes = ["/content/stream/", "/static/uploads/", "/upload/media/video/", "/assets/video/"];
 const entityRoutes = [
-  { prefix: "/categorias/", endpoint: "categorias", key: "categoria", title: "categoria", personalized: true },
-  { prefix: "/subcategorias/", endpoint: "subcategorias", key: "subcategoria", title: "subcategoria", personalized: true },
-  { prefix: "/brindes-para-empresas/", endpoint: "tipos-produtos", key: "tipo_produto", title: "tipo_produto", personalized: true },
-  { prefix: "/publicos-alvos/", endpoint: "publicos-alvos", key: "publico_alvo", title: "publico_alvo", personalized: false },
-  { prefix: "/datas-promocionais/", endpoint: "datas-promocionais", key: "data_promocional", title: "data_promocional", personalized: false },
+  { prefix: "/categorias/", endpoint: "categorias", key: "categoria", title: "categoria", personalized: true, detail: false },
+  { prefix: "/subcategorias/", endpoint: "subcategorias", key: "subcategoria", title: "subcategoria", personalized: true, detail: true },
+  { prefix: "/brindes-para-empresas/", endpoint: "tipos-produtos", key: "tipo_produto", title: "tipo_produto", personalized: true, detail: false },
+  { prefix: "/publicos-alvos/", endpoint: "publicos-alvos", key: "publico_alvo", title: "publico_alvo", personalized: false, detail: false },
+  { prefix: "/datas-promocionais/", endpoint: "datas-promocionais", key: "data_promocional", title: "data_promocional", personalized: false, detail: false },
 ] as const;
 const canonicalEntityCache = new Map<string, { slug: string; expiresAt: number }>();
 const entityCacheTtlMs = 5 * 60 * 1000;
@@ -105,17 +105,24 @@ const validateEntityRoute = async (request: NextRequest) => {
   }
 
   try {
+    const validationPath = route.detail
+      ? `${apiOrigin}/api/v1/${route.endpoint}/${id}`
+      : `${apiOrigin}/api/v1/${route.endpoint}/${id}/catalogo?empresaId=1&page=1&limit=1`;
     const response = await fetch(
-      `${apiOrigin}/api/v1/${route.endpoint}/${id}/catalogo?empresaId=1&page=1&limit=1`,
+      validationPath,
       { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(12_000) }
     );
     if (response.status === 404) return notFoundRewrite(request);
     if (!response.ok) return null;
     const data = unwrapData(await response.json());
-    const entity = data?.[route.key];
+    const entity = route.detail ? data : data?.[route.key];
     if (!entity || typeof entity !== "object") return notFoundRewrite(request);
-    const title = String((entity as Record<string, unknown>)[route.title] || "").trim();
+    const entityData = entity as Record<string, unknown>;
+    const title = String(entityData[route.title] || "").trim();
     if (!title) return notFoundRewrite(request);
+    if (String(entityData.habilitado || "S").toUpperCase() !== "S") {
+      return notFoundRewrite(request);
+    }
     const canonicalSlug = route.personalized
       ? friendlyPersonalizedParam(id, title)
       : friendlyParam(id, title);

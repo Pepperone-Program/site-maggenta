@@ -46,7 +46,11 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   const catalogo = await getCatalogoSubcategoriaProdutos(
     subcategoriaId,
     titleFromSlug(slug) || "Subcategoria",
-    { page: 1, limit: 1 }
+    {
+      page: 1,
+      limit: 1,
+      idCategoria: toNumber(firstParam(query.categoria)),
+    }
   );
   if (!catalogo.categoria) {
     notFound();
@@ -99,18 +103,25 @@ const SubcategoriaPage = async ({ params, searchParams }: PageProps) => {
   const page = toNumber(firstParam(query.page)) || 1;
   const limit = toNumber(firstParam(query.limit)) || 24;
   const categoriaIdFromQuery = toNumber(firstParam(query.categoria));
+  const selectedDatas = firstParam(query.datas_promocionais) || firstParam(query.data_promocional);
   const [catalogo, categorias, publicosAlvos, datasPromocionais] = await Promise.all([
     getCatalogoSubcategoriaProdutos(subcategoriaId, subcategoriaName, {
+      empresaId: toNumber(firstParam(query.empresaId)) || 1,
       page,
       limit,
       idCategoria: categoriaIdFromQuery,
+      publicos_alvos: firstParam(query.publicos_alvos),
+      quantidade_minima_min: toNumber(firstParam(query.quantidade_minima_min)),
+      quantidade_minima_max: toNumber(firstParam(query.quantidade_minima_max)),
+      data_promocional: firstParam(query.data_promocional),
+      datas_promocionais: firstParam(query.datas_promocionais),
     }),
     getCatalogoCategorias(),
     getPublicosAlvos(),
     getDatasPromocionais(),
   ]);
   if (!catalogo.categoria) notFound();
-  const parentCategoriaId = categoriaIdFromQuery || 0;
+  const parentCategoriaId = catalogo.parentCategoryId || categoriaIdFromQuery || 0;
   const parentCatalogo = parentCategoriaId
     ? await getCatalogoCategoria(parentCategoriaId, { page: 1, limit: 24 })
     : null;
@@ -152,6 +163,10 @@ const SubcategoriaPage = async ({ params, searchParams }: PageProps) => {
         activeFilters={{
           categoria: String(parentCategoriaId || 1),
           subcategorias: String(subcategoriaId || ""),
+          publicos_alvos: firstParam(query.publicos_alvos) || "",
+          quantidade_minima_min: firstParam(query.quantidade_minima_min) || "",
+          quantidade_minima_max: firstParam(query.quantidade_minima_max) || "",
+          datas_promocionais: selectedDatas || "",
           limit: firstParam(query.limit) || "24",
         }}
         categoryOptions={categorias}

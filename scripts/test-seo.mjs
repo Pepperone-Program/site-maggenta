@@ -42,6 +42,15 @@ check(!files.product.includes('availability: "https://schema.org/InStock"'), "O 
 check(!files.product.includes('price: product.discountedPrice'), "O Product JSON-LD ainda publica preço técnico.");
 check(files.product.includes("categoryCanonical"), "O breadcrumb estruturado não inclui a categoria.");
 
+check(
+  files.proxy.includes('endpoint: "subcategorias"') && files.proxy.includes("detail: true"),
+  "A rota de subcategoria nao valida o endpoint de detalhe existente."
+);
+check(
+  files.api.includes("getSubcategoriaById") && files.api.includes("parentCategoryId"),
+  "A subcategoria nao resolve sua categoria de origem pelo contrato da API."
+);
+
 for (const [name, source] of Object.entries({
   category: files.category,
   subcategory: files.subcategory,

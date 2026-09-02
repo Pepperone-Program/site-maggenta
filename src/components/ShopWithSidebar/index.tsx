@@ -438,6 +438,18 @@ const ShopWithSidebar = ({
       : String(id);
     const params = new URLSearchParams();
 
+    Object.entries({
+      publicos_alvos: activeFilters.publicos_alvos,
+      quantidade_minima_min: activeFilters.quantidade_minima_min,
+      quantidade_minima_max: activeFilters.quantidade_minima_max,
+      datas_promocionais: activeFilters.datas_promocionais,
+      limit: activeFilters.limit,
+    }).forEach(([key, value]) => {
+      if (value && !(key === "limit" && value === "24")) {
+        params.set(key, value);
+      }
+    });
+
     if (subcategoriesOriginCategoryId > 0) {
       params.set("categoria", String(subcategoriesOriginCategoryId));
     }

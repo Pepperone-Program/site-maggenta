@@ -147,8 +147,14 @@ export type CatalogoCategoria = {
 };
 
 export type CatalogoSubcategoria = {
+  id_empresa?: number;
+  id_categoria?: number;
   id_subcategoria: number;
   subcategoria: string;
+  descricao?: string | null;
+  icon?: string | null;
+  habilitado?: ApiFlag;
+  ordem?: number | null;
   total?: number;
 };
 
@@ -177,6 +183,7 @@ export type CatalogoFiltros = {
 
 export type CatalogoProdutos = {
   categoria: CatalogoCategoria | null;
+  parentCategoryId?: number;
   filtros: CatalogoFiltros;
   items: Product[];
   total: number;
@@ -205,6 +212,7 @@ export type CatalogoTipoProduto = {
     descricao?: string | null;
     habilitado?: ApiFlag;
   } | null;
+  parentCategoryId?: number;
   filtros: CatalogoFiltros;
   items: Product[];
   total: number;
@@ -304,12 +312,6 @@ type DataPromocionalApi = {
   descricao?: string | null;
   ordem?: number | null;
   habilitado?: ApiFlag;
-};
-
-type SubcategoriaProdutoApi = {
-  id_empresa?: number;
-  id_subcategoria: number;
-  id_produto: number;
 };
 
 const API_BASE_PATH = "/api/v1";
@@ -1493,28 +1495,41 @@ export async function getProdutoById(id: number): Promise<Product | null> {
   return mapApiProdutoToProduct(product, images);
 }
 
-export async function getProdutosIdsBySubcategoria(idSubcategoria: number): Promise<number[]> {
-  const produtos = await apiFetchAllPages<SubcategoriaProdutoApi>(
-    `/subcategorias/${encodeURIComponent(String(idSubcategoria))}/produtos`,
-    100,
-    50
+export async function getSubcategoriaById(
+  idSubcategoria: number
+): Promise<CatalogoSubcategoria | null> {
+  if (!Number.isFinite(idSubcategoria) || idSubcategoria <= 0) {
+    return null;
+  }
+
+  const subcategoria = await apiFetchItem<CatalogoSubcategoria>(
+    `/subcategorias/${encodeURIComponent(String(idSubcategoria))}`
   );
 
-  return Array.from(
-    new Set(
-      (produtos || [])
-        .map((item) => Number(item.id_produto))
-        .filter((id) => Number.isFinite(id) && id > 0)
-    )
-  );
+  if (
+    Number(subcategoria?.id_subcategoria) !== idSubcategoria ||
+    !Number(subcategoria?.id_categoria) ||
+    !String(subcategoria?.subcategoria || "").trim() ||
+    !isEnabled(subcategoria?.habilitado)
+  ) {
+    return null;
+  }
+
+  return subcategoria;
 }
 
 export async function getCatalogoSubcategoriaProdutos(
   idSubcategoria: number,
   subcategoriaNome = "Subcategoria",
-  query: Pick<CatalogoProdutosQuery, "empresaId" | "page" | "limit"> & { idCategoria?: number } = {}
+  query: CatalogoProdutosQuery & { idCategoria?: number } = {}
 ): Promise<CatalogoProdutos> {
+  const page = sanitizeCatalogPage(query.page);
+  const limit = sanitizeWideCatalogLimit(query.limit);
   const catalogo = await getCatalogoSubcategoria(idSubcategoria, query);
+
+  if (!catalogo.tipo_produto) {
+    return emptyCatalogoProdutos(page, limit);
+  }
 
   return {
     categoria: {
@@ -1526,6 +1541,7 @@ export async function getCatalogoSubcategoriaProdutos(
       habilitado: "S",
       url_capa: null,
     },
+    parentCategoryId: catalogo.parentCategoryId,
     filtros: catalogo.filtros,
     items: catalogo.items,
     total: catalogo.total,
@@ -1537,91 +1553,49 @@ export async function getCatalogoSubcategoriaProdutos(
 
 export async function getCatalogoSubcategoria(
   idSubcategoria: number,
-  query: Pick<CatalogoProdutosQuery, "empresaId" | "page" | "limit"> & { idCategoria?: number } = {}
+  query: CatalogoProdutosQuery & { idCategoria?: number } = {}
 ): Promise<CatalogoTipoProduto> {
   const page = sanitizeCatalogPage(query.page);
   const limit = sanitizeWideCatalogLimit(query.limit);
+  const subcategoria = await getSubcategoriaById(idSubcategoria);
+  const parentCategoryId = Number(subcategoria?.id_categoria || 0);
 
-  if (query.idCategoria) {
-    const catalogo = await getCatalogoCategoria(query.idCategoria, {
-      empresaId: query.empresaId || 1,
-      page,
-      limit,
-      subcategorias: String(idSubcategoria),
-    });
-    if (!catalogo.categoria) {
-      return emptyCatalogoTipoProduto(page, limit);
-    }
-    const subcategoriaNome =
-      catalogo.filtros.subcategorias.find((item) => item.id_subcategoria === idSubcategoria)
-        ?.subcategoria || catalogo.items[0]?.category || "Subcategoria";
-
-    return {
-      tipo_produto: {
-        id_empresa: 1,
-        id_tipo_produto: idSubcategoria,
-        tipo_produto: subcategoriaNome,
-        descricao: catalogo.categoria?.descricao || null,
-        habilitado: "S",
-      },
-      filtros: catalogo.filtros,
-      items: catalogo.items,
-      total: catalogo.total,
-      page: catalogo.page,
-      limit: catalogo.limit,
-      totalPages: catalogo.totalPages,
-    };
+  if (!subcategoria || !parentCategoryId) {
+    return emptyCatalogoTipoProduto(page, limit);
   }
 
-  const params = new URLSearchParams({
-    empresaId: String(query.empresaId || 1),
-    page: String(page),
-    limit: String(limit),
+  const catalogo = await getCatalogoCategoria(parentCategoryId, {
+    empresaId: query.empresaId || 1,
+    page,
+    limit,
+    subcategorias: String(idSubcategoria),
+    publicos_alvos: query.publicos_alvos,
+    quantidade_minima_min: query.quantidade_minima_min,
+    quantidade_minima_max: query.quantidade_minima_max,
+    data_promocional: query.data_promocional,
+    datas_promocionais: query.datas_promocionais,
   });
-  const firstPayload = await apiRequest(
-    `/subcategorias/${encodeURIComponent(String(idSubcategoria))}/catalogo?${params.toString()}`
-  );
-  const firstData =
-    firstPayload && typeof firstPayload === "object" && "data" in firstPayload
-      ? (firstPayload.data as {
-          subcategoria?: CatalogoSubcategoria | null;
-          filtros?: Partial<CatalogoFiltros>;
-          items?: ProdutoApi[];
-          total?: number;
-          page?: number;
-          limit?: number;
-          totalPages?: number;
-        })
-      : null;
 
-  if (firstData?.subcategoria) {
-    const subcategoriaNome = firstData.subcategoria?.subcategoria || "Subcategoria";
-    const items = firstData.items || [];
-
-    return {
-      tipo_produto: {
-        id_empresa: 1,
-        id_tipo_produto: idSubcategoria,
-        tipo_produto: subcategoriaNome,
-        descricao: null,
-        habilitado: "S",
-      },
-      filtros: {
-        subcategorias: firstData.filtros?.subcategorias || [],
-        publicos_alvos: firstData.filtros?.publicos_alvos || [],
-        datas_promocionais: firstData.filtros?.datas_promocionais || [],
-        quantidade_minima:
-          firstData.filtros?.quantidade_minima || emptyCatalogoFiltros.quantidade_minima,
-      },
-      items: items.map((product) => mapApiProdutoToProduct(product, [], subcategoriaNome)),
-      total: Number(firstData.total || items.length),
-      page: Number(firstData.page || page),
-      limit: Number(firstData.limit || limit),
-      totalPages: Math.max(Number(firstData.totalPages || 1), 1),
-    };
+  if (!catalogo.categoria) {
+    return emptyCatalogoTipoProduto(page, limit);
   }
 
-  return emptyCatalogoTipoProduto(page, limit);
+  return {
+    tipo_produto: {
+      id_empresa: Number(subcategoria.id_empresa || 1),
+      id_tipo_produto: idSubcategoria,
+      tipo_produto: subcategoria.subcategoria,
+      descricao: subcategoria.descricao || null,
+      habilitado: subcategoria.habilitado || "S",
+    },
+    parentCategoryId,
+    filtros: catalogo.filtros,
+    items: catalogo.items,
+    total: catalogo.total,
+    page: catalogo.page,
+    limit: catalogo.limit,
+    totalPages: catalogo.totalPages,
+  };
 }
 
 export async function searchProdutosSiteWithDestination(
