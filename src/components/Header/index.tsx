@@ -127,7 +127,7 @@ const defaultMenuGroups: HeaderMenuGroup[] = [
 const topbarItems = [
   "(11) 2287-6444",
   "Seja Bem-Vindo à Maggenta Brindes Corporativos!",
-  "Faturamento mínimo R$1.000,00",
+  "Faturamento mínimo R$500,00",
 ];
 
 const menuColumns = <T,>(items: T[], rowsPerColumn = 12) =>
