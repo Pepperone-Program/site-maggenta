@@ -1944,7 +1944,7 @@ export const getMenuGroups = async (): Promise<ApiMenuGroup[]> => {
     },
     {
       id: "brindes",
-      title: "Tipos de produtos",
+      title: "Tipos de Produtos",
       path: "/brindes-para-empresas",
       items: tipos.map((tipo) => ({
         id: String(tipo.id),
@@ -1961,7 +1961,7 @@ export const getMenuGroups = async (): Promise<ApiMenuGroup[]> => {
     },
     {
       id: "publicos",
-      title: "Publicos alvos",
+      title: "Públicos-alvo",
       items: publicos.map((publico) => ({
         id: String(publico.id),
         title: publico.title,
@@ -1972,7 +1972,7 @@ export const getMenuGroups = async (): Promise<ApiMenuGroup[]> => {
     },
     {
       id: "datas",
-      title: "Datas promocionais",
+      title: "Datas Promocionais",
       items: datas.map((data) => ({
         id: String(data.id),
         title: data.title,
