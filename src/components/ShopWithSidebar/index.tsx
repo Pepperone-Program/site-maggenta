@@ -592,20 +592,6 @@ const ShopWithSidebar = ({
                     selectedIds={selectedSubcategorias}
                     onToggle={selectSubcategory}
                   />
-
-                  <FilterGroup
-                    title="Publico-alvo"
-                    options={publicOptions}
-                    selectedIds={selectedPublicos}
-                    onToggle={(id) => toggleMultiFilter("publicos_alvos", id)}
-                  />
-
-                  <FilterGroup
-                    title="Datas promocionais"
-                    options={dateFilterOptions}
-                    selectedIds={selectedDatas}
-                    onToggle={(id) => toggleMultiFilter("datas_promocionais", id)}
-                  />
                 
                 </div>
               </form>
