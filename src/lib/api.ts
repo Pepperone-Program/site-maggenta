@@ -36,6 +36,7 @@ export type ProdutoApi = {
   quantidade_minima?: string | number | null;
   imagem?: string | null;
   imagem_url?: string | null;
+  url_imagem?: string | null;
   data_inclusao?: string | null;
   data_modificacao?: string | null;
   updated_at?: string | null;
@@ -751,6 +752,10 @@ export const productImageProxy = (
   );
 
 const normalizeImage = (product: ProdutoApi, folder: "thumb" | "alta") => {
+  if (isValidImageSrc(product.url_imagem)) {
+    return product.url_imagem;
+  }
+
   if (isValidImageSrc(product.imagem_url)) {
     return product.imagem_url;
   }
