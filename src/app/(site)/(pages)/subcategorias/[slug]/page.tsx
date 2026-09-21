@@ -46,11 +46,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   const catalogo = await getCatalogoSubcategoriaProdutos(
     subcategoriaId,
     titleFromSlug(slug) || "Subcategoria",
-    {
-      page: 1,
-      limit: 1,
-      idCategoria: toNumber(firstParam(query.categoria)),
-    }
+    { page: 1, limit: 1 }
   );
   if (!catalogo.categoria) {
     notFound();
@@ -102,14 +98,12 @@ const SubcategoriaPage = async ({ params, searchParams }: PageProps) => {
   const subcategoriaName = titleFromSlug(slug) || "Subcategoria";
   const page = toNumber(firstParam(query.page)) || 1;
   const limit = toNumber(firstParam(query.limit)) || 24;
-  const categoriaIdFromQuery = toNumber(firstParam(query.categoria));
   const selectedDatas = firstParam(query.datas_promocionais) || firstParam(query.data_promocional);
   const [catalogo, categorias, publicosAlvos, datasPromocionais] = await Promise.all([
     getCatalogoSubcategoriaProdutos(subcategoriaId, subcategoriaName, {
       empresaId: toNumber(firstParam(query.empresaId)) || 1,
       page,
       limit,
-      idCategoria: categoriaIdFromQuery,
       publicos_alvos: firstParam(query.publicos_alvos),
       quantidade_minima_min: toNumber(firstParam(query.quantidade_minima_min)),
       quantidade_minima_max: toNumber(firstParam(query.quantidade_minima_max)),
@@ -121,7 +115,7 @@ const SubcategoriaPage = async ({ params, searchParams }: PageProps) => {
     getDatasPromocionais(),
   ]);
   if (!catalogo.categoria) notFound();
-  const parentCategoriaId = catalogo.parentCategoryId || categoriaIdFromQuery || 0;
+  const parentCategoriaId = catalogo.parentCategoryId || 0;
   const parentCatalogo = parentCategoriaId
     ? await getCatalogoCategoria(parentCategoriaId, { page: 1, limit: 24 })
     : null;

@@ -199,6 +199,9 @@ const ShopWithSidebar = ({
   const [productStyle, setProductStyle] = useState("grid");
   const [productSidebar, setProductSidebar] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
+  const [subcategoryTotals, setSubcategoryTotals] = useState<Map<number, number>>(
+    () => new Map()
+  );
 
   const categoryName = catalogo.categoria?.categoria || "Brindes";
   const categoryDescription = sanitizeCategoryDescription(
@@ -230,11 +233,15 @@ const ShopWithSidebar = ({
     selectedQuantityMax,
   ]);
 
-  const subcategoryOptions = catalogo.filtros.subcategorias.map((item) => ({
-    id: item.id_subcategoria,
-    label: item.subcategoria,
-    total: item.total || 0,
-  }));
+  const subcategoryOptions = useMemo(
+    () =>
+      catalogo.filtros.subcategorias.map((item) => ({
+        id: item.id_subcategoria,
+        label: item.subcategoria,
+        total: subcategoryTotals.get(item.id_subcategoria) ?? item.total ?? 0,
+      })),
+    [catalogo.filtros.subcategorias, subcategoryTotals]
+  );
   const publicOptions = useMemo(() => {
     const totals = new Map(
       catalogo.filtros.publicos_alvos.map((item) => [
@@ -322,6 +329,44 @@ const ShopWithSidebar = ({
     activeFilters.quantidade_minima_min ||
     activeFilters.quantidade_minima_max;
   const isSubcategoryRoute = basePath.startsWith("/subcategorias/");
+  const isCategoryRoute = basePath.startsWith("/categorias/");
+
+  useEffect(() => {
+    if (!isCategoryRoute || !catalogo.filtros.subcategorias.length) {
+      setSubcategoryTotals(new Map());
+      return;
+    }
+
+    const controller = new AbortController();
+    const params = new URLSearchParams({
+      kind: "category",
+      categoria: String(activeCategoryId),
+      page: "1",
+      limit: "1",
+      includeFilters: "1",
+    });
+
+    fetch(`/api/produtos/catalogo?${params.toString()}`, { signal: controller.signal })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload) => {
+        if (!payload?.filtros?.subcategorias) return;
+
+        setSubcategoryTotals(
+          new Map(
+            payload.filtros.subcategorias.map((item: { id_subcategoria: number; total?: number }) => [
+              item.id_subcategoria,
+              Number(item.total || 0),
+            ])
+          )
+        );
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+      });
+
+    return () => controller.abort();
+  }, [activeCategoryId, catalogo.filtros.subcategorias.length, isCategoryRoute]);
+
   const infiniteEndpoint = useMemo(() => {
     const params = new URLSearchParams({
       kind: "category",

@@ -55,6 +55,19 @@ const api = createServer((request, response) => {
     return json(response, 200, { success: true, data: subcategory });
   }
 
+  if (request.method === "GET" && url.pathname === "/api/v1/subcategorias/195/produtos") {
+    return json(response, 200, {
+      success: true,
+      data: {
+        items: [product],
+        total: 1,
+        page: Number(url.searchParams.get("page") || 1),
+        limit: Number(url.searchParams.get("limit") || 24),
+        totalPages: 1,
+      },
+    });
+  }
+
   if (request.method === "GET" && url.pathname.startsWith("/api/v1/subcategorias/")) {
     return json(response, 404, { success: false, message: "Subcategoria nao encontrada" });
   }
@@ -159,19 +172,6 @@ try {
     );
   }
 
-  const filteredResponse = await fetch(
-    `http://127.0.0.1:${sitePort}/api/produtos/catalogo?kind=category&categoria=48&subcategorias=195&page=1&limit=24`
-  );
-  const filteredPayload = await filteredResponse.json();
-
-  if (
-    filteredResponse.status !== 200 ||
-    filteredPayload?.total !== 1 ||
-    filteredPayload?.items?.[0]?.id !== 8064
-  ) {
-    throw new Error(`O endpoint interno nao preservou o filtro: ${JSON.stringify(filteredPayload)}`);
-  }
-
   const oldSlugResponse = await fetch(
     `http://127.0.0.1:${sitePort}/subcategorias/195-slug-antigo?categoria=48`,
     { redirect: "manual" }
@@ -191,12 +191,20 @@ try {
     throw new Error(`Uma subcategoria inexistente retornou HTTP ${invalidResponse.status}.`);
   }
 
-  if (requestedPaths.some((path) => path.startsWith("/api/v1/subcategorias/195/catalogo"))) {
-    throw new Error("O site ainda consultou o endpoint inexistente de catalogo da subcategoria.");
+  if (
+    !requestedPaths.some((path) =>
+      path.startsWith("/api/v1/subcategorias/195/produtos?")
+    )
+  ) {
+    throw new Error("O site nao consultou os produtos diretamente pela subcategoria.");
+  }
+
+  if (requestedPaths.some((path) => path.includes("/api/v1/categorias/48/catalogo?subcategorias=195"))) {
+    throw new Error("O catalogo da subcategoria ainda depende do filtro de categoria.");
   }
 
   console.log(
-    "Subcategory contract smoke passed: page=200 catalog=1 canonical=308 invalid=404 endpoint=detail"
+    "Subcategory contract smoke passed: page=200 catalog=1 canonical=308 invalid=404 endpoint=products"
   );
 } finally {
   stopProcess(site);

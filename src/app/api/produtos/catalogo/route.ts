@@ -18,6 +18,7 @@ export async function GET(request: NextRequest) {
     const kind = params.get("kind") || "category";
     const page = number(params.get("page"), 1);
     const limit = Math.min(number(params.get("limit"), 36), 48);
+    const includeFilters = params.get("includeFilters") === "1";
     let catalog;
 
     if (kind === "products") {
@@ -46,6 +47,7 @@ export async function GET(request: NextRequest) {
         total: catalog.total,
         page: catalog.page,
         totalPages: catalog.totalPages,
+        ...(includeFilters ? { filtros: catalog.filtros } : {}),
       },
       {
         headers: {
