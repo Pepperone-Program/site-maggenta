@@ -456,9 +456,11 @@ const Checkout = () => {
                       role="alert"
                       className="rounded-md border-2 border-red bg-red-light-6 px-4 py-3 text-sm text-red"
                     >
-                      <strong className="block font-medium">*Atenção a golpes!*</strong>
+                      <strong className="block font-medium">CUIDADO COM GOLPES!</strong>
                       <span className="block">
-                        Não oferecemos pagamentos para testar nossos produtos. Desconfie de mensagens ou anúncios que prometam essa remuneração em nosso nome.
+                        A Maggenta Brindes NÃO oferece produtos ou brindes gratuitos para testes ou bonificações através de redes sociais.
+                        ⚠️ Não clique em links, não faça pagamentos e não forneça seus dados.
+                        Em caso de dúvida, entre em contato conosco pelos canais oficiais da Maggenta Brindes.
                       </span>
                     </div>
                   </div>
