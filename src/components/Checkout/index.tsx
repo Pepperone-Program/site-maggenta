@@ -456,9 +456,9 @@ const Checkout = () => {
                       role="alert"
                       className="rounded-md border-2 border-red bg-red-light-6 px-4 py-3 text-sm text-red"
                     >
-                      <strong className="block font-medium">Atenção</strong>
+                      <strong className="block font-medium">*Atenção a golpes!*</strong>
                       <span className="block">
-                        Não pagamos para testes de produtos, fique atento a golpes.
+                        Não oferecemos pagamentos para testar nossos produtos. Desconfie de mensagens ou anúncios que prometam essa remuneração em nosso nome.
                       </span>
                     </div>
                   </div>
