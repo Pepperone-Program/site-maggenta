@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "node:crypto";
 import { apiFetch } from "@/lib/api";
 
 type QuoteItem = {
@@ -13,7 +14,12 @@ type QuotePayload = {
   customer?: Record<string, unknown>;
   obs?: string;
   items?: QuoteItem[];
+  request_id?: string;
 };
+
+const WRITE_ATTEMPTS = 2;
+const WRITE_RETRY_DELAY_MS = 500;
+const ITEM_WRITE_CONCURRENCY = 4;
 
 const requiredFields = [
   "contato",
@@ -29,6 +35,49 @@ const fieldLabels: Record<(typeof requiredFields)[number], string> = {
 
 const text = (value: unknown) => String(value || "").trim();
 
+const requestId = (value: unknown) => {
+  const candidate = text(value);
+  return /^[a-zA-Z0-9:_-]{8,128}$/.test(candidate) ? candidate : randomUUID();
+};
+
+const wait = (delayMs: number) =>
+  new Promise((resolve) => setTimeout(resolve, delayMs));
+
+const writeWithRetry = async <T,>(
+  path: string,
+  body: Record<string, unknown>,
+  idempotencyKey: string
+) => {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= WRITE_ATTEMPTS; attempt += 1) {
+    try {
+      return await apiFetch<T>(path, {
+        method: "POST",
+        headers: { "Idempotency-Key": idempotencyKey },
+        body: JSON.stringify(body),
+      });
+    } catch (error) {
+      lastError = error;
+      if (attempt < WRITE_ATTEMPTS) {
+        await wait(WRITE_RETRY_DELAY_MS);
+      }
+    }
+  }
+
+  throw lastError;
+};
+
+const writeInBatches = async <T,>(
+  values: T[],
+  writer: (value: T, index: number) => Promise<unknown>
+) => {
+  for (let start = 0; start < values.length; start += ITEM_WRITE_CONCURRENCY) {
+    const batch = values.slice(start, start + ITEM_WRITE_CONCURRENCY);
+    await Promise.all(batch.map((value, offset) => writer(value, start + offset)));
+  }
+};
+
 export async function POST(request: NextRequest) {
   let payload: QuotePayload;
 
@@ -43,6 +92,7 @@ export async function POST(request: NextRequest) {
 
   const customer = payload.customer || {};
   const items = payload.items || [];
+  const quoteRequestId = requestId(payload.request_id);
 
   const missing = requiredFields.filter((field) => !text(customer[field]));
 
@@ -85,20 +135,21 @@ export async function POST(request: NextRequest) {
   };
 
   try {
-    const quote = await apiFetch<{ id_orcamento?: number }>("/orcamentos", {
-      method: "POST",
-      body: JSON.stringify(quoteBody),
-    });
+    const quote = await writeWithRetry<{ id_orcamento?: number }>(
+      "/orcamentos",
+      quoteBody,
+      quoteRequestId
+    );
     const idOrcamento = Number(quote?.id_orcamento);
 
     if (!Number.isFinite(idOrcamento) || idOrcamento <= 0) {
       throw new Error("A API nao confirmou o numero do orcamento.");
     }
 
-    for (const item of items) {
-      await apiFetch(`/orcamentos/${quote.id_orcamento}/itens`, {
-        method: "POST",
-        body: JSON.stringify({
+    await writeInBatches(items, async (item, index) => {
+      await writeWithRetry(
+        `/orcamentos/${quote.id_orcamento}/itens`,
+        {
           id_orcamento: quote.id_orcamento,
           data_orcamento: dataOrcamento,
           id_produto: item.id,
@@ -110,9 +161,10 @@ export async function POST(request: NextRequest) {
             item.discountedPrice && item.discountedPrice > 0
               ? String(item.discountedPrice)
               : null,
-        }),
-      });
-    }
+        },
+        `${quoteRequestId}:item:${index}:${item.id}`
+      );
+    });
 
     return NextResponse.json({
       success: true,

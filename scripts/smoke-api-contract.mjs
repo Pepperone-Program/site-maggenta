@@ -22,7 +22,11 @@ const api = createServer(async (request, response) => {
 
   if (request.method === "POST" && url.pathname === "/api/v1/orcamentos") {
     const body = await readJson(request);
-    received.push({ kind: "quote", body });
+    received.push({
+      kind: "quote",
+      body,
+      idempotencyKey: request.headers["idempotency-key"],
+    });
     return json(response, 200, {
       success: true,
       data: { id_orcamento: 4242 },
@@ -34,7 +38,11 @@ const api = createServer(async (request, response) => {
     url.pathname === "/api/v1/orcamentos/4242/itens"
   ) {
     const body = await readJson(request);
-    received.push({ kind: "item", body });
+    received.push({
+      kind: "item",
+      body,
+      idempotencyKey: request.headers["idempotency-key"],
+    });
 
     if (failQuoteItems) {
       return json(response, 500, { success: false, message: "falha controlada" });
@@ -73,6 +81,7 @@ const waitForSite = async () => {
 };
 
 const quotePayload = {
+  request_id: "contract-test-request-4242",
   customer: {
     contato: "Teste de contrato",
     email: "teste-contrato@example.com",
@@ -131,7 +140,11 @@ try {
     successPayload?.success !== true ||
     successPayload?.data?.id_orcamento !== 4242 ||
     received.filter((entry) => entry.kind === "quote").length !== 1 ||
-    received.filter((entry) => entry.kind === "item").length !== 1
+    received.filter((entry) => entry.kind === "item").length !== 1 ||
+    received.find((entry) => entry.kind === "quote")?.idempotencyKey !==
+      quotePayload.request_id ||
+    received.find((entry) => entry.kind === "item")?.idempotencyKey !==
+      `${quotePayload.request_id}:item:0:10`
   ) {
     throw new Error(
       `O fluxo de sucesso falhou: status=${successResponse.status} payload=${JSON.stringify(

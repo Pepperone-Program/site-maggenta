@@ -28,6 +28,15 @@ import {
 const ROUTE_STORAGE_KEY = "maggenta:last-internal-route";
 const QUOTE_CUSTOMER_STORAGE_KEY = "maggenta:quote-customer";
 const DEFAULT_RETURN_ROUTE = "/brindes-para-empresas";
+const QUOTE_REQUEST_TIMEOUT_MS = 120_000;
+
+const createQuoteRequestId = () => {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+
+  return `quote-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+};
 
 const fields = [
   { name: "contato", label: "Contato", placeholder: "Nome do responsável", required: true },
@@ -189,6 +198,7 @@ const Checkout = () => {
   const [cepLoading, setCepLoading] = useState(false);
   const [attribution, setAttribution] = useState<AttributionParams>({});
   const [returnRoute, setReturnRoute] = useState(DEFAULT_RETURN_ROUTE);
+  const pendingRequestRef = useRef<{ fingerprint: string; id: string } | null>(null);
 
   const total = cartItems.reduce(
     (sum, item) => sum + item.discountedPrice * item.quantity,
@@ -268,17 +278,29 @@ const Checkout = () => {
     const formData = new FormData(event.currentTarget);
     const customer = Object.fromEntries(formData.entries());
     const quoteCustomer = getQuoteCustomerFromFormData(formData);
+    const requestPayload = {
+      customer,
+      obs: `${String(formData.get("obs") || "")}${attributionToObsSuffix(attribution)}`,
+      items: cartItems,
+    };
+    const requestFingerprint = JSON.stringify(requestPayload);
+
+    if (pendingRequestRef.current?.fingerprint !== requestFingerprint) {
+      pendingRequestRef.current = {
+        fingerprint: requestFingerprint,
+        id: createQuoteRequestId(),
+      };
+    }
 
     try {
       const response = await fetchWithTimeout("/api/orcamento", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customer,
-          obs: `${String(formData.get("obs") || "")}${attributionToObsSuffix(attribution)}`,
-          items: cartItems,
+          ...requestPayload,
+          request_id: pendingRequestRef.current.id,
         }),
-      });
+      }, QUOTE_REQUEST_TIMEOUT_MS);
       const payload = await response.json();
 
       if (!response.ok || !payload.success) {
@@ -308,6 +330,7 @@ const Checkout = () => {
         // Bloqueios de storage não podem transformar um orçamento aceito em erro.
       }
       persistQuoteCustomer(quoteCustomer);
+      pendingRequestRef.current = null;
       dispatch(removeAllItemsFromCart());
       router.push("/orcamentos-obrigado");
     } catch (error) {
