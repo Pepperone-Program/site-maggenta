@@ -52,6 +52,16 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        source: "/brindes-para-empresas/lancamentos",
+        destination: `${siteUrl}/lancamentos`,
+        permanent: true,
+      },
+      {
+        source: "/brindes-para-empresas/premium",
+        destination: `${siteUrl}/brindes-personalizados`,
+        permanent: true,
+      },
+      {
         source: "/:path*",
         has: [
           {
