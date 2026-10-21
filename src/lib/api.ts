@@ -101,6 +101,7 @@ export type LandingPageApi = {
   title: string;
   slug?: string | null;
   description?: string | null;
+  descricao?: string | null;
   keywords: string;
   url: string;
   data_lp?: string | null;
@@ -450,7 +451,8 @@ const mapLandingPage = (landingPage: LandingPageApi): LandingPage | null => {
   return {
     ...landingPage,
     title: landingPage.title.trim(),
-    description: landingPage.description?.trim() || null,
+    description:
+      landingPage.description?.trim() || landingPage.descricao?.trim() || null,
     keywords: landingPage.keywords.trim(),
     path,
     slug: path.slice(1),
