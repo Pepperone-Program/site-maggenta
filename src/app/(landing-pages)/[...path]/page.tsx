@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { cache } from "react";
 import { getLandingPageByPath } from "@/lib/api";
@@ -103,36 +102,9 @@ export default async function LandingPage({ params }: PageProps) {
 
   const targetUrl = safeLandingPageUrl(landingPage.url);
   if (!targetUrl) notFound();
-  const indexable = isIndexableLandingPage(landingPage);
 
   return (
     <main style={{ width: "100%", minHeight: "100dvh", background: "#ffffff" }}>
-      {indexable && (
-        <header
-          style={{
-            maxWidth: 1180,
-            margin: "0 auto",
-            padding: "32px 20px 28px",
-            fontFamily: "Arial, sans-serif",
-          }}
-        >
-          <p style={{ margin: 0, color: "#9d174d", fontWeight: 700 }}>Campanha Maggenta</p>
-          <h1 style={{ margin: "10px 0 12px", color: "#1f2937", fontSize: "clamp(30px, 5vw, 48px)" }}>
-            {landingPage.title}
-          </h1>
-          <p style={{ maxWidth: 820, margin: 0, color: "#4b5563", fontSize: 18, lineHeight: 1.65 }}>
-            {landingPage.description}
-          </p>
-          <nav aria-label="Ações da campanha" style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 22 }}>
-            <Link href="/brindes-personalizados" style={{ color: "#9d174d", fontWeight: 700 }}>
-              Ver catálogo de brindes
-            </Link>
-            <Link href="/orcamentos" style={{ color: "#9d174d", fontWeight: 700 }}>
-              Solicitar orçamento
-            </Link>
-          </nav>
-        </header>
-      )}
       <iframe
         src={targetUrl}
         title={landingPage.title}
