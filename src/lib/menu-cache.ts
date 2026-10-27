@@ -1,7 +1,7 @@
 // Only validated navigation data is retained; failed reads never populate the cache.
 const entries = new Map<string, { value: unknown; expires: number }>();
 const pending = new Map<string, Promise<unknown>>();
-const TTL = 60 * 60 * 1000;
+const TTL = 10 * 60 * 1000;
 
 export async function cachedMenuData<T>(key: string, load: () => Promise<T>): Promise<T> {
   const cached = entries.get(key);

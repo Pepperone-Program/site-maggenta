@@ -2053,7 +2053,7 @@ async function decorateMenuCategories(categories: HeaderMenuItem[]) {
           if (src && isValidImageSrc(src)) images[item.id] = src;
         }
       }
-      menuRankingCache.set(key, { expires: Date.now() + 3600000, ids: selected.map((item) => item.id), images });
+      menuRankingCache.set(key, { expires: Date.now() + 10 * 60 * 1000, ids: selected.map((item) => item.id), images });
     } catch {
       const previous = menuRankingCache.get(key);
       menuRankingCache.set(key, { expires: Date.now() + 60000, ids: previous?.ids || [], images: previous?.images || {} });

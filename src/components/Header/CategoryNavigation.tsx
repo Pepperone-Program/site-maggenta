@@ -26,7 +26,8 @@ function Subcategories({ category, close }: { category: HeaderMenuItem; close: (
       if (!Array.isArray(payload.data)) throw new Error("Resposta inválida");
       return payload.data;
     },
-    staleTime: 3600000, gcTime: 3600000, retry: false,
+    staleTime: 10 * 60 * 1000, gcTime: 10 * 60 * 1000,
+    refetchInterval: 10 * 60 * 1000, retry: false,
   });
   return <div className={styles.categoryContent}>
     <div className={styles.categoryLinks}>

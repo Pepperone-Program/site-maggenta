@@ -19,7 +19,7 @@ await assert.rejects(cachedMenuData("failed", async () => { throw new Error("una
 assert.equal(await cachedMenuData("failed", async () => "recovered"), "recovered", "Failures must not poison the cache");
 const originalNow = Date.now;
 try {
-  const future = originalNow() + 3600001;
+  const future = originalNow() + 10 * 60 * 1000 + 1;
   Date.now = () => future;
   assert.deepEqual(await cachedMenuData("origin-a:categories", async () => ["updated"]), ["updated"]);
 } finally { Date.now = originalNow; }

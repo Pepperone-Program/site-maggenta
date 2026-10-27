@@ -5,9 +5,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchWithTimeout } from "@/lib/timed-fetch";
 import type { HeaderMenuGroup } from "@/types/header-menu";
 
-const CACHE_TIME = 60 * 60 * 1000;
-const FULL_KEY = "maggenta:header-menu:v4";
-const CATEGORIES_KEY = "maggenta:header-categories:v4";
+const CACHE_TIME = 10 * 60 * 1000;
+const FULL_KEY = "maggenta:header-menu:v5";
+const CATEGORIES_KEY = "maggenta:header-categories:v5";
 const hasCategories = (groups?: HeaderMenuGroup[]) =>
   Boolean(groups?.find((group) => group.id === "categorias")?.items?.length);
 
@@ -57,12 +57,14 @@ export function useHeaderMenu(fallback: HeaderMenuGroup[]) {
     queryKey: [FULL_KEY], queryFn: ({ signal }) => fetchMenu(FULL_KEY, signal),
     initialData: hasCategories(fallback) ? fallback : undefined,
     enabled: restored, staleTime: CACHE_TIME, gcTime: CACHE_TIME,
+    refetchInterval: CACHE_TIME,
     refetchOnWindowFocus: true, retry: 1,
   });
   const categories = useQuery({
     queryKey: [CATEGORIES_KEY], queryFn: ({ signal }) => fetchMenu(CATEGORIES_KEY, signal),
     enabled: restored && !hasCategories(full.data),
     staleTime: CACHE_TIME, gcTime: CACHE_TIME, retry: 1,
+    refetchInterval: CACHE_TIME,
   });
 
   // Ranking and secondary groups enrich the fast category list when available.
