@@ -309,7 +309,7 @@ const Header = ({
     <header
       ref={headerRef}
       className={`fixed left-0 top-0 z-9999 w-full transition-all duration-300 ${
-        stickyMenu ? "bg-white/95 shadow-2 backdrop-blur-xl" : "bg-white/92 backdrop-blur-xl"
+        stickyMenu ? "bg-white shadow-2" : "bg-white"
       }`}
     >
       <div className="border-b border-blue bg-white text-blue">
