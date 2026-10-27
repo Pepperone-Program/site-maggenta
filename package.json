@@ -17,6 +17,7 @@
     "test:search-contract": "node scripts/smoke-search-contract.mjs",
     "test:seo": "node scripts/test-seo.mjs",
     "test:menu-ranking": "node scripts/test-menu-ranking.mjs",
+    "test:menu-cache": "node scripts/test-menu-cache.mjs",
     "test:menu-contract": "node scripts/smoke-menu-contract.mjs"
   },
   "dependencies": {

@@ -68,6 +68,7 @@ export type ProdutoRankingApi = {
 export type { HeaderMenuItem as ApiMenuItem, HeaderMenuGroup as ApiMenuGroup } from "@/types/header-menu";
 import type { HeaderMenuGroup as ApiMenuGroup, HeaderMenuItem } from "@/types/header-menu";
 import { selectFeaturedCategories } from "@/lib/menu-ranking";
+import { cachedMenuData } from "@/lib/menu-cache";
 
 export type BannerTipo = "home_mega" | "home_grande" | "banner_medio" | "mega_banner";
 
@@ -1934,24 +1935,41 @@ export async function getActiveBanners(tipo?: BannerTipo): Promise<BannerApi[]> 
     .sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
 }
 
-export const getMenuGroups = async (): Promise<ApiMenuGroup[]> => {
-  const menuRequestInit: RequestInit = {};
-  const [rawCategories, tipos, publicos, datas] = await Promise.all([
-    apiFetchAllPages<CatalogoCategoria>("/categorias", 100, 80, menuRequestInit),
-    getCatalogoTiposProdutos(menuRequestInit),
-    getPublicosAlvos(menuRequestInit),
-    getDatasPromocionais(menuRequestInit),
-  ]);
+// Credentials participate in the internal scope; they are never returned to browsers.
+const menuCacheScope = () => JSON.stringify([apiBaseUrl(), process.env.NEXT_API_TOKEN || process.env.API_TOKEN || ""]);
 
-  const categorias: HeaderMenuItem[] = (rawCategories || [])
-    .filter((category) => isEnabled(category.habilitado))
+const getMenuCategories = () => cachedMenuData<HeaderMenuItem[]>(menuCacheScope() + ":categories", async () => {
+  const raw = await fetchAllFirstAvailable<CatalogoCategoria>(["/categorias", "/produtos/categorias"], 100);
+  const categories = (raw || []).filter((category) => isEnabled(category.habilitado))
+    .filter((category) => Number(category.id_categoria) > 0 && Boolean(category.categoria))
     .map((category) => ({
       id: String(category.id_categoria), title: category.categoria,
       path: "/categorias/" + encodeURIComponent(friendlyPersonalizedParam(category.id_categoria, category.categoria)),
       image: isValidImageSrc(category.url_capa) ? category.url_capa : undefined,
-    }))
-    .sort((a, b) => a.title.localeCompare(b.title, "pt-BR"));
-  await decorateMenuCategories(categorias);
+    })).sort((a, b) => a.title.localeCompare(b.title, "pt-BR"));
+  if (!categories.length) throw new ApiRequestError("Categorias do menu indisponiveis.");
+  return categories;
+});
+
+// A cold category list must not wait for statistics, products or secondary groups.
+export async function getMenuCategoryGroups(): Promise<ApiMenuGroup[]> {
+  const categories = (await getMenuCategories()).map((item) => ({ ...item }));
+  applyMenuRanking(categories);
+  return [{ id: "categorias", title: "Categorias", items: categories }];
+}
+
+export const getMenuGroups = (): Promise<ApiMenuGroup[]> => cachedMenuData(menuCacheScope() + ":full", async () => {
+  const [categorias, tipos, publicos, datas] = await Promise.all([
+    getMenuCategories().then(async (items) => {
+      const categories = items.map((item) => ({ ...item }));
+      await decorateMenuCategories(categories);
+      return categories;
+    }),
+    getCatalogoTiposProdutos(),
+    getPublicosAlvos(),
+    getDatasPromocionais(),
+  ]);
+
   if (!categorias.length || !tipos.length) {
     throw new ApiRequestError(
       "A API configurada em NEXT_API_URL retornou o menu comercial incompleto.",
@@ -2006,13 +2024,13 @@ export const getMenuGroups = async (): Promise<ApiMenuGroup[]> => {
       })),
     },
   ];
-};
+});
 
 // Isolate cached ranking by API origin. Only navigation metadata leaves the server.
 const menuRankingCache = new Map<string, { expires: number; ids: string[]; images: Record<string, string> }>();
 const menuRankingPending = new Map<string, Promise<void>>();
 async function decorateMenuCategories(categories: HeaderMenuItem[]) {
-  const key = apiBaseUrl();
+  const key = menuCacheScope();
   const refresh = async () => {
     try {
       const rankingInit: RequestInit = { signal: AbortSignal.timeout(3500) };
@@ -2049,7 +2067,11 @@ async function decorateMenuCategories(categories: HeaderMenuItem[]) {
     }
     await pending;
   }
-  const cached = menuRankingCache.get(key)!;
+  applyMenuRanking(categories);
+}
+
+function applyMenuRanking(categories: HeaderMenuItem[]) {
+  const cached = menuRankingCache.get(menuCacheScope()) || { ids: [], images: {} };
   const ids = [...new Set([...cached.ids.filter((id) => categories.some((item) => item.id === id)), ...categories.map((item) => item.id)])].slice(0, 5);
   for (const category of categories) {
     const index = ids.indexOf(category.id);
@@ -2058,11 +2080,13 @@ async function decorateMenuCategories(categories: HeaderMenuItem[]) {
   }
 }
 
-export async function getMenuSubcategories(id: number): Promise<HeaderMenuItem[]> {
-  const items = await apiFetchAllPages<CatalogoSubcategoria>("/categorias/" + id + "/subcategorias?habilitado=S");
-  if (!items) throw new Error("Subcategorias indisponiveis");
-  return items.filter((item) => isEnabled(item.habilitado) && (!item.id_categoria || Number(item.id_categoria) === id))
-    .sort(sortByOrderAndName("subcategoria"))
-    .map((item) => ({ id: String(item.id_subcategoria), title: item.subcategoria,
-      path: "/subcategorias/" + encodeURIComponent(friendlyPersonalizedParam(item.id_subcategoria, item.subcategoria)) }));
+export function getMenuSubcategories(id: number): Promise<HeaderMenuItem[]> {
+  return cachedMenuData(menuCacheScope() + ":subcategories:" + id, async () => {
+    const items = await apiFetchAllPages<CatalogoSubcategoria>("/categorias/" + id + "/subcategorias?habilitado=S");
+    if (!items) throw new Error("Subcategorias indisponiveis");
+    return items.filter((item) => isEnabled(item.habilitado) && (!item.id_categoria || Number(item.id_categoria) === id))
+      .sort(sortByOrderAndName("subcategoria"))
+      .map((item) => ({ id: String(item.id_subcategoria), title: item.subcategoria,
+        path: "/subcategorias/" + encodeURIComponent(friendlyPersonalizedParam(item.id_subcategoria, item.subcategoria)) }));
+  });
 }

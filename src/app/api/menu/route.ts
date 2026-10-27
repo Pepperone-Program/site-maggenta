@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
-import { getConfiguredApiOrigin, getMenuGroups } from "@/lib/api";
+import { getConfiguredApiOrigin, getMenuCategoryGroups, getMenuGroups } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const menu = await getMenuGroups();
+    const categoriesOnly = new URL(request.url).searchParams.get("section") === "categories";
+    const menu = await (categoriesOnly ? getMenuCategoryGroups() : getMenuGroups());
     return NextResponse.json(
       { success: true, data: menu },
       {

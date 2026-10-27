@@ -2,7 +2,6 @@
   display: flex;
   flex: 0 0 auto;
   align-items: center;
-  width: 132px;
 }
 
 .logo img {
@@ -10,12 +9,4 @@
   width: 100%;
   height: auto;
   object-fit: contain;
-}
-
-@media (min-width: 375px) {
-  .logo { width: 156px; }
-}
-
-@media (min-width: 640px) {
-  .logo { width: 180px; }
 }

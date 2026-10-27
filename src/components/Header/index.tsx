@@ -18,6 +18,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import "swiper/css";
 
 import CategoryNavigation from "./CategoryNavigation";
+import { useHeaderMenu } from "./useHeaderMenu";
 import type { HeaderMenuGroup } from "@/types/header-menu";
 export type { HeaderMenuGroup } from "@/types/header-menu";
 
@@ -40,14 +41,12 @@ type SearchSubmitPayload = {
 type SearchPayload = SearchSubmitPayload;
 
 const SEARCH_FIELD_WIDTH = 800;
-const HEADER_LOGO_HEIGHT = 74;
+const HEADER_LOGO_WIDTH = 180;
 const SEARCH_STALE_TIME = 30 * 1000;
 const SEARCH_CACHE_TIME = 5 * 60 * 1000;
 const SEARCH_CACHE_KEY = "product-search-v2";
 const SEARCH_API_PAGE_SIZE = 24;
 const SEARCH_SUGGESTION_LIMIT = 10;
-const MENU_CACHE_TIME = 60 * 60 * 1000;
-const MENU_CACHE_KEY = "header-menu-v3";
 
 const searchProducts = async (
   query: string,
@@ -64,20 +63,6 @@ const searchProducts = async (
   }
 
   return response.json();
-};
-
-const fetchMenuGroups = async (signal?: AbortSignal): Promise<HeaderMenuGroup[]> => {
-  const response = await fetchWithTimeout("/api/menu", {
-    cache: "no-store",
-    signal,
-  }, 12000);
-
-  if (!response.ok) {
-    throw new Error("Não foi possível atualizar o menu.");
-  }
-
-  const payload = await response.json();
-  return Array.isArray(payload?.data) ? payload.data : defaultMenuGroups;
 };
 
 const showSearchNotFoundMessage = () => {
@@ -165,18 +150,7 @@ const Header = ({
   const totalPrice = useSelector(selectTotalPrice);
   const trimmedSearchQuery = searchQuery.trim();
   const normalizedSearchQuery = trimmedSearchQuery.toLocaleLowerCase("pt-BR");
-  const menuQuery = useQuery<HeaderMenuGroup[]>({
-    queryKey: [MENU_CACHE_KEY],
-    queryFn: ({ signal }) => fetchMenuGroups(signal),
-    initialData: initialMenuGroups,
-    staleTime: MENU_CACHE_TIME,
-    gcTime: MENU_CACHE_TIME,
-    refetchInterval: MENU_CACHE_TIME,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: "always",
-    retry: 1,
-  });
-  const menuGroups: HeaderMenuGroup[] = menuQuery.data ?? initialMenuGroups;
+  const menu = useHeaderMenu(initialMenuGroups);
   const suggestionsQuery = useQuery({
     queryKey: [SEARCH_CACHE_KEY, debouncedSearchQuery, SEARCH_API_PAGE_SIZE],
     queryFn: ({ signal }) =>
@@ -363,13 +337,13 @@ const Header = ({
             stickyMenu ? "py-3" : "py-4"
           }`}
         >
-          <Link className={styles.logo} href="/" aria-label="Maggenta">
+          <Link className={styles.logo} style={{ width: `min(${HEADER_LOGO_WIDTH}px, 38vw)` }} href="/" aria-label="Maggenta">
             <img
               src="/images/logo/NOVO_LOGO_MAGG_HORIZONTAL_COR.png"
               alt="Maggenta"
-              width={880}
-              height={150}
-              style={{ maxHeight: HEADER_LOGO_HEIGHT }}
+              width={HEADER_LOGO_WIDTH}
+              height={31}
+              style={{ width: "100%", height: "auto", maxWidth: "100%" }}
             />
           </Link>
 
@@ -583,8 +557,8 @@ const Header = ({
           </div>
         </div>
       </div>
-      <CategoryNavigation groups={menuGroups} mobileOpen={navigationOpen} onClose={closeNavigation}
-        menuError={menuQuery.isError} retryMenu={() => { void menuQuery.refetch(); }} />
+      <CategoryNavigation groups={menu.groups} mobileOpen={navigationOpen} onClose={closeNavigation}
+        menuError={menu.isError} retryMenu={menu.retry} />
     </header>
   );
 };

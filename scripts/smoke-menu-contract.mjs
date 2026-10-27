@@ -8,11 +8,16 @@ const titles = ["Canetas", "Tecnologia", "Garrafas", "Bolsas Térmicas", "Caneca
 const categories = titles.map((categoria, i) => ({ id_categoria: i + 1, categoria, habilitado: "S", url_capa: "/images/categories/categories-01.png" }));
 const calls = [];
 let failSubcategories = false;
+let slowSecondaryGroups = true;
 const json = (res, code, data) => { res.writeHead(code, { "Content-Type": "application/json" }); res.end(JSON.stringify(data)); };
 const api = createServer((req, res) => {
   const url = new URL(req.url, "http://localhost"); calls.push(url.pathname);
   if (url.pathname === "/api/v1/categorias") return json(res, 200, { data: categories });
-  if (url.pathname === "/api/v1/tipos-produtos/habilitados") return json(res, 200, { data: [{ id_tipo_produto: 1, tipo_produto: "Corporativos", habilitado: "S" }] });
+  if (url.pathname === "/api/v1/tipos-produtos/habilitados") {
+    const respond = () => json(res, 200, { data: [{ id_tipo_produto: 1, tipo_produto: "Corporativos", habilitado: "S" }] });
+    if (slowSecondaryGroups) { setTimeout(respond, 1500); return; }
+    return respond();
+  }
   if (url.pathname === "/api/v1/publicos-alvos") return json(res, 200, { data: [{ id_publico_alvo: 1, publico_alvo: "Empresas", habilitado: "S" }] });
   if (url.pathname === "/api/v1/datas-promocionais") return json(res, 200, { data: [{ id_data_promocional: 1, data_promocional: "Natal", habilitado: "S" }] });
   if (url.pathname === "/api/v1/estatisticas-produtos/ranking") {
@@ -47,18 +52,31 @@ let browser;
 try {
   let response;
   for (let i = 0; i < 80; i++) {
-    try { response = await fetch(`${origin}/api/menu`); if (response.ok) break; } catch {}
+    try { response = await fetch(`${origin}/api/menu/categories/invalid`); if (response.status === 400) break; } catch {}
     await new Promise(resolve => setTimeout(resolve, 250));
   }
-  assert.ok(response?.ok, output.slice(-2000));
+  assert.equal(response?.status, 400, output.slice(-2000));
+  let fullFinished = false;
+  const fullRequest = fetch(`${origin}/api/menu`).then(response => { fullFinished = true; return response; });
+  const fastResponse = await fetch(`${origin}/api/menu?section=categories`);
+  const fastPayload = await fastResponse.json();
+  assert.equal(fastPayload.data[0].items.length, categories.length);
+  assert.equal(fullFinished, false, "Categories must arrive before a slow secondary group");
+  response = await fullRequest;
+  assert.ok(response.ok);
+  slowSecondaryGroups = false;
   const payload = await response.json();
   const menuCategories = payload.data.find(group => group.id === "categorias").items;
   assert.deepEqual(menuCategories.filter(c => c.featuredOrder !== undefined).sort((a,b) => a.featuredOrder-b.featuredOrder).map(c => c.id), ["2", "3", "1", "4", "5"]);
   assert.ok(!JSON.stringify(payload).includes("menu-test-token"));
   await fetch(`${origin}/api/menu`);
+  assert.equal(calls.filter(path => path === "/api/v1/categorias").length, 1, "Fast and full responses must share categories");
+  assert.equal(calls.filter(path => path === "/api/v1/tipos-produtos/habilitados").length, 1, "A warm menu must not query the upstream API again");
   assert.equal(calls.filter(path => path.endsWith("/ranking")).length, 1);
   const subs = await (await fetch(`${origin}/api/menu/categories/2`)).json();
   assert.equal(subs.data.length, 1); assert.ok(subs.data[0].path.startsWith("/subcategorias/50-"));
+  await fetch(`${origin}/api/menu/categories/2`);
+  assert.equal(calls.filter(path => path === "/api/v1/categorias/2/subcategorias").length, 1);
   assert.equal((await fetch(`${origin}/api/menu/categories/invalid`)).status, 400);
   console.log("Menu API contract: ranking IDs, deduplication, cache, private token, subcategory visibility and canonical links passed.");
   if (process.env.MENU_PLAYWRIGHT_PATH) {
@@ -97,7 +115,13 @@ try {
     failSubcategories = false;
     await page.getByRole("button", { name: "Tentar novamente" }).click();
     await page.getByRole("link", { name: "Acessórios para empresas", exact: true }).waitFor();
+    let reloadMenuRequests = 0;
+    await page.route("**/api/menu**", route => { reloadMenuRequests++; return route.abort(); });
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await nav.getByRole("link", { name: "Tecnologia", exact: true }).first().waitFor();
+    assert.equal(reloadMenuRequests, 0, "A fresh session snapshot must restore the menu without a request");
     console.log("Browser: desktop hover, keyboard, Escape, outside click, 768/390/320px navigation, overflow and retry passed. Screenshots: .next/menu-review");
+    console.log("Menu performance: independent cold categories, cached upstream reads and session restoration passed.");
   }
 } finally {
   await browser?.close();
