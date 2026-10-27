@@ -15,7 +15,9 @@
     "test:api-contract": "node scripts/smoke-api-contract.mjs",
     "test:subcategory-contract": "node scripts/smoke-subcategory-contract.mjs",
     "test:search-contract": "node scripts/smoke-search-contract.mjs",
-    "test:seo": "node scripts/test-seo.mjs"
+    "test:seo": "node scripts/test-seo.mjs",
+    "test:menu-ranking": "node scripts/test-menu-ranking.mjs",
+    "test:menu-contract": "node scripts/smoke-menu-contract.mjs"
   },
   "dependencies": {
     "@microsoft/clarity": "^1.0.2",

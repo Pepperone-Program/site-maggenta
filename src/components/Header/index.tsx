@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
+import styles from "./Header.module.css";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Autoplay } from "swiper/modules";
@@ -16,16 +17,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 // @ts-ignore -- Side-effect CSS import resolved by Next.js bundler.
 import "swiper/css";
 
-export type HeaderMenuGroup = {
-  id: string;
-  title: string;
-  path?: string;
-  items?: {
-    id: string;
-    title: string;
-    path: string;
-  }[];
-};
+import CategoryNavigation from "./CategoryNavigation";
+import type { HeaderMenuGroup } from "@/types/header-menu";
+export type { HeaderMenuGroup } from "@/types/header-menu";
 
 type SearchSuggestion = {
   id: number;
@@ -45,13 +39,15 @@ type SearchSubmitPayload = {
 
 type SearchPayload = SearchSubmitPayload;
 
+const SEARCH_FIELD_WIDTH = 800;
+const HEADER_LOGO_HEIGHT = 74;
 const SEARCH_STALE_TIME = 30 * 1000;
 const SEARCH_CACHE_TIME = 5 * 60 * 1000;
 const SEARCH_CACHE_KEY = "product-search-v2";
 const SEARCH_API_PAGE_SIZE = 24;
 const SEARCH_SUGGESTION_LIMIT = 10;
 const MENU_CACHE_TIME = 60 * 60 * 1000;
-const MENU_CACHE_KEY = "header-menu-v2";
+const MENU_CACHE_KEY = "header-menu-v3";
 
 const searchProducts = async (
   query: string,
@@ -74,7 +70,7 @@ const fetchMenuGroups = async (signal?: AbortSignal): Promise<HeaderMenuGroup[]>
   const response = await fetchWithTimeout("/api/menu", {
     cache: "no-store",
     signal,
-  });
+  }, 12000);
 
   if (!response.ok) {
     throw new Error("Não foi possível atualizar o menu.");
@@ -130,11 +126,6 @@ const topbarItems = [
   "Faturamento mínimo R$500,00",
 ];
 
-const menuColumns = <T,>(items: T[], rowsPerColumn = 12) =>
-  Array.from({ length: Math.ceil(items.length / rowsPerColumn) }, (_, index) =>
-    items.slice(index * rowsPerColumn, index * rowsPerColumn + rowsPerColumn)
-  );
-
 const searchPathFromQuery = (query: string) =>
   `/busca?q=${encodeURIComponent(query.trim())}`;
 
@@ -143,21 +134,32 @@ const Header = ({
 }: {
   initialMenuGroups?: HeaderMenuGroup[];
 }) => {
+  const headerRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const element = headerRef.current;
+    if (!element) return;
+    const update = () => document.documentElement.style.setProperty("--site-header-height", element.getBoundingClientRect().height + "px");
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    return () => { observer.disconnect(); document.documentElement.style.removeProperty("--site-header-height"); };
+  }, []);
   const router = useRouter();
   const queryClient = useQueryClient();
   const pathname = usePathname();
   const [navigationOpen, setNavigationOpen] = useState(false);
+  const closeNavigation = useCallback(() => setNavigationOpen(false), []);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
-  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+
   const [searching, setSearching] = useState(false);
-  const menuCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const mobileSearchRef = useRef<HTMLDivElement>(null);
   const mobileSearchInputRef = useRef<HTMLInputElement>(null);
-  const touchMenuHandled = useRef(false);
+
   const { openCartModal } = useCartModalContext();
   const cartItems = useAppSelector((state) => state.cartReducer.items);
   const totalPrice = useSelector(selectTotalPrice);
@@ -191,31 +193,9 @@ const Header = ({
         : []
       : [];
 
-  const openMenu = (menuId: string) => {
-    if (menuCloseTimer.current) {
-      clearTimeout(menuCloseTimer.current);
-    }
-
-    setActiveMenuId(menuId);
-  };
-
-  const toggleMenu = (menuId: string) => {
-    if (menuCloseTimer.current) {
-      clearTimeout(menuCloseTimer.current);
-    }
-
-    setActiveMenuId((current) => (current === menuId ? null : menuId));
-  };
-
-  const closeMenu = () => {
-    menuCloseTimer.current = setTimeout(() => {
-      setActiveMenuId(null);
-    }, 160);
-  };
-
   const closeSearchUi = useCallback(() => {
     setNavigationOpen(false);
-    setActiveMenuId(null);
+
     setSearchFocused(false);
     setMobileSearchOpen(false);
   }, []);
@@ -351,22 +331,15 @@ const Header = ({
     [searchQuery, router, searching, closeSearchUi, queryClient]
   );
 
-  useEffect(() => {
-    return () => {
-      if (menuCloseTimer.current) {
-        clearTimeout(menuCloseTimer.current);
-      }
-    };
-  }, []);
-
   return (
     <header
+      ref={headerRef}
       className={`fixed left-0 top-0 z-9999 w-full transition-all duration-300 ${
         stickyMenu ? "bg-white/95 shadow-2 backdrop-blur-xl" : "bg-white/92 backdrop-blur-xl"
       }`}
     >
       <div className="border-b border-blue bg-white text-blue">
-        <div className="mx-auto h-9 w-full max-w-[1800px] px-2 text-center text-sm font-semibold">
+        <div className="mx-auto h-9 w-full max-w-[1600px] px-2 text-center text-sm font-semibold">
           <Swiper
             loop
             direction="vertical"
@@ -384,130 +357,30 @@ const Header = ({
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-[1800px] px-2 sm:px-3">
+      <div className="mx-auto w-full max-w-[1600px] px-2 sm:px-3">
         <div
-          className={`relative grid grid-cols-[auto_1fr_auto] items-center gap-4 transition-all duration-200 ${
+          className={`relative flex flex-nowrap items-center gap-4 transition-all duration-200 ${
             stickyMenu ? "py-3" : "py-4"
           }`}
         >
-          <Link className="ml-2 flex-shrink-0 sm:ml-3 sm:flex-shrink-0 xl:ml-0 xl:flex-shrink-0" href="/" aria-label="Maggenta">
+          <Link className={styles.logo} href="/" aria-label="Maggenta">
             <img
               src="/images/logo/NOVO_LOGO_MAGG_HORIZONTAL_COR.png"
               alt="Maggenta"
-              width={190}
-              height={32}
-              className="h-auto w-[132px] sm:w-[176px] lg:w-[190px]"
+              width={880}
+              height={150}
+              style={{ maxHeight: HEADER_LOGO_HEIGHT }}
             />
           </Link>
 
-          <nav
-            className={`absolute left-0 right-0 top-full w-full flex-col rounded-b-[28px] border-none border-gray-3 bg-white p-0 shadow-2 min-[1200px]:static min-[1200px]:block min-[1200px]:w-auto min-[1200px]:translate-x-0 min-[1200px]:translate-y-0 min-[1200px]:border-0 min-[1200px]:bg-transparent min-[1200px]:p-0 min-[1200px]:shadow-none ${
-            
-              navigationOpen ? "flex" : "hidden"
-            }`}
-          >
-            <ul className="flex max-h-[calc(100dvh-132px)] flex-col gap-5 overflow-y-auto overscroll-contain px-2 py-3 min-[1200px]:max-h-none min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-center min-[1200px]:gap-9 min-[1200px]:overflow-visible min-[1200px]:px-0 min-[1200px]:py-0">
-              {menuGroups.map((menuItem) => (
-                <li
-                  key={menuItem.id}
-                  onMouseEnter={() => openMenu(menuItem.id)}
-                  onMouseLeave={closeMenu}
-                  className="group"
-                >
-                  {menuItem.items?.length ? (
-                    <>
-                      <button
-                        type="button"
-                        aria-expanded={activeMenuId === menuItem.id}
-                        onPointerDown={(event) => {
-                          if (event.pointerType === "mouse") {
-                            return;
-                          }
-
-                          event.preventDefault();
-                          touchMenuHandled.current = true;
-                          toggleMenu(menuItem.id);
-                        }}
-                        onClick={(event) => {
-                          if (touchMenuHandled.current) {
-                            touchMenuHandled.current = false;
-                            return;
-                          }
-
-                          if (menuItem.path) {
-                            setNavigationOpen(false);
-                            setActiveMenuId(null);
-                            router.push(menuItem.path);
-                            return;
-                          }
-
-                          toggleMenu(menuItem.id);
-                        }}
-                        className="flex min-h-11 items-center gap-1 py-2 text-left text-sm font-medium text-dark hover:text-blue min-[1200px]:min-h-0 min-[1200px]:py-0"
-                      >
-                        <span className="relative before:absolute before:left-0 before:-top-2 before:h-[3px] before:w-0 before:rounded-b-[3px] before:bg-blue before:duration-200 min-[1200px]:group-hover:before:w-full">
-                          {menuItem.title}
-                        </span>
-                      </button>
-
-                      <div
-                        onMouseEnter={() => openMenu(menuItem.id)}
-                        onMouseLeave={closeMenu}
-                        data-active={activeMenuId === menuItem.id ? "true" : undefined}
-                        data-dropdown-id={menuItem.id}
-                        className={`static pt-0 min-[1200px]:absolute min-[1200px]:left-[calc(50%+140px)] min-[1200px]:top-full min-[1200px]:z-9999 min-[1200px]:w-auto min-[1200px]:max-w-[calc(100vw-32px)] min-[1200px]:-translate-x-1/2 min-[1200px]:pt-0 ${
-                          activeMenuId === menuItem.id ? "block" : "hidden"
-                        }`}
-                      >
-                        <div className="mt-0 max-h-[min(60dvh,420px)] overflow-y-auto overscroll-contain rounded-2xl border border-gray-3 bg-white p-2 pt-0 shadow-2 min-[1200px]:max-h-none min-[1200px]:overflow-x-auto min-[1200px]:overflow-y-visible min-[1200px]:rounded-[24px] min-[1200px]:px-8 min-[1200px]:py-7 min-[1200px]:pt-7">
-                          <div className="flex flex-col gap-x-12 gap-y-1 min-[1200px]:flex-row">
-                            {menuColumns(menuItem.items, 16).map((column, columnIndex) => (
-                              <ul
-                                key={`${menuItem.id}-${columnIndex}`}
-                                className="flex min-w-[240px] flex-col gap-y-1"
-                              >
-                                {column.map((item, itemIndex) => (
-                                  <li key={item.id} className={itemIndex === 0 ? "pt-[5px]" : undefined}>
-                                    <Link
-                                      href={item.path}
-                                      onClick={() => {
-                                        setNavigationOpen(false);
-                                        setActiveMenuId(null);
-                                      }}
-                                      className="block min-h-11 rounded-full px-3 py-1 text-sm font-light uppercase text-dark hover:bg-gray-1 hover:text-blue min-[1200px]:min-h-0 min-[1200px]:text-xs"
-                                    >
-                                      {item.title}
-                                    </Link>
-                                  </li>
-                                ))}
-                              </ul>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <Link
-                      href={menuItem.path || "/"}
-                      onClick={() => setNavigationOpen(false)}
-                      className="relative flex min-h-11 items-center py-2 text-sm font-medium text-dark hover:text-blue before:absolute before:left-0 before:-top-2 before:h-[3px] before:w-0 before:rounded-b-[3px] before:bg-blue before:duration-200 min-[1200px]:min-h-0 min-[1200px]:py-0 min-[1200px]:hover:before:w-full"
-                    >
-                      {menuItem.title}
-                    </Link>
-                  )}
-                </li>
-              ))}
-            </ul>
-
-          </nav>
-
-          <div className="flex items-center justify-end gap-2 sm:gap-4">
-            <div ref={mobileSearchRef} className="relative flex h-11 items-center justify-end sm:hidden">
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-2 sm:gap-4 lg:gap-6">
+            <div ref={mobileSearchRef} className="relative flex h-12 items-center justify-end sm:hidden">
               <form
                 onSubmit={handleSearchSubmit}
-                className={`relative flex h-11 origin-right items-center overflow-visible transition-[width,opacity,transform] duration-300 ease-out motion-reduce:transition-none ${
+                style={{ maxWidth: SEARCH_FIELD_WIDTH }}
+                className={`relative flex h-12 origin-right items-center overflow-visible transition-[width,opacity,transform] duration-300 ease-out motion-reduce:transition-none ${
                   mobileSearchOpen
-                    ? "w-[calc(100vw-168px)] max-w-[240px] scale-x-100 opacity-100"
+                    ? "w-[calc(100vw-168px)] scale-x-100 opacity-100 min-[375px]:w-[calc(100vw-192px)]"
                     : "pointer-events-none w-0 scale-x-95 opacity-0"
                 }`}
               >
@@ -521,14 +394,14 @@ const Header = ({
                   aria-label="Buscar produtos"
                   placeholder="Buscar produtos"
                   tabIndex={mobileSearchOpen ? 0 : -1}
-                  className="h-11 w-full rounded-full border border-gray-3 bg-gray-1 pl-4 pr-11 text-sm text-dark outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-dark-4 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                  className="h-12 w-full rounded-full border border-gray-3 bg-gray-2 pl-4 pr-12 text-base text-dark outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-dark-4 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                 />
                 <button
                   type="submit"
                   aria-label="Buscar"
                   disabled={searching}
                   aria-busy={searching}
-                  className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-full text-dark transition-colors duration-200 hover:bg-gray-2 hover:text-blue disabled:cursor-wait disabled:opacity-70"
+                  className="absolute right-0 top-0 flex h-12 w-12 items-center justify-center rounded-full text-blue transition-colors duration-200 hover:bg-gray-2 hover:text-blue disabled:cursor-wait disabled:opacity-70"
                 >
                   <SearchButtonIcon loading={searching} />
                 </button>
@@ -590,6 +463,8 @@ const Header = ({
 
                 <button
                   aria-label="Abrir menu"
+                  aria-controls="category-navigation"
+                  aria-expanded={navigationOpen}
                   tabIndex={mobileSearchOpen ? -1 : 0}
                   className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-3 bg-white shadow-1"
                   onClick={() => setNavigationOpen((value) => !value)}
@@ -606,7 +481,8 @@ const Header = ({
 
             <form
               onSubmit={handleSearchSubmit}
-              className="relative hidden w-[132px] items-center justify-end transition-all duration-300 xsm:w-[150px] sm:flex sm:w-[220px] lg:w-[320px]"
+              style={{ width: SEARCH_FIELD_WIDTH, maxWidth: "100%" }}
+              className="relative mx-auto hidden min-w-0 shrink items-center justify-end sm:flex sm:ml-4 lg:mx-auto"
             >
               <input
                 value={searchQuery}
@@ -619,14 +495,14 @@ const Header = ({
                 name="search"
                 aria-label="Buscar produtos"
                 placeholder="Buscar produtos"
-                className="h-11 w-full rounded-full border border-gray-3 bg-gray-1 pl-4 pr-11 text-sm text-dark outline-none transition-all duration-300 placeholder:text-dark-4 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                className="h-14 w-full rounded-full border border-gray-3 bg-gray-2 pl-5 pr-14 text-base text-dark outline-none transition-all duration-300 placeholder:text-dark-4 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
               />
               <button
                 type="submit"
                 aria-label="Buscar"
                 disabled={searching}
                 aria-busy={searching}
-                className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-full text-dark transition-colors duration-200 hover:bg-gray-2 hover:text-blue disabled:cursor-wait disabled:opacity-70"
+                className="absolute right-0 top-0 flex h-14 w-14 items-center justify-center rounded-full text-blue transition-colors duration-200 hover:bg-gray-2 hover:text-blue disabled:cursor-wait disabled:opacity-70"
               >
                 <SearchButtonIcon loading={searching} />
               </button>
@@ -655,8 +531,8 @@ const Header = ({
               className="hidden min-w-max flex-col leading-tight text-blue min-[1200px]:flex"
               aria-label="Ligue para Maggenta Brindes"
             >
-              <span className="text-xs font-medium text-blue/80">Ligue-nos agora</span>
-              <span className="text-sm font-semibold">(11) 2287-6444</span>
+              <span className="text-sm font-medium text-blue/80">Ligue-nos agora</span>
+              <span className="text-xl font-bold tracking-tight">(11) 2287-6444</span>
             </a>
 
             <button
@@ -692,6 +568,8 @@ const Header = ({
 
             <button
               aria-label="Abrir menu"
+                  aria-controls="category-navigation"
+                  aria-expanded={navigationOpen}
               className="hidden h-11 w-11 items-center justify-center rounded-full border border-gray-3 bg-white shadow-1 sm:flex min-[1200px]:hidden"
               onClick={() => setNavigationOpen((value) => !value)}
               type="button"
@@ -705,6 +583,8 @@ const Header = ({
           </div>
         </div>
       </div>
+      <CategoryNavigation groups={menuGroups} mobileOpen={navigationOpen} onClose={closeNavigation}
+        menuError={menuQuery.isError} retryMenu={() => { void menuQuery.refetch(); }} />
     </header>
   );
 };

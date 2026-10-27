@@ -20,7 +20,7 @@ const InstitutionalPage = ({
   sections,
 }: InstitutionalPageProps) => {
   return (
-    <main className="bg-white pt-[124px] sm:pt-[112px]">
+    <main className="bg-white pt-[var(--site-header-height)]">
       <section className="border-b border-gray-3 bg-[#f7faf8]">
         <div className="mx-auto grid w-full max-w-[1800px] gap-10 px-2 py-14 sm:px-3 lg:grid-cols-[0.9fr_1.4fr] lg:py-20">
           <div>

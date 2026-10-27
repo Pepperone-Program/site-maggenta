@@ -229,3 +229,6 @@ input[type='search']::-webkit-search-results-decoration {
 [data-sonner-toast] {
   z-index: 2147483647 !important;
 }
+
+:root { --site-header-height: 112px; }
+@media (min-width: 1200px) { :root { --site-header-height: 190px; } }

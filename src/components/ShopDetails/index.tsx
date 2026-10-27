@@ -215,7 +215,7 @@ const ShopDetails = ({
 
   return (
     <>
-      <main className="bg-[#f5f5f4] pt-[120px] sm:pt-[124px]">
+      <main className="bg-[#f5f5f4] pt-[var(--site-header-height)]">
         <section className="pb-12">
           <div className="mx-auto w-full max-w-[1800px] px-4 pt-8 sm:px-8 xl:px-3">
             <nav className="mb-5 text-sm text-dark-4" aria-label="Breadcrumb">

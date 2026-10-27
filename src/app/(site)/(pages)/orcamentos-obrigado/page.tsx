@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 
 const OrcamentosObrigadoPage = () => {
   return (
-    <main className="min-h-screen bg-gray-2 pt-[150px] sm:pt-[138px]">
+    <main className="min-h-screen bg-gray-2 pt-[calc(var(--site-header-height)+32px)]">
       <QuoteConversion />
       <section className="mx-auto flex min-h-[calc(100vh-180px)] w-full max-w-[900px] items-center justify-center px-4 py-16">
         <div className="w-full rounded-md bg-white px-6 py-12 text-center shadow-1 sm:px-10 sm:py-16">

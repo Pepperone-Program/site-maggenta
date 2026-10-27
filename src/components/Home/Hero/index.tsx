@@ -159,7 +159,7 @@ const Hero = ({ banners = [] }: HeroProps) => {
   );
 
   return (
-    <section className="overflow-hidden bg-[#f5f5f4] pt-[132px] sm:pt-[124px]">
+    <section className="overflow-hidden bg-[#f5f5f4] pt-[var(--site-header-height)]">
       {banners.length > 0 && (
         <h1 className="sr-only">Maggenta Brindes Corporativos Personalizados para Empresas</h1>
       )}
