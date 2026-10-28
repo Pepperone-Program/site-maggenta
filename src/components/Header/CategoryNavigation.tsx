@@ -91,7 +91,7 @@ export default function CategoryNavigation({ groups, mobileOpen, onClose, menuEr
         <span aria-hidden="true">☰</span> Veja todas as categorias
       </button>
       {featured.map((item) => <div className={styles.featured} key={item.id} onMouseEnter={(event) => hover(`category-${item.id}`, event.currentTarget.querySelector("button")!)}>
-        <Link href={item.path} onClick={close}><CategoryImage item={item} /><span>{item.title}</span></Link>
+        <Link href={item.path} onClick={close}><CategoryImage item={item} /><span className={styles.categoryName}>{item.title}</span></Link>
         <button type="button" aria-label={`Abrir subcategorias de ${item.title}`} aria-expanded={active === `category-${item.id}`} aria-controls="category-panel" onClick={(event) => toggle(`category-${item.id}`, event.currentTarget)}>⌄</button>
       </div>)}
       <Link className={styles.launches} href="/lancamentos" onMouseEnter={() => { cancel(); setActive(null); }} onClick={close}>Lançamentos</Link>
@@ -101,7 +101,7 @@ export default function CategoryNavigation({ groups, mobileOpen, onClose, menuEr
         <div><button type="button" className={styles.back} onClick={() => open("all")}>← Todas as categorias</button><h2 className={styles.title}>{extra.title}</h2><ul className={styles.subcategories}>{extra.items?.map((item) => <li key={item.id}><Link href={item.path} onClick={close}>{item.title}</Link></li>)}</ul></div> :
         <div className={styles.allContent}>
           <div>{categories.length ? <ul className={styles.categories}>{categories.map((item) => <li key={item.id}>
-            <Link href={item.path} onClick={close}><CategoryImage item={item} /><span>{item.title}</span></Link>
+            <Link href={item.path} onClick={close}><CategoryImage item={item} /><span className={styles.categoryName}>{item.title}</span></Link>
             <button type="button" aria-label={`Abrir subcategorias de ${item.title}`} onClick={() => open(`category-${item.id}`)}>›</button>
           </li>)}</ul> : <p role="status" className={styles.status}>{menuError ? <>Não foi possível carregar as categorias. <button type="button" onClick={retryMenu}>Tentar novamente</button></> : "Carregando categorias…"}</p>}</div>
           <aside className={styles.explore}><h2>Explore também</h2>{extras.map((item) => item.path ?

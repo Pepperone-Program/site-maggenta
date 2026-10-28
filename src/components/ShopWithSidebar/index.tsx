@@ -3,13 +3,15 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { fetchWithTimeout } from "@/lib/timed-fetch";
 import RangeSlider from "react-range-slider-input";
 import "react-range-slider-input/dist/style.css";
 import Breadcrumb from "../Common/Breadcrumb";
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
 import shopData from "../Shop/shopData";
-import type { CatalogoOption, CatalogoProdutos } from "@/lib/api";
+import type { CatalogoOption, CatalogoProdutos, SubcategoryProductTotal } from "@/lib/api";
 import { friendlyPersonalizedParam } from "@/lib/slugs";
 import type { Product } from "@/types/product";
 import { useInfiniteProducts } from "@/hooks/useInfiniteProducts";
@@ -29,7 +31,7 @@ type ActiveFilters = {
 type FilterOption = {
   id: number;
   label: string;
-  total: number;
+  total: number | null;
 };
 
 const defaultCatalogo: CatalogoProdutos = {
@@ -157,11 +159,12 @@ const FilterGroup = ({
                 </span>
 
                 <span
+                  aria-label={option.total === null ? "Total de produtos indisponível" : `${formatNumber(option.total)} produtos na subcategoria`}
                   className={`inline-flex shrink-0 rounded-full px-2 text-custom-xs duration-200 group-hover:bg-blue group-hover:text-white ${
                     selected ? "bg-blue text-white" : "bg-gray-2"
                   }`}
                 >
-                  {option.total}
+                  {option.total === null ? "?" : formatNumber(option.total)}
                 </span>
               </button>
             );
@@ -201,10 +204,6 @@ const ShopWithSidebar = ({
   const [productStyle, setProductStyle] = useState("grid");
   const [productSidebar, setProductSidebar] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
-  const [subcategoryTotals, setSubcategoryTotals] = useState<Map<number, number>>(
-    () => new Map()
-  );
-
   const categoryName = catalogo.categoria?.categoria || "Brindes";
   const categoryDescription = sanitizeCategoryDescription(
     catalogo.categoria?.descricao || ""
@@ -212,6 +211,30 @@ const ShopWithSidebar = ({
   const activeCategoryId = catalogKind === "products" ? 0 :
     parseInt(String(activeFilters.categoria || catalogo.categoria?.id_categoria || 1), 10) || 1;
   const subcategoriesOriginCategoryId = subcategoriesContextCategoryId || activeCategoryId;
+  const isSubcategoryRoute = basePath.startsWith("/subcategorias/");
+  const isCategoryRoute = basePath.startsWith("/categorias/");
+  const independentSubcategoryCounts = isCategoryRoute || isSubcategoryRoute;
+  const totalsQuery = useQuery<SubcategoryProductTotal[]>({
+    queryKey: ["subcategory-product-totals", subcategoriesOriginCategoryId],
+    enabled: independentSubcategoryCounts && subcategoriesOriginCategoryId > 0 && catalogo.filtros.subcategorias.length > 0,
+    queryFn: async ({ signal }) => {
+      const response = await fetchWithTimeout(
+        "/api/categorias/" + subcategoriesOriginCategoryId + "/subcategorias/totais", { signal }, 12000
+      );
+      if (!response.ok) throw new Error("Contagens indisponiveis.");
+      const payload = await response.json();
+      if (!Array.isArray(payload.data)) throw new Error("Contagens invalidas.");
+      return payload.data;
+    },
+    staleTime: 10 * 60 * 1000, gcTime: 10 * 60 * 1000,
+    refetchInterval: 10 * 60 * 1000, retry: 1,
+  });
+  const subcategoryTotals = useMemo(() => new Map<number, number | null>(
+    (totalsQuery.data || []).map((item): [number, number | null] => [item.id_subcategoria, item.total])
+  ), [totalsQuery.data]);
+  const totalsUnavailable = totalsQuery.isError || (totalsQuery.data &&
+    catalogo.filtros.subcategorias.some((item) => subcategoryTotals.get(item.id_subcategoria) == null));
+
   const pageTitle = customPageTitle || `${categoryName} personalizados`;
   const initialItems = products || catalogo.items;
   const selectedSubcategorias = useMemo(
@@ -240,9 +263,9 @@ const ShopWithSidebar = ({
       catalogo.filtros.subcategorias.map((item) => ({
         id: item.id_subcategoria,
         label: item.subcategoria,
-        total: subcategoryTotals.get(item.id_subcategoria) ?? item.total ?? 0,
+        total: independentSubcategoryCounts ? (subcategoryTotals.get(item.id_subcategoria) ?? null) : (item.total ?? 0),
       })),
-    [catalogo.filtros.subcategorias, subcategoryTotals]
+    [catalogo.filtros.subcategorias, subcategoryTotals, independentSubcategoryCounts]
   );
   const publicOptions = useMemo(() => {
     const totals = new Map(
@@ -330,45 +353,6 @@ const ShopWithSidebar = ({
     selectedDatas.length > 0 ||
     activeFilters.quantidade_minima_min ||
     activeFilters.quantidade_minima_max;
-  const isSubcategoryRoute = basePath.startsWith("/subcategorias/");
-  const isCategoryRoute = basePath.startsWith("/categorias/");
-
-  useEffect(() => {
-    if (!isCategoryRoute || !catalogo.filtros.subcategorias.length) {
-      setSubcategoryTotals(new Map());
-      return;
-    }
-
-    const controller = new AbortController();
-    const params = new URLSearchParams({
-      kind: "category",
-      categoria: String(activeCategoryId),
-      page: "1",
-      limit: "1",
-      includeFilters: "1",
-    });
-
-    fetch(`/api/produtos/catalogo?${params.toString()}`, { signal: controller.signal })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((payload) => {
-        if (!payload?.filtros?.subcategorias) return;
-
-        setSubcategoryTotals(
-          new Map(
-            payload.filtros.subcategorias.map((item: { id_subcategoria: number; total?: number }) => [
-              item.id_subcategoria,
-              Number(item.total || 0),
-            ])
-          )
-        );
-      })
-      .catch((error: unknown) => {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-      });
-
-    return () => controller.abort();
-  }, [activeCategoryId, catalogo.filtros.subcategorias.length, isCategoryRoute]);
-
   const infiniteEndpoint = useMemo(() => {
     const params = new URLSearchParams({
       kind: catalogKind,
@@ -643,6 +627,12 @@ const ShopWithSidebar = ({
                     selectedIds={selectedSubcategorias}
                     onToggle={selectSubcategory}
                   />}
+                  {independentSubcategoryCounts && totalsUnavailable && (
+                    <button type="button" onClick={() => { void totalsQuery.refetch(); }}
+                      disabled={totalsQuery.isFetching} className="px-5 py-2 text-left text-sm text-blue disabled:opacity-50">
+                      {totalsQuery.isFetching ? "Atualizando contagens…" : "Tentar atualizar contagens"}
+                    </button>
+                  )}
                 
                 </div>
               </form>

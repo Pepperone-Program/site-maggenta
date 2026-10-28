@@ -2,21 +2,22 @@
 .navigation a, .navigation button { -webkit-tap-highlight-color: transparent; }
 .navigation :is(a, button):focus-visible { outline: 2px solid #9d174d; outline-offset: 3px; border-radius: 4px; }
 .bar { display: flex; max-width: 1600px; margin: auto; padding: 0 24px; height: 76px; align-items: stretch; }
-.allTrigger { display: flex; align-items: center; gap: 14px; padding-right: 28px; color: #9d174d; font-size: 12px; font-weight: 800; text-transform: uppercase; }
+.allTrigger { display: flex; align-items: center; gap: 14px; padding-right: 28px; background: #fff; color: #9d174d; font-size: 12px; font-weight: 800; text-transform: uppercase; }
 .allTrigger > span { font-size: 19px; }
 .allTrigger[aria-expanded=true] { color: #831843; }
-.featured { position: relative; flex: 1; min-width: 0; display: flex; border-left: 1px solid #e7e5e4; }
+.featured { position: relative; flex: 1; min-width: 0; display: flex; background: #fff; border-left: 1px solid #e7e5e4; }
 .featured > a { display: flex; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700; padding: 6px 18px; text-align: center; line-height: 1.2; }
 .featured > button { position: absolute; right: 4px; bottom: 8px; width: 24px; height: 24px; color: #9d174d; }
-.featured:has([aria-expanded=true]), .featured:hover, .allTrigger:hover { background: #fdf4f8; }
+.categoryName { color: #292524; }
+.featured:is(:has([aria-expanded=true]), :hover, :focus-within) > a > .categoryName { color: #9d174d; }
 .launches { display: flex; align-items: center; justify-content: center; padding-left: 28px; border-left: 1px solid #e7e5e4; text-transform: uppercase; font-size: 12px; font-weight: 800; }
 .panel { position: absolute; top: 100%; left: max(24px, calc((100% - 1552px) / 2)); right: max(24px, calc((100% - 1552px) / 2)); background: white; padding: 28px; box-shadow: 0 14px 30px #29252418; border: 1px solid #e7e5e4; border-top: 0; max-height: calc(100dvh - 210px); overflow-y: auto; overscroll-behavior: contain; animation: appear .14s ease-out; }
 .allContent { display: grid; grid-template-columns: minmax(0, 1fr) 230px; gap: 28px; }
 .categories { columns: 5; column-gap: 20px; }
-.categories li { display: flex; align-items: center; break-inside: avoid; margin-bottom: 5px; }
+.categories li { display: flex; align-items: center; break-inside: avoid; margin-bottom: 5px; background: #fff; }
 .categories li > a { display: flex; align-items: center; gap: 10px; min-height: 42px; flex: 1; font-size: 13px; line-height: 1.4; border-radius: 4px; }
 .categories li > button { width: 26px; min-height: 36px; color: #9d174d; }
-.categories li:hover { background: #fdf4f8; }
+.categories li:is(:hover, :focus-within) > a > .categoryName { color: #9d174d; }
 .image { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; flex-shrink: 0; color: #9d174d; }
 .image img { width: 100%; height: 100%; object-fit: contain; }
 .featured .image { width: 34px; height: 34px; }
@@ -28,8 +29,8 @@
 .categoryLinks { flex: 1; min-width: 0; }
 .title { display: block; font-size: 14px; font-weight: 800; color: #9d174d; border-bottom: 1px solid #e7e5e4; padding-bottom: 12px; margin-bottom: 16px; }
 .subcategories { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px 22px; }
-.subcategories a { display: flex; align-items: center; min-height: 42px; font-size: 13px; border-radius: 4px; padding: 6px; }
-.subcategories a:hover { background: #fdf4f8; color: #9d174d; }
+.subcategories a { display: flex; align-items: center; min-height: 42px; font-size: 13px; border-radius: 4px; padding: 6px; background: #fff; }
+.subcategories a:is(:hover, :focus-visible) { color: #9d174d; }
 .viewAll { display: inline-flex; gap: 6px; color: #9d174d; font-weight: 800; font-size: 13px; margin-top: 24px; min-height: 36px; align-items: center; }
 .visual { width: 160px; align-self: center; }
 .largeImage { width: 160px; height: 160px; display: flex; align-items: center; justify-content: center; color: #9d174d; }

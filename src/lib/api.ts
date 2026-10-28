@@ -2090,3 +2090,38 @@ export function getMenuSubcategories(id: number): Promise<HeaderMenuItem[]> {
         path: "/subcategorias/" + encodeURIComponent(friendlyPersonalizedParam(item.id_subcategoria, item.subcategoria)) }));
   });
 }
+
+export type SubcategoryProductTotal = { id_subcategoria: number; total: number | null };
+
+export async function getCategorySubcategoryTotals(categoryId: number): Promise<SubcategoryProductTotal[]> {
+  const subcategories = await getMenuSubcategories(categoryId);
+  const totals: SubcategoryProductTotal[] = new Array(subcategories.length);
+  const init: RequestInit = { signal: AbortSignal.timeout(8000) };
+  let next = 0;
+  // Keep upstream concurrency bounded; a total needs only one product, not every page.
+  await Promise.all(Array.from({ length: Math.min(4, subcategories.length) }, async () => {
+    while (next < subcategories.length) {
+      const index = next++;
+      const id = Number(subcategories[index].id);
+      try {
+        const total = await cachedMenuData(menuCacheScope() + ":subcategory-total:" + id, async () => {
+          init.signal!.throwIfAborted();
+          init.signal!.throwIfAborted();
+          const data = await apiFetchItem<{ total?: number | string }>(
+            `/subcategorias/${id}/produtos?page=1&limit=1`, init
+          );
+          const value = Number(data?.total);
+          if (data?.total === undefined || data.total === null || !Number.isSafeInteger(value) || value < 0) {
+            throw new Error("Total da subcategoria indisponivel.");
+          }
+          return value;
+        });
+        totals[index] = { id_subcategoria: id, total };
+      } catch {
+        // Failed totals are not cached or replaced with category-intersection counts.
+        totals[index] = { id_subcategoria: id, total: null };
+      }
+    }
+  }));
+  return totals;
+}
