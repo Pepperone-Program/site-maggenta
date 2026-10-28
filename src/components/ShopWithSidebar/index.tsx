@@ -183,6 +183,7 @@ const ShopWithSidebar = ({
   dateOptions = [],
   pageTitle: customPageTitle,
   basePath = "/brindes-personalizados",
+  catalogKind = "category",
   subcategoriesContextCategoryId,
 }: {
   catalogo?: CatalogoProdutos;
@@ -193,6 +194,7 @@ const ShopWithSidebar = ({
   dateOptions?: CatalogoOption[];
   pageTitle?: string;
   basePath?: string;
+  catalogKind?: "category" | "products";
   subcategoriesContextCategoryId?: number;
 }) => {
   const router = useRouter();
@@ -207,7 +209,7 @@ const ShopWithSidebar = ({
   const categoryDescription = sanitizeCategoryDescription(
     catalogo.categoria?.descricao || ""
   );
-  const activeCategoryId =
+  const activeCategoryId = catalogKind === "products" ? 0 :
     parseInt(String(activeFilters.categoria || catalogo.categoria?.id_categoria || 1), 10) || 1;
   const subcategoriesOriginCategoryId = subcategoriesContextCategoryId || activeCategoryId;
   const pageTitle = customPageTitle || `${categoryName} personalizados`;
@@ -369,15 +371,15 @@ const ShopWithSidebar = ({
 
   const infiniteEndpoint = useMemo(() => {
     const params = new URLSearchParams({
-      kind: "category",
-      categoria: String(activeCategoryId),
+      kind: catalogKind,
       limit: String(catalogo.limit),
     });
+    if (catalogKind === "category") params.set("categoria", String(activeCategoryId));
     Object.entries(activeFilters).forEach(([key, value]) => {
       if (value && key !== "page" && key !== "limit") params.set(key, value);
     });
     return `/api/produtos/catalogo?${params.toString()}`;
-  }, [activeCategoryId, activeFilters, catalogo.limit]);
+  }, [activeCategoryId, activeFilters, catalogKind, catalogo.limit]);
   const infinite = useInfiniteProducts({
     initialItems,
     initialPage: catalogo.page,
@@ -412,7 +414,6 @@ const ShopWithSidebar = ({
         value === undefined ||
         value === null ||
         value === "" ||
-        (key === "categoria" && String(value) === "1") ||
         (key === "limit" && String(value) === "24") ||
         (key === "page" && String(value) === "1")
       ) {
@@ -506,6 +507,10 @@ const ShopWithSidebar = ({
   };
 
   const selectCategory = (id: number) => {
+    if (id === 0) {
+      router.push("/brindes-personalizados");
+      return;
+    }
     const selectedCategory = categories.find((category) => category.id === id);
     const categoryParam = selectedCategory
       ? friendlyPersonalizedParam(id, selectedCategory.title)
@@ -621,6 +626,7 @@ const ShopWithSidebar = ({
                           onChange={(event) => selectCategory(Number(event.target.value))}
                           className="h-11 w-full rounded-full border border-gray-3 bg-white px-4 text-custom-sm text-dark outline-none duration-200 focus:border-blue"
                         >
+                          <option value={0}>Todas as categorias</option>
                           {categories.map((category) => (
                             <option key={category.id} value={category.id}>
                               {category.title}
@@ -631,12 +637,12 @@ const ShopWithSidebar = ({
                     </div>
                   )}
 
-                  <FilterGroup
+                  {catalogKind === "category" && <FilterGroup
                     title="Subcategorias"
                     options={subcategoryOptions}
                     selectedIds={selectedSubcategorias}
                     onToggle={selectSubcategory}
-                  />
+                  />}
                 
                 </div>
               </form>

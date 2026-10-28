@@ -3,10 +3,9 @@ import { Metadata } from "next";
 import { permanentRedirect } from "next/navigation";
 import ShopWithSidebar from "@/components/ShopWithSidebar";
 import {
-  getCatalogoCategoria,
   getCatalogoCategorias,
-  getDatasPromocionais,
-  getPublicosAlvos,
+  getProdutosSitePaginated,
+  type CatalogoProdutos,
 } from "@/lib/api";
 import { buildSeoOther, catalogRobots, categoryPath, contextualKeywords, siteUrl } from "@/lib/seo";
 
@@ -54,26 +53,19 @@ const toNumber = (value: string | string[] | undefined) => {
 
 const BrindesPersonalizadosPage = async ({ searchParams }: CatalogPageProps) => {
   const params = (await searchParams) || {};
-  const categoriaId = toNumber(params.categoria) || 1;
-  const selectedDatas = firstParam(params.datas_promocionais) || firstParam(params.data_promocional);
-  const [catalogo, categorias, publicosAlvos, datasPromocionais] = await Promise.all([
-    getCatalogoCategoria(categoriaId, {
+  const categoriaId = toNumber(params.categoria);
+  const hasCategory = Number.isFinite(categoriaId) && categoriaId > 0;
+  const limit = Math.min(Math.max(toNumber(params.limit) || 24, 1), 48);
+  const [products, categorias] = await Promise.all([
+    hasCategory ? Promise.resolve(null) : getProdutosSitePaginated({
       empresaId: toNumber(params.empresaId) || 1,
-      page: toNumber(params.page) || 1,
-      limit: toNumber(params.limit) || 24,
-      subcategorias: firstParam(params.subcategorias),
-      publicos_alvos: firstParam(params.publicos_alvos),
-      quantidade_minima_min: toNumber(params.quantidade_minima_min),
-      quantidade_minima_max: toNumber(params.quantidade_minima_max),
-      data_promocional: firstParam(params.data_promocional),
-      datas_promocionais: firstParam(params.datas_promocionais),
+      page: Math.max(toNumber(params.page) || 1, 1),
+      limit,
     }),
     getCatalogoCategorias(),
-    getPublicosAlvos(),
-    getDatasPromocionais(),
   ]);
 
-  if (firstParam(params.categoria)) {
+  if (hasCategory) {
     const redirectParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       const firstValue = firstParam(value);
@@ -82,29 +74,31 @@ const BrindesPersonalizadosPage = async ({ searchParams }: CatalogPageProps) => 
       }
     });
     const categoryTitle =
-      catalogo.categoria?.categoria ||
       categorias.find((category) => category.id === categoriaId)?.title ||
       "brindes";
     const query = redirectParams.toString();
     permanentRedirect(`${categoryPath(categoriaId, categoryTitle)}${query ? `?${query}` : ""}`);
   }
 
+  const catalogo: CatalogoProdutos = {
+    ...products,
+    categoria: null,
+    filtros: {
+      subcategorias: [],
+      publicos_alvos: [],
+      datas_promocionais: [],
+      quantidade_minima: { min: 0, max: 0 },
+    },
+  };
+
   return (
     <main>
       <ShopWithSidebar
         catalogo={catalogo}
-        activeFilters={{
-          categoria: String(categoriaId),
-          subcategorias: firstParam(params.subcategorias) || "",
-          publicos_alvos: firstParam(params.publicos_alvos) || "",
-          quantidade_minima_min: firstParam(params.quantidade_minima_min) || "",
-          quantidade_minima_max: firstParam(params.quantidade_minima_max) || "",
-          datas_promocionais: selectedDatas || "",
-          limit: firstParam(params.limit) || "24",
-        }}
+        catalogKind="products"
+        pageTitle="Brindes personalizados"
+        activeFilters={{ limit: String(limit) }}
         categoryOptions={categorias}
-        publicOptions={publicosAlvos}
-        dateOptions={datasPromocionais}
       />
     </main>
   );

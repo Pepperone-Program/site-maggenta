@@ -14,6 +14,7 @@
     "lint": "eslint .",
     "test:api-contract": "node scripts/smoke-api-contract.mjs",
     "test:subcategory-contract": "node scripts/smoke-subcategory-contract.mjs",
+    "test:full-catalog-contract": "node scripts/smoke-full-catalog-contract.mjs",
     "test:search-contract": "node scripts/smoke-search-contract.mjs",
     "test:seo": "node scripts/test-seo.mjs",
     "test:menu-ranking": "node scripts/test-menu-ranking.mjs",
