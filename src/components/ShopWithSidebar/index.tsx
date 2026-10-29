@@ -187,6 +187,7 @@ const ShopWithSidebar = ({
   pageTitle: customPageTitle,
   basePath = "/brindes-personalizados",
   catalogKind = "category",
+  subcategoryId,
   subcategoriesContextCategoryId,
 }: {
   catalogo?: CatalogoProdutos;
@@ -198,6 +199,7 @@ const ShopWithSidebar = ({
   pageTitle?: string;
   basePath?: string;
   catalogKind?: "category" | "products";
+  subcategoryId?: number;
   subcategoriesContextCategoryId?: number;
 }) => {
   const router = useRouter();
@@ -355,15 +357,16 @@ const ShopWithSidebar = ({
     activeFilters.quantidade_minima_max;
   const infiniteEndpoint = useMemo(() => {
     const params = new URLSearchParams({
-      kind: catalogKind,
+      kind: subcategoryId ? "subcategory" : catalogKind,
       limit: String(catalogo.limit),
     });
     if (catalogKind === "category") params.set("categoria", String(activeCategoryId));
     Object.entries(activeFilters).forEach(([key, value]) => {
       if (value && key !== "page" && key !== "limit") params.set(key, value);
     });
+    if (subcategoryId) params.set("id", String(subcategoryId));
     return `/api/produtos/catalogo?${params.toString()}`;
-  }, [activeCategoryId, activeFilters, catalogKind, catalogo.limit]);
+  }, [activeCategoryId, activeFilters, catalogKind, catalogo.limit, subcategoryId]);
   const infinite = useInfiniteProducts({
     initialItems,
     initialPage: catalogo.page,

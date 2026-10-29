@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   getCatalogoCategoria,
+  getCatalogoSubcategoria,
   getCatalogoTipoProduto,
   getConfiguredApiOrigin,
   getProdutosSitePaginated,
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
     } else if (kind === "search") {
       catalog = await searchProdutosSiteCatalogo(params.get("q") || "", { page, limit });
     } else {
-      catalog = await getCatalogoCategoria(number(params.get("categoria"), 1), {
+      const query = {
         empresaId: 1,
         page,
         limit,
@@ -38,7 +39,10 @@ export async function GET(request: NextRequest) {
         quantidade_minima_max: number(params.get("quantidade_minima_max"), 0) || undefined,
         data_promocional: params.get("data_promocional") || undefined,
         datas_promocionais: params.get("datas_promocionais") || undefined,
-      });
+      };
+      catalog = kind === "subcategory"
+        ? await getCatalogoSubcategoria(number(params.get("id"), 0), query)
+        : await getCatalogoCategoria(number(params.get("categoria"), 1), query);
     }
 
     return NextResponse.json(

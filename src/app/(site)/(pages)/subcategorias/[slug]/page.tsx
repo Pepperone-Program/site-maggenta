@@ -168,6 +168,7 @@ const SubcategoriaPage = async ({ params, searchParams }: PageProps) => {
         dateOptions={datasPromocionais}
         pageTitle={`${canonicalName} personalizado`}
         basePath={canonicalPath}
+        subcategoryId={subcategoriaId}
         subcategoriesContextCategoryId={parentCategoriaId || undefined}
       />
     </main>

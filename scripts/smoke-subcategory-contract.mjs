@@ -58,6 +58,21 @@ const api = createServer((request, response) => {
   const url = new URL(request.url || "/", `http://127.0.0.1:${apiPort}`);
   requestedPaths.push(`${url.pathname}${url.search}`);
 
+  if (url.pathname === "/api/v1/subcategorias/199") {
+    return json(response, 200, { data: { ...subcategory, id_subcategoria: 199 } });
+  }
+  if (url.pathname === "/api/v1/subcategorias/199/produtos") {
+    const page = Number(url.searchParams.get("page") || 1);
+    const limit = Number(url.searchParams.get("limit") || 24);
+    const products = Array.from({ length: 50 }, (_, index) => ({
+      ...product, id_produto: 9000 + index, produto: `Produto paginado ${index + 1}`,
+    }));
+    return json(response, 200, { data: {
+      items: products.slice((page - 1) * limit, page * limit),
+      total: products.length, page, limit, totalPages: Math.ceil(products.length / limit),
+    } });
+  }
+
   if (url.pathname === "/api/v1/categorias/48") return json(response, 200, { data: category });
   if (url.pathname === "/api/v1/categorias/48/subcategorias") {
     return json(response, 200, paginated([
@@ -183,6 +198,31 @@ try {
   await waitForSite();
 
   const canonicalPath = "/subcategorias/195-baldes-de-gelo-personalizado";
+  const paginatedHtml = await (await fetch(
+    `http://127.0.0.1:${sitePort}/subcategorias/199-baldes-de-gelo-personalizado?categoria=48`
+  )).text();
+  assert.ok(paginatedHtml.includes('"subcategoryId":199') || paginatedHtml.includes('\\"subcategoryId\\":199'));
+  const loadedIds = new Set();
+  for (const page of [1, 2, 3]) {
+    const response = await fetch(`http://127.0.0.1:${sitePort}/api/produtos/catalogo?kind=subcategory&id=199&categoria=48&subcategorias=199&page=${page}&limit=24&publicos_alvos=7&quantidade_minima_min=10&datas_promocionais=8`);
+    assert.equal(response.status, 200);
+    const data = await response.json();
+    assert.equal(data.page, page);
+    assert.equal(data.total, 50);
+    assert.equal(data.totalPages, 3);
+    assert.equal(data.items.length, page === 3 ? 2 : 24);
+    data.items.forEach(item => loadedIds.add(item.id));
+    assert.ok(requestedPaths.some(path => {
+      const url = new URL(path, "http://localhost");
+      return url.pathname === "/api/v1/subcategorias/199/produtos"
+        && url.searchParams.get("page") === String(page)
+        && url.searchParams.get("publicos_alvos") === "7"
+        && url.searchParams.get("quantidade_minima_min") === "10"
+        && url.searchParams.get("datas_promocionais") === "8";
+    }));
+  }
+  assert.equal(loadedIds.size, 50);
+  console.log("Subcategory pagination: 50 distinct products across three pages, with filters preserved.");
   const pageResponse = await fetch(`http://127.0.0.1:${sitePort}${canonicalPath}`);
   const pageHtml = await pageResponse.text();
 
