@@ -96,7 +96,7 @@ const api = createServer((request, response) => {
     return json(response, 200, {
       success: true,
       data: {
-        items: [product],
+        items: [product, { ...product, id_produto: 8065, produto: "Produto desabilitado", habilitado: "N" }, { ...product, id_produto: 8066, produto: "Produto fora do site", site: "N" }],
         total: 1,
         page: Number(url.searchParams.get("page") || 1),
         limit: Number(url.searchParams.get("limit") || 24),
@@ -225,6 +225,11 @@ try {
   console.log("Subcategory pagination: 50 distinct products across three pages, with filters preserved.");
   const pageResponse = await fetch(`http://127.0.0.1:${sitePort}${canonicalPath}`);
   const pageHtml = await pageResponse.text();
+  assert.ok(!pageHtml.includes("Produto desabilitado"));
+  assert.ok(!pageHtml.includes("Produto fora do site"));
+  const subcategoryApiResponse = await fetch(`http://127.0.0.1:${sitePort}/api/produtos/catalogo?kind=subcategory&id=195&page=2`);
+  const subcategoryApiData = await subcategoryApiResponse.json();
+  assert.deepEqual(subcategoryApiData.items.map(item => item.id), [8064]);
 
   if (
     pageResponse.status !== 200 ||

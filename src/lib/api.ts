@@ -1612,7 +1612,9 @@ export async function getCatalogoSubcategoria(
       quantidade_minima:
         data.filtros?.quantidade_minima || emptyCatalogoFiltros.quantidade_minima,
     },
-    items: items.map((product) => mapApiProdutoToProduct(product, [], subcategoria.subcategoria)),
+    items: items
+      .filter((product) => isEnabled(product.habilitado) && isEnabled(product.site))
+      .map((product) => mapApiProdutoToProduct(product, [], subcategoria.subcategoria)),
     total: Number(data.total || items.length || 0),
     page: Number(data.page || page),
     limit: Number(data.limit || limit),
