@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
+import MetaPixel from "./MetaPixel";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
   bingUetId,
@@ -11,7 +12,6 @@ import {
   rdStationAccountId,
 } from "@/lib/google-tags";
 
-const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 const integrazapSrc =
   "https://integrazap.com.br/gadget-v.1/wapp-flutuante.js?x=019d7ce4c9075179faf49505675e4494&y=349319781679&z=maggenta.com.br";
 
@@ -111,37 +111,7 @@ const MarketingPixels = () => {
           data-cf-beacon={JSON.stringify({ token: cloudflareBeaconToken })}
         />
       )}
-      {metaPixelId && (
-        <>
-          <Script
-            id="meta-pixel-init"
-            strategy="lazyOnload"
-            dangerouslySetInnerHTML={{
-              __html: `
-                !function(f,b,e,v,n,t,s)
-                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-                n.queue=[];t=b.createElement(e);t.async=!0;
-                t.src=v;s=b.getElementsByTagName(e)[0];
-                s.parentNode.insertBefore(t,s)}(window, document,'script',
-                'https://connect.facebook.net/en_US/fbevents.js');
-                fbq('init', '${metaPixelId}');
-                fbq('track', 'PageView');
-              `,
-            }}
-          />
-          <noscript>
-            <img
-              height="1"
-              width="1"
-              style={{ display: "none" }}
-              src={`https://www.facebook.com/tr?id=${metaPixelId}&ev=PageView&noscript=1`}
-              alt=""
-            />
-          </noscript>
-        </>
-      )}
+      <MetaPixel />
     </>
   );
 };

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import MetaPixel from "@/components/Common/MetaPixel";
 
 export default function LandingPagesLayout({ children }: { children: ReactNode }) {
   return (
@@ -11,6 +12,7 @@ export default function LandingPagesLayout({ children }: { children: ReactNode }
           background: "#ffffff",
         }}
       >
+        <MetaPixel />
         {children}
       </body>
     </html>
